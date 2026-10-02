@@ -346,8 +346,12 @@ class HealthConnectManager(private val context: Context) {
             .groupBy { it.time.atZone(zone).toLocalDate() }
             .mapValues { (_, records) -> records.last().weight.inKilograms }
 
-        val exerciseRecords = readAllRecords(ExerciseSessionRecord::class, range)
-        Log.d(TAG, "readRange trening: ${exerciseRecords.size} rådata-poster")
+        // Samme økt kan ligge i Health Connect flere ganger når flere apper har skrevet
+        // den (f.eks. Garmin Connect og Google Fit/Strava) - da ble den vist dobbelt og
+        // treningsminuttene telt to ganger. Overlappende økter slås sammen til én.
+        val rawExerciseRecords = readAllRecords(ExerciseSessionRecord::class, range)
+        val exerciseRecords = dedupeOverlappingSessions(rawExerciseRecords, { it.startTime }, { it.endTime })
+        Log.d(TAG, "readRange trening: ${rawExerciseRecords.size} rådata-poster, ${exerciseRecords.size} etter duplikatfjerning")
         val trainingMinutesByDay = exerciseRecords
             .groupBy { it.startTime.atZone(zone).toLocalDate() }
             .mapValues { (_, records) ->
