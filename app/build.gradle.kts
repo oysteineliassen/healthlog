@@ -16,8 +16,20 @@ android {
         applicationId = "no.healthlog.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
+        // Byggnummeret fra GitHub Actions, så hver ny APK har høyere versjon enn forrige.
+        versionCode = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 1
         versionName = "1.0"
+    }
+
+    // Fast debug-nøkkel i repoet: uten den lager hver CI-maskin sin egen, og Android
+    // nekter da å oppdatere appen (krever avinstallering). Bare for debug - ikke hemmelig.
+    signingConfigs {
+        getByName("debug") {
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
     }
 
     buildTypes {
