@@ -302,14 +302,15 @@ class HealthConnectManager(private val context: Context) {
 
         // HRV (RMSSD) - bare hvis tillatelsen er gitt; uten den ville lesingen kastet
         // SecurityException og stoppet HELE synken. Flere målinger samme dag (typisk
-        // gjennom natta) slås sammen til ett snitt, lagt på dagen målingen ble tatt.
+        // gjennom natta) slås sammen til ett snitt, lagt på dagen natten SLUTTER (som
+        // søvnen) - målinger før midnatt hører til natten som ender neste morgen.
         val hrvByDay: Map<LocalDate, Double> = if (hasHrvPermission()) {
             runCatching { readAllRecords(HeartRateVariabilityRmssdRecord::class, range) }
                 .getOrElse { e ->
                     Log.w(TAG, "Kunne ikke lese HRV", e)
                     emptyList()
                 }
-                .groupBy { it.time.atZone(zone).toLocalDate() }
+                .groupBy { nightDate(it.time.atZone(zone).toLocalDateTime()) }
                 .mapValues { (_, records) -> records.map { it.heartRateVariabilityMillis }.average() }
         } else {
             emptyMap()

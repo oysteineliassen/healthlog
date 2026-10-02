@@ -46,7 +46,7 @@
     <string name="error_waist_range">Enter a value between 30 and 200 cm</string>
     <string name="label_sleep_score">Sleep score (0–100)</string>
     <string name="error_percentage_range">Enter a whole number between 0 and 100</string>
-    <string name="label_hrv">HRV (ms)</string>
+    <string name="label_hrv">HRV, last night (ms)</string>
     <string name="error_hrv_range">Enter a value between 0 and 300 ms</string>
     <string name="label_body_battery_high">Body Battery, highest</string>
     <string name="label_evening_summary">How the day went</string>

@@ -46,7 +46,7 @@
     <string name="error_waist_range">Skriv inn en verdi mellom 30 og 200 cm</string>
     <string name="label_sleep_score">Søvnscore (0–100)</string>
     <string name="error_percentage_range">Skriv inn et heltall mellom 0 og 100</string>
-    <string name="label_hrv">HRV (ms)</string>
+    <string name="label_hrv">HRV, natt til i dag (ms)</string>
     <string name="error_hrv_range">Skriv inn en verdi mellom 0 og 300 ms</string>
     <string name="label_body_battery_high">Body Battery, høyeste</string>
     <string name="label_evening_summary">Hvordan gikk dagen</string>
