@@ -1,6 +1,7 @@
 package no.healthlog.app.coach
 
 import no.healthlog.app.DayTags
+import no.healthlog.app.NutritionLevel
 import no.healthlog.app.TrainingIntensity
 import no.healthlog.app.data.HealthDay
 import org.junit.Assert.assertEquals
@@ -266,5 +267,17 @@ class CoachEngineTest {
         val found = ids(buildCoachCandidates(data, today, 480, 8000))
         assertFalse(CoachMessageId.HABIT_SLEEP_LOWER in found)
         assertFalse(CoachMessageId.HABIT_SLEEP_HIGHER in found)
+    }
+
+    @Test
+    fun `fasting days are kept out of the normal, like sick and travel days`() {
+        assertTrue(HealthDay(date = "2026-09-20", nutritionLevel = NutritionLevel.FASTING).isAtypical())
+        assertFalse(HealthDay(date = "2026-09-20", nutritionLevel = NutritionLevel.LIGHT).isAtypical())
+        // 5 fastedager med lav HRV skal ikke trekke ned normalen.
+        val data = days(20) { ago, date ->
+            val fasting = ago in 1..5
+            HealthDay(date = date.toString(), hrvMs = if (fasting) 20.0 else 50.0, nutritionLevel = if (fasting) NutritionLevel.FASTING else null)
+        }
+        assertEquals(50.0, normalFor(byDate(data), today) { it.hrvMs }!!.mean, 0.01)
     }
 }

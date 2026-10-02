@@ -190,7 +190,7 @@
     <!-- SettingsScreen.kt: overskrift og Garmin/Health Connect-boksen -->
     <string name="settings_title">Innstillinger</string>
     <string name="settings_garmin_title">Garmin via Health Connect</string>
-    <string name="settings_garmin_description">Henter skritt, søvn, hvilepuls og vekt fra Garmin Connect via Health Connect. Body Battery, stress og HRV deles ikke via Health Connect og må registreres manuelt.</string>
+    <string name="settings_garmin_description">Henter skritt, søvn, hvilepuls og vekt fra Garmin Connect via Health Connect. Body Battery, stress og HRV deles ikke via Health Connect – registrer dem manuelt eller importer Garmin-filer (se under).</string>
     <string name="action_sync_today">Hent fra Health Connect i dag</string>
     <string name="label_auto_sync">Synk automatisk hver dag</string>
     <string name="desc_auto_sync">Kjøres omtrent én gang i døgnet i bakgrunnen. Ikke et eksakt klokkeslett.</string>
@@ -206,8 +206,8 @@
 
     <!-- SettingsScreen.kt: Sikkerhetskopi-boksen -->
     <string name="settings_backup_title">Sikkerhetskopi</string>
-    <string name="settings_garmin_title">Garmin-filer</string>
-    <string name="settings_garmin_description">Garmin deler ikke søvnscore, HRV for natten, Body Battery eller stress med Health Connect. Eksporter en dag i Garmin Connect (zip med .fit-filer) og importer den her – du kan velge flere filer samtidig. Felter du har rettet manuelt beholdes.</string>
+    <string name="settings_garmin_files_title">Garmin-filer</string>
+    <string name="settings_garmin_files_description">Garmin deler ikke søvnscore, HRV for natten, Body Battery eller stress med Health Connect. Eksporter en dag i Garmin Connect (zip med .fit-filer) og importer den her – du kan velge flere filer samtidig. Felter du har rettet manuelt beholdes.</string>
     <string name="action_import_garmin">Importer Garmin-filer</string>
     <string name="garmin_import_done">Importerte Garmin-data for %1$d dager.</string>
     <string name="garmin_import_none">Fant ingen Garmin-data i filene du valgte.</string>
@@ -466,6 +466,7 @@
     <string name="nutrition_level_light">Lett</string>
     <string name="nutrition_level_moderate">Moderat</string>
     <string name="nutrition_level_heavy">Tung</string>
+    <string name="nutrition_level_fasting">Faste</string>
 
     <!-- HistoryScreen.kt: filtrer på treningstype -->
     <string name="history_filter_training_button">Treningstype</string>
@@ -618,6 +619,24 @@
     <string name="today_card_diary">Planer og dagsoppsummering</string>
     <string name="today_card_readiness">Dagsform</string>
     <string name="today_card_coach">AI-trener</string>
+    <string name="today_card_ai_coach">AI-innsikt (ekstern)</string>
+    <string name="settings_ai_coach_title">AI-innsikt (ekstern)</string>
+    <string name="settings_ai_coach_description">Viser et kort på I dag som lager en ferdig prompt med dataene dine. Lim den inn i Claude, ChatGPT, Copilot o.l., og lim svaret tilbake i appen. Appen sender ingenting selv – du velger hva som deles.</string>
+    <string name="ai_coach_title">AI-innsikt</string>
+    <string name="ai_coach_empty">Kopier prompten, lim den inn i AI-assistenten din, og lim svaret inn her.</string>
+    <string name="ai_coach_answer_from">Svar fra %1$s</string>
+    <string name="ai_coach_answer_old">på tide å spørre igjen?</string>
+    <string name="ai_coach_show_more">Vis alt</string>
+    <string name="ai_coach_show_less">Vis mindre</string>
+    <string name="ai_coach_period_label">Data for de siste</string>
+    <string name="ai_coach_period_days">%1$d dager</string>
+    <string name="ai_coach_copy_prompt">Kopier prompt</string>
+    <string name="ai_coach_share_prompt">Del …</string>
+    <string name="ai_coach_share_title">Send prompten til</string>
+    <string name="ai_coach_prompt_copied">Prompten er kopiert – lim den inn i AI-assistenten din.</string>
+    <string name="ai_coach_paste_answer">Lim inn svar</string>
+    <string name="ai_coach_paste_title">Lim inn AI-svaret</string>
+    <string name="ai_coach_paste_hint">Kopier hele svaret i AI-appen og lim det inn her. Det erstatter forrige svar.</string>
     <string name="today_card_score_goals">Helse-score og Dagens mål</string>
     <string name="today_card_heart_rate">Puls gjennom dagen</string>
     <string name="today_card_sleep_debt">Søvnbalanse</string>

@@ -1,5 +1,6 @@
 package no.healthlog.app
 
+import no.healthlog.app.coach.AiCoachPreferences
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
@@ -305,6 +306,9 @@ fun TodayScreen(
     val context = LocalContext.current
     var cardOrder by remember { mutableStateOf(resolveTodayCardOrder(TilePreferences.getTodayCardOrder(context))) }
     var hiddenCards by remember { mutableStateOf(TilePreferences.getHiddenTodayCards(context)) }
+    // Ekstern AI-trener er valgfri og slås på i Innstillinger - av betyr at kortet
+    // ikke finnes, heller ikke i "Tilpass I dag".
+    val aiCoachEnabled = remember { AiCoachPreferences.isEnabled(context) }
     var showCustomize by remember { mutableStateOf(false) }
 
     LazyColumn(
@@ -339,6 +343,7 @@ fun TodayScreen(
                 "diary" -> item(key = id) { DiaryCard(today) }
                 "readiness" -> item(key = id) { ReadinessCard(all) }
                 "coach" -> item(key = id) { CoachCard(all) }
+                "ai_coach" -> if (aiCoachEnabled) item(key = id) { AiCoachCard(all) }
                 "score_goals" -> item(key = id) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -368,7 +373,7 @@ fun TodayScreen(
 
     if (showCustomize) {
         TodayCustomizeDialog(
-            order = cardOrder,
+            order = if (aiCoachEnabled) cardOrder else cardOrder.filter { it != "ai_coach" },
             hidden = hiddenCards,
             onChange = { newOrder, newHidden ->
                 cardOrder = newOrder

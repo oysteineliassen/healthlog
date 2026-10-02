@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 
 /** Kortene på I dag som kan skjules og flyttes - i standardrekkefølgen. Overskriften står alltid øverst. */
 val DEFAULT_TODAY_CARD_ORDER = listOf(
-    "weekly_summary", "monthly_summary", "summary", "diary", "readiness", "coach",
+    "weekly_summary", "monthly_summary", "summary", "diary", "readiness", "coach", "ai_coach",
     "score_goals", "weekly_activity", "heart_rate", "sleep_debt", "weight_trend", "metrics"
 )
 
@@ -45,6 +45,7 @@ fun todayCardLabel(id: String): String = stringResource(
         "diary" -> R.string.today_card_diary
         "readiness" -> R.string.today_card_readiness
         "coach" -> R.string.today_card_coach
+        "ai_coach" -> R.string.today_card_ai_coach
         "score_goals" -> R.string.today_card_score_goals
         "weekly_activity" -> R.string.today_card_weekly_activity
         "heart_rate" -> R.string.today_card_heart_rate

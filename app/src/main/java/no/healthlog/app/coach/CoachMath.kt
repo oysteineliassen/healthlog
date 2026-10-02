@@ -1,6 +1,7 @@
 package no.healthlog.app.coach
 
 import no.healthlog.app.DayTags
+import no.healthlog.app.NutritionLevel
 import no.healthlog.app.TrainingIntensity
 import no.healthlog.app.data.HealthDay
 import no.healthlog.app.data.habitTagSet
@@ -22,9 +23,11 @@ internal fun byDate(allDays: List<HealthDay>): Map<LocalDate, HealthDay> =
 /**
  * Dager merket syk eller reise holdes utenfor "din normal" og sammenhenger - en uke
  * med influensa skal ikke trekke ned HRV-normalen din eller få det til å se ut som at
- * trening gir dårligere søvn. Hviledager er derimot vanlige dager og telles med.
+ * trening gir dårligere søvn. Det samme gjelder fastedager, som påvirker puls, HRV og
+ * søvn kraftig noen dager. Hviledager er derimot vanlige dager og telles med.
  */
-internal fun HealthDay.isAtypical(): Boolean = dayTag == DayTags.SICK || dayTag == DayTags.TRAVEL
+internal fun HealthDay.isAtypical(): Boolean =
+    dayTag == DayTags.SICK || dayTag == DayTags.TRAVEL || nutritionLevel == NutritionLevel.FASTING
 
 /** Snitt og standardavvik - null hvis det er færre enn [minCount] verdier å bygge på. */
 internal data class Baseline(val mean: Double, val stdDev: Double, val count: Int)

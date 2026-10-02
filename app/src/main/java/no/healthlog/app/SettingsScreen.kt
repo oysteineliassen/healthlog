@@ -1,5 +1,6 @@
 package no.healthlog.app
 
+import no.healthlog.app.coach.AiCoachPreferences
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import android.Manifest
@@ -312,6 +313,8 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
     }
 
     var pendingImportJson by remember { mutableStateOf<String?>(null) }
+
+    var aiCoachEnabled by remember { mutableStateOf(AiCoachPreferences.isEnabled(context)) }
 
     val garminImportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenMultipleDocuments()
@@ -653,15 +656,42 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
         item {
             Card(shape = RoundedCornerShape(20.dp)) {
                 Column(Modifier.padding(18.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            stringResource(R.string.settings_ai_coach_title),
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Switch(checked = aiCoachEnabled, onCheckedChange = {
+                            aiCoachEnabled = it
+                            AiCoachPreferences.setEnabled(context, it)
+                        })
+                    }
+
+                    Spacer(Modifier.height(8.dp))
+
+                    Text(stringResource(R.string.settings_ai_coach_description))
+                }
+            }
+        }
+
+        item {
+            Card(shape = RoundedCornerShape(20.dp)) {
+                Column(Modifier.padding(18.dp)) {
                     Text(
-                        stringResource(R.string.settings_garmin_title),
+                        stringResource(R.string.settings_garmin_files_title),
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.titleLarge
                     )
 
                     Spacer(Modifier.height(8.dp))
 
-                    Text(stringResource(R.string.settings_garmin_description))
+                    Text(stringResource(R.string.settings_garmin_files_description))
 
                     Spacer(Modifier.height(14.dp))
 

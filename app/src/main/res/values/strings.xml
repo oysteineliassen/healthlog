@@ -190,7 +190,7 @@
     <!-- SettingsScreen.kt: title and the Garmin/Health Connect card -->
     <string name="settings_title">Settings</string>
     <string name="settings_garmin_title">Garmin via Health Connect</string>
-    <string name="settings_garmin_description">Fetches steps, sleep, resting heart rate, and weight from Garmin Connect via Health Connect. Body Battery, stress, and HRV aren\'t shared via Health Connect and must be logged manually.</string>
+    <string name="settings_garmin_description">Fetches steps, sleep, resting heart rate, and weight from Garmin Connect via Health Connect. Body Battery, stress, and HRV aren\'t shared via Health Connect – log them manually or import Garmin files (see below).</string>
     <string name="action_sync_today">Fetch from Health Connect today</string>
     <string name="label_auto_sync">Sync automatically every day</string>
     <string name="desc_auto_sync">Runs about once a day in the background. Not at an exact time.</string>
@@ -206,8 +206,8 @@
 
     <!-- SettingsScreen.kt: Backup card -->
     <string name="settings_backup_title">Backup</string>
-    <string name="settings_garmin_title">Garmin files</string>
-    <string name="settings_garmin_description">Garmin does not share sleep score, overnight HRV, Body Battery or stress with Health Connect. Export a day in Garmin Connect (zip with .fit files) and import it here – you can pick several files at once. Fields you have corrected manually are kept.</string>
+    <string name="settings_garmin_files_title">Garmin files</string>
+    <string name="settings_garmin_files_description">Garmin does not share sleep score, overnight HRV, Body Battery or stress with Health Connect. Export a day in Garmin Connect (zip with .fit files) and import it here – you can pick several files at once. Fields you have corrected manually are kept.</string>
     <string name="action_import_garmin">Import Garmin files</string>
     <string name="garmin_import_done">Imported Garmin data for %1$d days.</string>
     <string name="garmin_import_none">Found no Garmin data in the selected files.</string>
@@ -466,6 +466,7 @@
     <string name="nutrition_level_light">Light</string>
     <string name="nutrition_level_moderate">Moderate</string>
     <string name="nutrition_level_heavy">Heavy</string>
+    <string name="nutrition_level_fasting">Fasting</string>
 
     <!-- HistoryScreen.kt: filter by training type -->
     <string name="history_filter_training_button">Training type</string>
@@ -618,6 +619,24 @@
     <string name="today_card_diary">Plans and daily summary</string>
     <string name="today_card_readiness">Readiness</string>
     <string name="today_card_coach">AI coach</string>
+    <string name="today_card_ai_coach">AI insight (external)</string>
+    <string name="settings_ai_coach_title">AI insight (external)</string>
+    <string name="settings_ai_coach_description">Shows a card on Today that creates a ready-made prompt with your data. Paste it into Claude, ChatGPT, Copilot or similar, and paste the answer back into the app. Nothing is sent anywhere by the app itself – you choose what to share.</string>
+    <string name="ai_coach_title">AI insight</string>
+    <string name="ai_coach_empty">Copy the prompt, paste it into your AI assistant, and paste the answer back here.</string>
+    <string name="ai_coach_answer_from">Answer from %1$s</string>
+    <string name="ai_coach_answer_old">consider asking again</string>
+    <string name="ai_coach_show_more">Show all</string>
+    <string name="ai_coach_show_less">Show less</string>
+    <string name="ai_coach_period_label">Data for the last</string>
+    <string name="ai_coach_period_days">%1$d days</string>
+    <string name="ai_coach_copy_prompt">Copy prompt</string>
+    <string name="ai_coach_share_prompt">Share…</string>
+    <string name="ai_coach_share_title">Send prompt to</string>
+    <string name="ai_coach_prompt_copied">Prompt copied – paste it into your AI assistant.</string>
+    <string name="ai_coach_paste_answer">Paste answer</string>
+    <string name="ai_coach_paste_title">Paste the AI answer</string>
+    <string name="ai_coach_paste_hint">Copy the whole answer in the AI app and paste it here. It replaces the previous answer.</string>
     <string name="today_card_score_goals">Health score and daily goals</string>
     <string name="today_card_heart_rate">Heart rate through the day</string>
     <string name="today_card_sleep_debt">Sleep balance</string>
