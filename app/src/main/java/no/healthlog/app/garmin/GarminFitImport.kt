@@ -140,7 +140,11 @@ fun summarizeGarminFiles(files: List<List<FitMessage>>, zone: ZoneId): List<Garm
             }
         }
 
-    return result.values.sortedBy { it.date }
+    // Garmin skriver dagens siste hvilepuls nøyaktig ved midnatt, så den havner også på
+    // neste dato. En dag med BARE hvilepuls er en slik rest, ikke en ekte dag.
+    return result.values
+        .filter { it != GarminDayData(it.date, restingHeartRate = it.restingHeartRate) }
+        .sortedBy { it.date }
 }
 
 /**
