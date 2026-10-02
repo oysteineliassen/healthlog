@@ -491,6 +491,9 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
                     var weightGoalText by remember {
                         mutableStateOf(GoalPreferences.getWeightGoalKg(context)?.let { "%.1f".format(it) } ?: "")
                     }
+                    var maxHeartRateText by remember {
+                        mutableStateOf(GoalPreferences.getMaxHeartRate(context)?.toString() ?: "")
+                    }
 
                     OutlinedTextField(
                         value = stepsGoalText,
@@ -541,6 +544,17 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
                         modifier = Modifier.fillMaxWidth()
                     )
 
+                    Spacer(Modifier.height(10.dp))
+
+                    OutlinedTextField(
+                        value = maxHeartRateText,
+                        onValueChange = { maxHeartRateText = it },
+                        label = { Text(stringResource(R.string.settings_goals_max_hr_label)) },
+                        supportingText = { Text(stringResource(R.string.settings_goals_max_hr_hint)) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
                     Spacer(Modifier.height(14.dp))
 
                     Button(onClick = {
@@ -554,6 +568,13 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
                             GoalPreferences.setWeightGoalKg(context, null)
                         } else {
                             weightText.toDoubleOrNull()?.takeIf { it in ValidationRanges.weightKg }?.let { GoalPreferences.setWeightGoalKg(context, it) }
+                        }
+                        // Makspuls: tomt fjerner den (standard brukes), urimelige tall ignoreres.
+                        val maxHr = maxHeartRateText.trim()
+                        if (maxHr.isEmpty()) {
+                            GoalPreferences.setMaxHeartRate(context, null)
+                        } else {
+                            maxHr.toIntOrNull()?.takeIf { it in 120..230 }?.let { GoalPreferences.setMaxHeartRate(context, it) }
                         }
                         vm.showMessage(context.getString(R.string.msg_goals_saved))
                     }) {

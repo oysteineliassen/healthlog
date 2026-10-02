@@ -666,6 +666,8 @@
     <string name="settings_goals_weekly_activity_label">Weekly activity goal (min)</string>
     <string name="settings_goals_weight_label">Weight goal (kg)</string>
     <string name="settings_goals_weight_hint">Optional. Leave empty for no weight goal.</string>
+    <string name="settings_goals_max_hr_label">Max heart rate (optional)</string>
+    <string name="settings_goals_max_hr_hint">Used to rate workout intensity (heart rate reserve). Empty = 185 is assumed. Takes effect from the next sync.</string>
     <string name="metric_title_body_fat">Body fat</string>
     <string name="period_comparison_steps_avg">Average steps per day: %1$s vs. %2$s</string>
     <string name="period_label_week">Week %1$d · %2$s–%3$s</string>

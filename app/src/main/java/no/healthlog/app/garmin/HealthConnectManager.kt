@@ -1,5 +1,6 @@
 package no.healthlog.app.garmin
 
+import no.healthlog.app.GoalPreferences
 import android.content.Context
 import android.util.Log
 import androidx.health.connect.client.HealthConnectClient
@@ -70,18 +71,6 @@ data class HealthConnectDaySnapshot(
     // økten, brukt av grafer/AI-trener/rekorder som forventer én verdi per dag.
     val trainingSessions: String? = null
 )
-
-/** Grov intensitetsvurdering fra puls under en økt sammenlignet med hvilepulsen din den
- * dagen - IKKE en klinisk VO2max-beregning (det krever makspuls/alder, som vi ikke har). */
-private fun classifyIntensity(bpmSamples: List<Long>, restingHr: Int?): String? {
-    if (restingHr == null || bpmSamples.isEmpty()) return null
-    val elevation = bpmSamples.average() - restingHr
-    return when {
-        elevation < 20.0 -> TrainingIntensity.LIGHT
-        elevation < 40.0 -> TrainingIntensity.MODERATE
-        else -> TrainingIntensity.VIGOROUS
-    }
-}
 
 /**
  * Health Connect har rundt 60 spesifikke exerciseType-koder - dekker bare de vanligste
@@ -350,6 +339,7 @@ class HealthConnectManager(private val context: Context) {
         // den (f.eks. Garmin Connect og Google Fit/Strava) - da ble den vist dobbelt og
         // treningsminuttene telt to ganger. Overlappende økter slås sammen til én.
         val rawExerciseRecords = readAllRecords(ExerciseSessionRecord::class, range)
+        val maxHeartRate = GoalPreferences.getMaxHeartRate(context)
         val exerciseRecords = dedupeOverlappingSessions(rawExerciseRecords, { it.startTime }, { it.endTime })
         Log.d(TAG, "readRange trening: ${rawExerciseRecords.size} rådata-poster, ${exerciseRecords.size} etter duplikatfjerning")
         val trainingMinutesByDay = exerciseRecords
@@ -389,7 +379,7 @@ class HealthConnectManager(private val context: Context) {
                         .filter { (time, _) -> !time.isBefore(session.startTime) && !time.isAfter(session.endTime) }
                         .map { (_, bpm) -> bpm }
                 }
-                val intensity = classifyIntensity(bpmDuringExercise, restingHr) ?: return@mapNotNull null
+                val intensity = classifyIntensity(bpmDuringExercise, restingHr, maxHeartRate) ?: return@mapNotNull null
                 date to intensity
             }
             .toMap()
@@ -417,7 +407,7 @@ class HealthConnectManager(private val context: Context) {
                     TrainingSession(
                         type = mapExerciseType(session.exerciseType),
                         minutes = Duration.between(session.startTime, session.endTime).toMinutes().toInt(),
-                        intensity = classifyIntensity(bpmDuringSession, restingHr)
+                        intensity = classifyIntensity(bpmDuringSession, restingHr, maxHeartRate)
                     )
                 }
             }

@@ -15,7 +15,20 @@ private const val KEY_WEEKLY_ACTIVITY_GOAL = "goal_weekly_activity_minutes"
 // Helsemyndighetenes anbefaling for voksne: minst 150 min moderat aktivitet per uke.
 private const val DEFAULT_WEEKLY_ACTIVITY_GOAL = 150
 
+private const val KEY_MAX_HEART_RATE = "max_heart_rate"
+
 object GoalPreferences {
+
+    /** Valgfritt - null betyr ikke satt (da antas DEFAULT_MAX_HEART_RATE ved intensitet). */
+    fun getMaxHeartRate(context: Context): Int? =
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .getInt(KEY_MAX_HEART_RATE, 0)
+            .takeIf { it > 0 }
+
+    fun setMaxHeartRate(context: Context, value: Int?) {
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .edit().putInt(KEY_MAX_HEART_RATE, value ?: 0).apply()
+    }
 
     fun getStepsGoal(context: Context): Int =
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)

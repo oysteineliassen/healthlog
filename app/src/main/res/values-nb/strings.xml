@@ -666,6 +666,8 @@
     <string name="settings_goals_weekly_activity_label">Aktivitetsmål per uke (min)</string>
     <string name="settings_goals_weight_label">Vektmål (kg)</string>
     <string name="settings_goals_weight_hint">Valgfritt. La stå tomt for ingen vektmål.</string>
+    <string name="settings_goals_max_hr_label">Makspuls (valgfritt)</string>
+    <string name="settings_goals_max_hr_hint">Brukes til å vurdere intensiteten på økter (pulsreserve). Tomt = 185 antas. Gjelder fra neste synk.</string>
     <string name="metric_title_body_fat">Kroppsfett</string>
     <string name="period_comparison_steps_avg">Snitt skritt per dag: %1$s vs. %2$s</string>
     <string name="period_label_week">Uke %1$d · %2$s–%3$s</string>
