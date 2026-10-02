@@ -2,6 +2,8 @@ package no.healthlog.app.data
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import no.healthlog.app.garmin.GarminDayData
+import no.healthlog.app.garmin.mergeGarminDay
 
 class HealthRepository(
     private val dao: HealthDayDao
@@ -99,6 +101,14 @@ class HealthRepository(
      * Skriver hele listen fra en sikkerhetskopi rett inn (overskriver eksisterende
      * rader for samme dato, rører ikke datoer som ikke finnes i filen).
      */
+    /** Fletter inn dager fra en Garmin-eksport (se garmin/GarminFitImport.kt). */
+    suspend fun importGarminDays(days: List<GarminDayData>): Int {
+        days.forEach { garmin ->
+            dao.upsert(mergeGarminDay(dao.get(garmin.date.toString()), garmin))
+        }
+        return days.size
+    }
+
     suspend fun importBackup(days: List<HealthDay>): Int {
         val stamped = days.map { it.copy(updatedAt = System.currentTimeMillis()) }
         dao.upsertAll(stamped)

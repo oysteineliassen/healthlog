@@ -1,5 +1,14 @@
 package no.healthlog.app
 
+import android.net.Uri
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import no.healthlog.app.garmin.decodeFit
+import no.healthlog.app.garmin.extractFitFiles
+import no.healthlog.app.garmin.summarizeGarminFiles
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
+import java.time.ZoneId
 import android.content.Context
 import androidx.compose.runtime.*
 import androidx.lifecycle.ViewModel
@@ -15,6 +24,21 @@ import no.healthlog.app.garmin.upsertSnapshot
 import no.healthlog.app.widget.HealthWidgetProvider
 import java.time.LocalDate
 import kotlin.math.roundToInt
+
+/** Øvre grense per valgt fil - en dagseksport er under 100 kB, hele kontoen kan være flere GB. */
+private const val GARMIN_MAX_FILE_BYTES = 100L * 1024 * 1024
+
+private fun readCapped(input: InputStream, maxBytes: Long): ByteArray {
+    val out = ByteArrayOutputStream()
+    val buffer = ByteArray(64 * 1024)
+    while (true) {
+        val n = input.read(buffer)
+        if (n < 0) break
+        out.write(buffer, 0, n)
+        if (out.size() > maxBytes) throw IllegalArgumentException("Filen er for stor (over ${maxBytes / 1024 / 1024} MB)")
+    }
+    return out.toByteArray()
+}
 
 data class ManualEntryInput(
     val weightKg: Double?,
@@ -87,6 +111,33 @@ class HealthViewModel(
 
     fun exportCsv(): String =
         healthDaysToCsv(days.value)
+
+    /**
+     * Leser valgte Garmin-filer (.zip fra "Eksporter" i Garmin Connect, eller enkelt-
+     * .fit-filer) og fletter dataene inn. Kjører utenfor hovedtråden - en zip kan
+     * inneholde mange filer.
+     */
+    fun importGarminFiles(uris: List<Uri>) {
+        safeLaunch {
+            val days = withContext(Dispatchers.IO) {
+                val fitFiles = uris.flatMap { uri ->
+                    val bytes = appContext.contentResolver.openInputStream(uri)?.use { input ->
+                        readCapped(input, GARMIN_MAX_FILE_BYTES)
+                    } ?: return@flatMap emptyList()
+                    extractFitFiles(bytes)
+                }
+                val decoded = fitFiles.mapNotNull { runCatching { decodeFit(it) }.getOrNull() }
+                summarizeGarminFiles(decoded, ZoneId.systemDefault())
+            }
+            if (days.isEmpty()) {
+                message = appContext.getString(R.string.garmin_import_none)
+                return@safeLaunch
+            }
+            val count = repo.importGarminDays(days)
+            message = appContext.getString(R.string.garmin_import_done, count)
+            HealthWidgetProvider.requestUpdate(appContext)
+        }
+    }
 
     fun importBackup(json: String) {
         viewModelScope.launch {

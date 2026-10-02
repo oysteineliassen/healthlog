@@ -206,6 +206,11 @@
 
     <!-- SettingsScreen.kt: Sikkerhetskopi-boksen -->
     <string name="settings_backup_title">Sikkerhetskopi</string>
+    <string name="settings_garmin_title">Garmin-filer</string>
+    <string name="settings_garmin_description">Garmin deler ikke søvnscore, HRV for natten, Body Battery eller stress med Health Connect. Eksporter en dag i Garmin Connect (zip med .fit-filer) og importer den her – du kan velge flere filer samtidig. Felter du har rettet manuelt beholdes.</string>
+    <string name="action_import_garmin">Importer Garmin-filer</string>
+    <string name="garmin_import_done">Importerte Garmin-data for %1$d dager.</string>
+    <string name="garmin_import_none">Fant ingen Garmin-data i filene du valgte.</string>
     <string name="settings_backup_description">Lag en fil med all helsedataen din. Velg Google Drive som lagringssted i dialogen som åpnes, så kan du hente den frem igjen på en ny telefon.</string>
     <string name="action_create_backup">Lag sikkerhetskopi</string>
     <string name="action_restore_backup">Gjenopprett fra sikkerhetskopi</string>

@@ -313,6 +313,12 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
 
     var pendingImportJson by remember { mutableStateOf<String?>(null) }
 
+    val garminImportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenMultipleDocuments()
+    ) { uris ->
+        if (uris.isNotEmpty()) vm.importGarminFiles(uris)
+    }
+
     val importLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri ->
@@ -639,6 +645,31 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
                             )
                         }
                         Switch(checked = isWeeklySummaryOn, onCheckedChange = { onWeeklySummaryToggle(it) })
+                    }
+                }
+            }
+        }
+
+        item {
+            Card(shape = RoundedCornerShape(20.dp)) {
+                Column(Modifier.padding(18.dp)) {
+                    Text(
+                        stringResource(R.string.settings_garmin_title),
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleLarge
+                    )
+
+                    Spacer(Modifier.height(8.dp))
+
+                    Text(stringResource(R.string.settings_garmin_description))
+
+                    Spacer(Modifier.height(14.dp))
+
+                    OutlinedButton(onClick = {
+                        // Garmin-filer har ingen fast MIME-type på Android - zip og "ukjent".
+                        garminImportLauncher.launch(arrayOf("application/zip", "application/octet-stream", "*/*"))
+                    }) {
+                        Text(stringResource(R.string.action_import_garmin))
                     }
                 }
             }

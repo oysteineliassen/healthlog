@@ -206,6 +206,11 @@
 
     <!-- SettingsScreen.kt: Backup card -->
     <string name="settings_backup_title">Backup</string>
+    <string name="settings_garmin_title">Garmin files</string>
+    <string name="settings_garmin_description">Garmin does not share sleep score, overnight HRV, Body Battery or stress with Health Connect. Export a day in Garmin Connect (zip with .fit files) and import it here – you can pick several files at once. Fields you have corrected manually are kept.</string>
+    <string name="action_import_garmin">Import Garmin files</string>
+    <string name="garmin_import_done">Imported Garmin data for %1$d days.</string>
+    <string name="garmin_import_none">Found no Garmin data in the selected files.</string>
     <string name="settings_backup_description">Create a file with all your health data. Choose Google Drive as the storage location in the dialog that opens, so you can retrieve it again on a new phone.</string>
     <string name="action_create_backup">Create backup</string>
     <string name="action_restore_backup">Restore from backup</string>
