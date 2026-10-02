@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Gjelder Android 12+ (API 31+), som splittet backup-reglene i to: skybackup
+     og enhet-til-enhet-overføring. Samme eksklusjon som backup_rules.xml,
+     bare i det nyere formatet som kreves fra og med Android 12. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="database" path="healthlog.db" />
+        <exclude domain="database" path="healthlog.db-wal" />
+        <exclude domain="database" path="healthlog.db-shm" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="database" path="healthlog.db" />
+        <exclude domain="database" path="healthlog.db-wal" />
+        <exclude domain="database" path="healthlog.db-shm" />
+    </device-transfer>
+</data-extraction-rules>

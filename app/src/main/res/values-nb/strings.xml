@@ -1,0 +1,647 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- HealthViewModel.kt: statusmeldinger vist i snackbar -->
+    <string name="error_generic">Noe gikk galt: %1$s</string>
+    <string name="saved">Lagret</string>
+    <string name="entry_deleted">Registrering slettet</string>
+    <string name="health_connect_fetched_today">Hentet data fra Health Connect</string>
+    <string name="msg_refresh_needs_permission">Gi HealthLog tilgang til Health Connect i Innstillinger først.</string>
+    <string name="health_connect_fetched_range">Hentet %1$d dager med historikk fra Health Connect</string>
+    <string name="backup_restored">Gjenopprettet %1$d dager fra sikkerhetskopi.</string>
+    <string name="backup_read_failed">Kunne ikke lese sikkerhetskopifilen: %1$s</string>
+
+    <!-- HealthViewModel.kt: helse-score-status -->
+    <string name="health_score_status_great">Meget bra</string>
+    <string name="health_score_status_good">Bra</string>
+    <string name="health_score_status_ok">OK</string>
+    <string name="health_score_status_poor">Kan forbedres</string>
+
+    <!-- HealthLogApp.kt: bunnnavigasjon -->
+    <string name="nav_today">I dag</string>
+    <string name="nav_trends">Trender</string>
+    <string name="nav_history">Historikk</string>
+    <string name="nav_settings">Innstillinger</string>
+    <string name="fab_register_description">Registrer</string>
+
+    <!-- HealthLogApp.kt: DeleteConfirmDialog -->
+    <string name="delete_confirm_title">Slett registrering</string>
+    <string name="delete_confirm_message">Er du sikker på at du vil slette denne registreringen? Dette kan ikke angres.</string>
+
+    <!-- Delte handlingsknapper - brukes både i HealthLogApp.kt og HistoryScreen.kt -->
+    <string name="action_delete">Slett</string>
+    <string name="action_cancel">Avbryt</string>
+    <string name="action_save">Lagre</string>
+
+    <!-- HealthLogApp.kt: EntryDialog (og samme felt i HistoryScreen.kt sin EditHistoryDialog) -->
+    <string name="entry_dialog_title">Registrer i dag</string>
+    <string name="label_morning_plan">Planer for dagen</string>
+    <string name="placeholder_morning_plan">Hva er planen i dag?</string>
+    <string name="label_weight">Vekt (kg)</string>
+    <string name="error_weight_range">Skriv inn en verdi mellom 20 og 300 kg</string>
+    <string name="label_waist">Midjemål (cm)</string>
+    <string name="error_waist_range">Skriv inn en verdi mellom 30 og 200 cm</string>
+    <string name="label_sleep_score">Søvnscore (0–100)</string>
+    <string name="error_percentage_range">Skriv inn et heltall mellom 0 og 100</string>
+    <string name="label_hrv">HRV (ms)</string>
+    <string name="error_hrv_range">Skriv inn en verdi mellom 0 og 300 ms</string>
+    <string name="label_body_battery_high">Body Battery, høyeste</string>
+    <string name="label_evening_summary">Hvordan gikk dagen</string>
+    <string name="placeholder_evening_summary">Hvordan gikk det?</string>
+    <string name="label_stress">Stress (1–100)</string>
+    <string name="label_body_battery_low">Body Battery, laveste</string>
+
+    <!-- Delt "–"-plassholder for manglende verdier -->
+    <string name="value_placeholder">–</string>
+
+    <!-- HistoryScreen.kt: overskrift, tom-tilstand, månedsheader -->
+    <string name="history_title">Historikk</string>
+    <string name="history_entry_count">%1$d registreringer</string>
+    <string name="history_empty">Ingen historikk registrert ennå.</string>
+    <string name="month_collapse">Skjul måned</string>
+    <string name="month_expand">Vis måned</string>
+
+    <!-- HistoryScreen.kt: HistoryDayCard -->
+    <string name="action_edit">Rediger</string>
+    <string name="diary_morning_prefix">Planer: %1$s</string>
+    <string name="diary_evening_prefix">Kveld: %1$s</string>
+    <string name="metric_weight">Vekt: %1$s</string>
+    <string name="metric_waist">Midje: %1$s</string>
+    <string name="metric_resting_hr">Hvilepuls: %1$s</string>
+    <string name="metric_hrv">HRV: %1$s</string>
+    <string name="metric_sleep">Søvn: %1$s</string>
+    <string name="metric_steps">Skritt: %1$s</string>
+    <string name="metric_training">Trening: %1$s</string>
+    <string name="metric_body_battery">Body Battery: %1$s</string>
+    <string name="metric_stress">Stress: %1$s</string>
+    <string name="metric_sleep_score">Søvnscore: %1$s</string>
+
+    <!-- HistoryScreen.kt: EditHistoryDialog (feltnavn/valideringer gjenbrukt fra HealthLogApp.kt) -->
+    <string name="edit_dialog_title">Rediger registrering</string>
+    <string name="placeholder_morning_plan_past">Hva var planen denne dagen?</string>
+    <string name="placeholder_evening_summary_past">Hvordan gikk det denne dagen?</string>
+    <string name="edit_health_connect_section_title">Automatiske verdier</string>
+    <string name="edit_health_connect_hint">Rettet du en feilregistrering her, blir den ikke overskrevet igjen neste gang du henter fra Health Connect.</string>
+    <string name="label_sleep_minutes">Søvn (minutter)</string>
+    <string name="label_training_type">Treningstype</string>
+    <string name="label_training_intensity">Intensitet</string>
+    <string name="error_generic_range">Ugyldig verdi.</string>
+    <string name="action_save_changes">Lagre endringer</string>
+
+    <!-- TodayScreen.kt: HealthScoreCard -->
+    <string name="health_score_title">Helse-score</string>
+
+    <!-- TodayScreen.kt: WeightTrendCard -->
+    <string name="weight_trend_title">Vektutvikling</string>
+    <string name="weight_trend_change">%1$s %2$s kg siste periode</string>
+
+    <!-- TodayScreen.kt: DailyGoalsCard -->
+    <string name="daily_goals_title">Dagens mål</string>
+    <string name="goal_steps">%1$d skritt</string>
+    <string name="goal_training">%1$d min trening</string>
+    <string name="goal_weight_recorded">Registrert vekt</string>
+    <string name="goal_waist_recorded">Registrert midjemål</string>
+    <string name="goal_sleep">%1$d timer søvn</string>
+    <string name="goal_achieved_format">✅ %1$s</string>
+    <string name="goal_not_achieved_format">❌ %1$s</string>
+
+    <!-- TodayScreen.kt: TodayScreen/SummaryCard -->
+    <string name="today_title">Min helse</string>
+    <string name="summary_card_title">Dagens status</string>
+    <string name="metrics_section_title">Helsemålinger</string>
+    <string name="no_data_summary">Ingen data registrert ennå</string>
+    <string name="summary_steps_sleep_format">%1$s skritt  •  %2$s søvn</string>
+    <string name="data_stored_locally">Data lagres lokalt på telefonen.</string>
+
+    <!-- TodayScreen.kt: DiaryCard (titlene gjenbruker label_morning_plan/label_evening_summary) -->
+    <string name="no_morning_plan">Ingen planer registrert i dag ennå. Trykk + for å skrive noen.</string>
+    <string name="no_evening_summary">Ingen oppsummering registrert ennå. Trykk + for å skrive en.</string>
+
+    <!-- TodayScreen.kt: MetricGrid -->
+    <string name="metric_label_resting_hr">Hvilepuls</string>
+    <string name="metric_label_hrv">HRV</string>
+    <string name="metric_label_sleep">Søvn</string>
+    <string name="metric_label_sleep_score">Søvnscore</string>
+    <string name="metric_label_body_battery">Body Battery</string>
+    <string name="metric_label_stress">Stress</string>
+    <string name="metric_label_steps">Skritt</string>
+    <string name="metric_label_training">Trening</string>
+    <string name="metric_label_weight_waist">Vekt / midje</string>
+
+    <!-- TrendsScreen.kt: header, periode-velger, del-knapper -->
+    <string name="trends_title">Trender</string>
+    <string name="trends_subtitle">Utvikling over tid</string>
+    <string name="range_14_days">14 dager</string>
+    <string name="range_31_days">31 dager</string>
+    <string name="range_1_year">1 år</string>
+    <string name="share_as_image">Del som bilde</string>
+    <string name="share_as_pdf">Del som PDF</string>
+    <string name="share_summary_title">Helsesammendrag</string>
+
+    <!-- TrendsScreen.kt: graf-titler/enheter som ikke allerede finnes fra andre skjermer -->
+    <string name="metric_title_weight">Vekt</string>
+    <string name="metric_title_waist">Midjemål</string>
+    <string name="unit_kg">kg</string>
+    <string name="unit_cm">cm</string>
+    <string name="unit_ms">ms</string>
+    <string name="unit_bpm">bpm</string>
+    <string name="unit_hours">timer</string>
+    <string name="unit_points">poeng</string>
+    <string name="goal_label_under">Mål (under)</string>
+    <string name="goal_label_default">Mål</string>
+
+    <!-- TrendsScreen.kt: delt tekst i TrendCard/RangeTrendCard/DatedLineChart/RangeBarChart -->
+    <string name="no_measurements">Ingen registreringer</string>
+    <string name="label_change">Endring</string>
+    <string name="label_months">Måneder</string>
+    <string name="label_measurements">Målinger</string>
+    <string name="label_avg_high_low">Snitt høyt / lavt</string>
+    <string name="chart_no_data">Ingen data registrert ennå.</string>
+    <string name="chart_single_point">Én registrering. Flere målinger gir en trend.</string>
+    <string name="tooltip_value_format">%1$s %2$s</string>
+    <string name="tooltip_high_format">Høyt: %1$s</string>
+    <string name="tooltip_low_format">Lavt: %1$s</string>
+    <string name="goal_caption_format">%1$s: %2$s %3$s</string>
+
+    <!-- SettingsScreen.kt: statusmeldinger vist i snackbar (samme mønster som HealthViewModel.kt) -->
+    <string name="msg_health_connect_access_denied">Health Connect-tilgang ble ikke gitt.</string>
+    <string name="msg_auto_sync_on">Automatisk daglig synk er skrudd på.</string>
+    <string name="msg_background_access_denied">Bakgrunnstilgang ble ikke gitt – automatisk synk er ikke aktivert.</string>
+    <string name="msg_health_connect_unavailable_status">Health Connect er ikke installert eller må oppdateres på denne telefonen (status: %1$d).</string>
+    <string name="msg_health_connect_error">Feil mot Health Connect: %1$s</string>
+    <string name="msg_auto_sync_off">Automatisk daglig synk er skrudd av.</string>
+    <string name="msg_health_connect_unavailable">Health Connect er ikke installert eller må oppdateres.</string>
+    <string name="msg_background_sync_unsupported">Denne Health Connect-versjonen støtter ikke bakgrunnssynk ennå. Oppdater Health Connect fra Play Store.</string>
+    <string name="msg_sync_today_first_for_auto">Trykk «Hent fra Health Connect i dag» én gang først, så kan automatisk synk skrus på.</string>
+    <string name="msg_sync_today_first_for_history">Trykk «Hent fra Health Connect i dag» én gang først, så kan du hente historikk.</string>
+    <string name="msg_backup_saved">Sikkerhetskopi lagret.</string>
+    <string name="msg_backup_save_failed">Kunne ikke lagre sikkerhetskopi: %1$s</string>
+    <string name="msg_csv_saved">CSV-fil lagret.</string>
+    <string name="msg_csv_save_failed">Kunne ikke lagre CSV-fil: %1$s</string>
+    <string name="msg_file_empty">Fant ikke innhold i den valgte filen.</string>
+    <string name="msg_file_read_failed">Kunne ikke lese filen: %1$s</string>
+    <string name="msg_auto_backup_on">Automatisk daglig backup er skrudd på.</string>
+    <string name="msg_auto_backup_setup_failed">Kunne ikke sette opp automatisk backup: %1$s</string>
+    <string name="msg_auto_backup_off">Automatisk daglig backup er skrudd av.</string>
+
+    <!-- SettingsScreen.kt: overskrift og Garmin/Health Connect-boksen -->
+    <string name="settings_title">Innstillinger</string>
+    <string name="settings_garmin_title">Garmin via Health Connect</string>
+    <string name="settings_garmin_description">Henter skritt, søvn, hvilepuls og vekt fra Garmin Connect via Health Connect. Body Battery, stress og HRV deles ikke via Health Connect og må registreres manuelt.</string>
+    <string name="action_sync_today">Hent fra Health Connect i dag</string>
+    <string name="label_auto_sync">Synk automatisk hver dag</string>
+    <string name="desc_auto_sync">Kjøres omtrent én gang i døgnet i bakgrunnen. Ikke et eksakt klokkeslett.</string>
+    <string name="label_fetch_history">Hent historikk</string>
+    <string name="action_last_7_days">Siste 7 dager</string>
+    <string name="action_last_30_days">Siste 30 dager</string>
+
+    <!-- SettingsScreen.kt: Utseende-boksen -->
+    <string name="settings_appearance_title">Utseende</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Lys</string>
+    <string name="theme_dark">Mørk</string>
+
+    <!-- SettingsScreen.kt: Sikkerhetskopi-boksen -->
+    <string name="settings_backup_title">Sikkerhetskopi</string>
+    <string name="settings_backup_description">Lag en fil med all helsedataen din. Velg Google Drive som lagringssted i dialogen som åpnes, så kan du hente den frem igjen på en ny telefon.</string>
+    <string name="action_create_backup">Lag sikkerhetskopi</string>
+    <string name="action_restore_backup">Gjenopprett fra sikkerhetskopi</string>
+    <string name="label_auto_backup">Automatisk daglig backup</string>
+    <string name="desc_auto_backup_on_format">Skriver til: %1$s. Omtrent én gang i døgnet i bakgrunnen.</string>
+    <string name="desc_auto_backup_off">Velg en fil første gang du skrur denne på – appen skriver til den automatisk videre.</string>
+    <string name="desc_auto_backup_last_error">Sist feilet %1$s: %2$s</string>
+    <string name="desc_auto_backup_last_success">Sist oppdatert %1$s</string>
+    <string name="desc_auto_backup_access_lost">Appen har mistet tilgangen til backup-filen. Trykk «Endre plassering» og velg en fil på nytt.</string>
+
+    <!-- SettingsScreen.kt: Eksporter data og Personvern-boksene -->
+    <string name="settings_export_title">Eksporter data</string>
+    <string name="settings_export_description">Lager en CSV-fil for egen analyse i regneark (Excel, Sheets osv.). Dette er ikke ment som sikkerhetskopi – bruk JSON-eksporten over til det.</string>
+    <string name="action_export_csv">Eksporter som CSV</string>
+    <string name="settings_privacy_title">Personvern</string>
+    <string name="settings_privacy_description">Helsehistorikken din lagres lokalt i appens database og sendes ikke til noen server. Ved en teknisk feil sendes en anonym feilrapport (ikke helsedataen din) til Firebase Crashlytics for feilsøking.</string>
+
+    <!-- SettingsScreen.kt: importbekreftelsesdialog (tittel gjenbruker action_restore_backup) -->
+    <string name="confirm_restore_message">Dette overskriver eksisterende registreringer for datoene som finnes i filen. Datoer som ikke finnes i filen berøres ikke. Fortsette?</string>
+    <string name="action_restore">Gjenopprett</string>
+
+    <!-- share/SummaryRenderer.kt og SummaryShare.kt: radetiketter og faste tekster i sammendraget -->
+    <string name="summary_row_weight_change">Vekt, endring</string>
+    <string name="summary_row_waist_change">Midjemål, endring</string>
+    <string name="summary_row_hrv_avg">HRV, snitt</string>
+    <string name="summary_row_resting_hr_avg">Hvilepuls, snitt</string>
+    <string name="summary_row_sleep_avg">Søvn, snitt</string>
+    <string name="summary_row_sleep_score_avg">Søvnscore, snitt</string>
+    <string name="summary_row_body_battery_high_avg">Body Battery høy, snitt</string>
+    <string name="summary_row_body_battery_low_avg">Body Battery lav, snitt</string>
+    <string name="summary_row_stress_avg">Stress, snitt</string>
+    <string name="summary_row_steps_avg">Skritt, snitt</string>
+    <string name="summary_no_data">Ingen data registrert i denne perioden.</string>
+    <string name="summary_footer">Generert av HealthLog</string>
+    <string name="share_chooser_title">Del sammendrag</string>
+
+    <!-- widget/HealthWidgetProvider.kt og widget_health_score.xml -->
+    <string name="widget_steps_format">%1$s skritt</string>
+    <string name="widget_steps_placeholder">– skritt</string>
+    <string name="widget_sleep_format">%1$d t %2$d min søvn</string>
+    <string name="widget_sleep_placeholder">– søvn</string>
+
+    <!-- TodayScreen.kt: CoachCard / coach/CoachEngine.kt - fiktiv "AI-trener" -->
+    <string name="coach_title">AI-trener</string>
+    <string name="coach_milestone_streak_record_steps">Ny rekord: %1$d dager på rad med skrittmål nådd!</string>
+    <string name="coach_milestone_streak_record_sleep">Ny rekord: %1$d dager på rad med søvnmål nådd!</string>
+    <string name="coach_milestone_first_hrv_50">Første gang HRV har vært over 50 ms – bra jobbet.</string>
+    <string name="coach_milestone_total_days">%1$d dager med registreringer – imponerende konsistens.</string>
+    <string name="coach_concern_sleep_low">Søvnen har vært litt kort noen dager nå – kanskje verdt en tidligere kveld snart?</string>
+    <string name="coach_concern_stress_high">Stress-tallene har vært høyere enn vanlig den siste tiden.</string>
+    <string name="coach_concern_no_entry">Det er %1$d dager siden sist registrering – bare en påminnelse, ikke noe press.</string>
+    <string name="coach_concern_hrv_down">HRV har gått litt ned nylig – kan være verdt å følge med på.</string>
+    <string name="coach_positive_hrv_up">HRV har gått opp den siste tiden – kroppen din ser ut til å restituere bedre.</string>
+    <string name="coach_positive_resting_hr_down">Hvilepulsen din har sunket litt – ofte et tegn på bedre kondisjon.</string>
+    <string name="coach_positive_sleep_streak">%1$d dager på rad med god søvn. Legger grunnlaget for resten.</string>
+    <string name="coach_positive_steps_streak">%1$d dager på rad over 8000 skritt – solid streak.</string>
+    <string name="coach_positive_score_streak">Helse-scoren har ligget høyt en stund nå.</string>
+    <string name="coach_neutral">Stabil periode – ingen store endringer å melde.</string>
+    <string name="readiness_title">Dagsform</string>
+    <string name="readiness_level_good">God</string>
+    <string name="readiness_level_moderate">Middels</string>
+    <string name="readiness_level_low">Lav</string>
+    <string name="readiness_advice_good_strong">Kroppen ser uthvilt ut – en god dag for en hard økt.</string>
+    <string name="readiness_advice_good_normal">Alt er innenfor din normal – tren som planlagt.</string>
+    <string name="readiness_advice_moderate">Én ting skiller seg ut – en rolig eller moderat økt passer bedre enn en hard i dag.</string>
+    <string name="readiness_advice_low">Flere tegn på at kroppen trenger hvile – ta det rolig i dag.</string>
+    <string name="readiness_signal_vs_normal">%1$s: %2$s (din normal: %3$s)</string>
+    <string name="readiness_signal_vs_goal">%1$s: %2$s (mål: %3$s)</string>
+    <string name="readiness_label_sleep_last_night">Søvn i natt</string>
+    <string name="readiness_signal_load_high">Treningsbelastning: %1$d %% over en normal uke</string>
+    <string name="coach_why_hint">Trykk for å se tallene bak</string>
+    <string name="coach_why_title">Hvorfor denne meldingen?</string>
+    <string name="coach_why_none">Ingen tydelige mønstre akkurat nå. Treneren sier fra når noe skiller seg ut fra din normal.</string>
+    <string name="coach_why_weighting">Nyere dager teller mer enn eldre, slik at mønsteret gjenspeiler hvordan det er nå.</string>
+    <string name="coach_why_recent_vs_previous">%1$s – snitt siste 14 dager: %2$s · de 14 dagene før: %3$s</string>
+    <string name="coach_why_with_without">%1$s – %2$s: %3$s (%4$d dager) · øvrige dager: %5$s (%6$d dager)</string>
+    <string name="coach_why_streak">%1$d dager på rad nå · forrige rekord: %2$d dager</string>
+    <string name="coach_why_latest_vs_normal">%1$s nå: %2$s · din normal: %3$s</string>
+    <string name="coach_why_latest">%1$s nå: %2$s</string>
+    <string name="coach_why_recent_average">%1$s – snitt siste %2$d dager: %3$s</string>
+    <string name="coach_why_last7_vs_normal">%1$s – siste 7 dager: %2$s · normalt: %3$s</string>
+    <string name="coach_why_days_since">Siste registrering: %1$s</string>
+    <string name="coach_why_based_on">Basert på %1$d dager med data. Dager merket syk eller reise er holdt utenfor.</string>
+    <string name="coach_metric_training_load">Treningsbelastning (min vektet etter intensitet)</string>
+    <string name="coach_metric_deep_sleep">Dyp søvn</string>
+    <string name="coach_metric_awake">Våken tid per natt</string>
+    <string name="coach_condition_trained">dager med trening (20+ min)</string>
+    <string name="coach_condition_rest_day">hviledager</string>
+    <string name="coach_condition_low_stress">dager med lavt stress</string>
+    <string name="coach_condition_light_meals">dager med lette måltider</string>
+    <string name="coach_condition_active_day">aktive dager (30+ aktive min)</string>
+    <string name="coach_concern_training_load_spike">Du har trent %1$d %% mer enn vanlig siste uke. Kroppen trenger tid til å tilpasse seg – legg inn en rolig dag snart.</string>
+    <string name="coach_concern_awake_up">Du har vært mer våken om natta denne uka – i snitt %1$d min per natt. Faste leggetider og mindre skjerm før sengetid kan hjelpe.</string>
+    <string name="coach_positive_deep_sleep_up">Mer dyp søvn enn vanlig i natt (%1$d min). Det er i dyp søvn kroppen restituerer mest.</string>
+    <string name="coach_nudge_training_load_drop">Du har trent %1$d %% mindre enn vanlig siste uke. En kort økt i dag holder formen ved like.</string>
+
+    <!-- DayTags.kt / HealthLogApp.kt / HistoryScreen.kt: merk spesielle dager -->
+    <string name="day_tag_sick">Syk</string>
+    <string name="day_tag_travel">Reise</string>
+    <string name="day_tag_rest">Hviledag</string>
+
+    <!-- reminder/*.kt: morgen- og kveldspåminnelser -->
+    <string name="reminder_channel_name">Påminnelser</string>
+    <string name="reminder_channel_description">Minner deg på å fylle ut planer for dagen om morgenen, og hvordan dagen gikk om kvelden.</string>
+    <string name="reminder_notification_title_morning">Planer for dagen?</string>
+    <string name="reminder_notification_text_morning">Du har ikke skrevet noen planer for i dag ennå.</string>
+    <string name="reminder_notification_title_evening">Hvordan gikk dagen?</string>
+    <string name="reminder_notification_text_evening">Du har ikke skrevet noe om hvordan dagen gikk ennå.</string>
+    <string name="settings_reminder_title">Påminnelser</string>
+    <string name="settings_reminder_description">To uavhengige påminnelser: én for planer om morgenen, én for dagsoppsummering om kvelden.</string>
+    <string name="label_morning_reminder">Planer for dagen (morgen)</string>
+    <string name="label_evening_reminder">Hvordan gikk dagen (kveld)</string>
+    <string name="label_send_reminder">Send påminnelse</string>
+    <string name="msg_reminder_on">Påminnelse er skrudd på.</string>
+    <string name="msg_reminder_off">Påminnelse er skrudd av.</string>
+    <string name="msg_notification_permission_denied">Varslingstillatelse ble ikke gitt.</string>
+
+    <!-- TodayScreen.kt / coach/WeeklySummary.kt: ukentlig oppsummering -->
+    <string name="weekly_summary_title">Ukentlig oppsummering</string>
+    <string name="weekly_summary_steps">Skritt denne uken: %1$s</string>
+    <string name="weekly_summary_sleep">Snittsøvn denne uken: %1$s timer</string>
+    <string name="weekly_summary_score">Snitt helse-score denne uken: %1$d</string>
+    <string name="weekly_summary_prev_week">(forrige uke: %1$s)</string>
+
+    <!-- coach/CoachEngine.kt: sammenhenger (runde 4) -->
+    <string name="coach_correlation_training_sleep">Du sover i snitt %1$s timer mer på dager du trener enn på dager du ikke gjør.</string>
+    <string name="coach_correlation_training_hrv">HRV-en din er i snitt %1$s ms høyere på dager du trener.</string>
+    <string name="coach_correlation_rest_stress">Stresset ditt er i snitt %1$s poeng lavere på hviledager.</string>
+
+    <!-- HrvGoal.kt / TrendsScreen.kt: personlig HRV-mål -->
+    <string name="goal_label_hrv_personal">Ditt nivå</string>
+    <string name="goal_label_hrv_generic">Mål (foreløpig)</string>
+
+    <!-- HealthLogApp.kt: angre sletting -->
+    <string name="action_undo">Angre</string>
+
+    <!-- HistoryScreen.kt: filtrer på tagg -->
+    <string name="history_filter_all">Alle</string>
+    <string name="history_empty_filtered">Ingen registreringer med denne taggen.</string>
+
+    <!-- PersonalGoals.kt / TrendsScreen.kt: personlig hvilepuls-mål -->
+    <string name="goal_label_resting_hr_personal">Ditt nivå (under)</string>
+    <string name="goal_label_resting_hr_generic">Mål (under, foreløpig)</string>
+    <string name="goal_label_sleep_personal">Ditt nivå</string>
+    <string name="goal_label_sleep_generic">Mål (foreløpig)</string>
+
+    <!-- share/ClinicalSummary.kt / TrendsScreen.kt: klinisk PDF-sammendrag -->
+    <string name="share_as_clinical_pdf">Del som klinisk PDF</string>
+    <string name="clinical_summary_title">Helserapport</string>
+    <string name="clinical_entry_count">%1$d registreringer i perioden</string>
+    <string name="clinical_footer">Generert av HealthLog – %1$s</string>
+    <string name="clinical_section_vitals">Vitale målinger</string>
+    <string name="clinical_row_weight">Vekt, snitt</string>
+    <string name="clinical_row_waist">Midjemål, snitt</string>
+    <string name="clinical_row_resting_hr">Hvilepuls, snitt</string>
+    <string name="clinical_row_hrv">HRV, snitt</string>
+    <string name="clinical_section_sleep">Søvn</string>
+    <string name="clinical_row_sleep_duration">Søvnlengde, snitt</string>
+    <string name="clinical_row_sleep_score">Søvnscore, snitt</string>
+    <string name="clinical_section_activity">Aktivitet</string>
+    <string name="clinical_row_steps_avg">Skritt, snitt per dag</string>
+    <string name="clinical_row_training_avg">Trening, snitt per dag</string>
+    <string name="clinical_section_wellbeing">Velvære</string>
+    <string name="clinical_row_stress">Stress, snitt</string>
+    <string name="clinical_row_body_battery_high">Body Battery høy, snitt</string>
+    <string name="clinical_row_body_battery_low">Body Battery lav, snitt</string>
+
+    <!-- TrainingIntensity.kt: intensitetsnivåer basert på puls under trening -->
+    <string name="training_intensity_light">Lett</string>
+    <string name="training_intensity_moderate">Moderat</string>
+    <string name="training_intensity_vigorous">Høy</string>
+
+    <!-- TrainingType.kt: treningstype fra Health Connect sin exerciseType -->
+    <string name="training_type_running">Løping</string>
+    <string name="training_type_walking">Gange</string>
+    <string name="training_type_biking">Sykling</string>
+    <string name="training_type_strength_training">Styrketrening</string>
+    <string name="training_type_swimming">Svømming</string>
+    <string name="training_type_yoga">Yoga</string>
+    <string name="training_type_hiking">Fottur</string>
+    <string name="training_type_hiit">HIIT</string>
+    <string name="training_type_elliptical">Ellipsemaskin</string>
+    <string name="training_type_rowing">Roing</string>
+    <string name="training_type_skiing">Ski</string>
+    <string name="training_type_other">Annet</string>
+
+    <!-- TrendsScreen.kt: enhet for treningsgrafen, tilgjengelighetsbeskrivelser for graf-Canvas -->
+    <string name="unit_minutes">min</string>
+    <string name="chart_accessibility_description">%1$s. Periode %2$s. Siste verdi %3$s. Endring %4$s.</string>
+    <string name="range_chart_accessibility_description">%1$s. Periode %2$s til %3$s. Siste høy %4$s, siste lav %5$s.</string>
+
+    <!-- res/xml/shortcuts.xml: app-snarvei -->
+    <string name="shortcut_quick_entry_short">Registrer</string>
+    <string name="shortcut_quick_entry_long">Registrer i dag</string>
+
+    <!-- CalendarHeatMap.kt: kalender-oversikt i Historikk -->
+    <string name="heat_map_previous_month">Forrige måned</string>
+    <string name="heat_map_next_month">Neste måned</string>
+    <string name="heat_map_cell_description">%1$s, helse-score %2$d</string>
+    <string name="heat_map_cell_description_empty">%1$s, ingen registrering</string>
+
+    <!-- OnboardingScreen.kt: førstegangs-introduksjon -->
+    <string name="onboarding_welcome_title">Velkommen til HealthLog</string>
+    <string name="onboarding_welcome_body">HealthLog samler helsedataen din på ett sted – automatisk fra Garmin via Health Connect, og manuelt for det som ikke deles. Alt lagres lokalt på telefonen din.</string>
+    <string name="onboarding_health_connect_title">Koble til Garmin</string>
+    <string name="onboarding_health_connect_body">Skritt, søvn, hvilepuls, vekt og treningsøkter hentes automatisk fra Garmin Connect via Health Connect. Body Battery, stress og HRV deles ikke via Health Connect – disse registrerer du selv, sammen med dagboken din.</string>
+    <string name="onboarding_baseline_title">Mål som tilpasser seg deg</string>
+    <string name="onboarding_baseline_body">Noen grafer (HRV, hvilepuls, søvn) viser et personlig mål basert på dine egne siste målinger, i stedet for ett fast tall for alle. Du trenger minst 14 dager med data før dette slår inn – frem til da vises et generelt, forsiktig tall.</string>
+    <string name="onboarding_back">Tilbake</string>
+    <string name="onboarding_skip">Hopp over</string>
+    <string name="onboarding_next">Neste</string>
+    <string name="onboarding_get_started">Kom i gang</string>
+
+    <!-- HistoryScreen.kt: søk i dagbok og hopp-til-dato -->
+    <string name="action_jump_to_date">Hopp til dato</string>
+    <string name="action_ok">OK</string>
+    <string name="history_search_placeholder">Søk i dagboken</string>
+    <string name="action_clear_search">Tøm søk</string>
+
+    <!-- SleepDebt.kt / TodayScreen.kt: SleepDebtCard -->
+    <string name="sleep_debt_title">Søvngjeld</string>
+    <string name="sleep_surplus_title">Søvnoverskudd</string>
+    <string name="sleep_balanced_title">Søvnbalanse</string>
+    <string name="sleep_debt_value">%1$s timer</string>
+    <string name="sleep_debt_description">Siste 14 dager, sammenlignet med søvnmålet ditt på %1$s timer.</string>
+
+    <!-- coach/CoachEngine.kt: flere sammenhenger (stress vs. søvn/HRV) -->
+    <string name="coach_correlation_stress_sleep">Du sover i snitt %1$s timer mer på dager med lavt stress enn på dager med høyere stress.</string>
+    <string name="coach_correlation_stress_hrv">HRV-en din er i snitt %1$s ms høyere på dager med lavt stress.</string>
+
+    <!-- coach/MonthlySummary.kt / TodayScreen.kt: månedlig oppsummering -->
+    <string name="monthly_summary_title">Månedlig oppsummering</string>
+    <string name="monthly_summary_steps">Skritt denne måneden: %1$s</string>
+    <string name="monthly_summary_sleep">Snittsøvn denne måneden: %1$s timer</string>
+    <string name="monthly_summary_score">Snitt helse-score denne måneden: %1$d</string>
+    <string name="monthly_summary_prev_month">(forrige måned: %1$s)</string>
+
+    <!-- RecordsScreen.kt: personlige rekorder -->
+    <string name="nav_records">Rekorder</string>
+    <string name="records_title">Rekorder</string>
+    <string name="record_steps_streak">Lengste streak, skrittmål</string>
+    <string name="record_sleep_streak">Lengste streak, søvnmål</string>
+    <string name="record_lowest_resting_hr">Laveste hvilepuls</string>
+    <string name="record_highest_hrv">Høyeste HRV</string>
+    <string name="record_most_steps">Flest skritt på én dag</string>
+    <string name="record_longest_training">Lengste treningsøkt</string>
+    <string name="record_highest_score">Høyeste helse-score</string>
+    <string name="record_total_days">Totalt antall registreringer</string>
+    <string name="record_days_format">%1$d dager</string>
+
+    <!-- NutritionLevel.kt: enkel ernæringslogging -->
+    <string name="nutrition_level_light">Lett</string>
+    <string name="nutrition_level_moderate">Moderat</string>
+    <string name="nutrition_level_heavy">Tung</string>
+
+    <!-- HistoryScreen.kt: filtrer på treningstype -->
+    <string name="history_filter_training_button">Treningstype</string>
+    <string name="history_filter_training_button_count">Treningstype (%1$d)</string>
+    <string name="history_filter_training_clear">Tøm valg</string>
+
+    <!-- backup/BackupFailureNotifier.kt: varsel etter flere mislykkede backup-forsøk -->
+    <string name="backup_failure_channel_name">Sikkerhetskopi feilet</string>
+    <string name="backup_failure_channel_description">Varsler deg hvis automatisk sikkerhetskopi har feilet flere ganger på rad.</string>
+    <string name="backup_failure_notification_title">Automatisk sikkerhetskopi feiler</string>
+    <string name="backup_failure_notification_text">Har feilet flere dager på rad. Sjekk innstillingene for sikkerhetskopi.</string>
+
+    <!-- SettingsScreen.kt: selvvalgt tidspunkt for daglig påminnelse -->
+    <string name="label_reminder_time">Tidspunkt</string>
+
+    <string name="nutrition_section_label">Dagens måltider</string>
+    <string name="nutrition_section_label_history">Måltider</string>
+
+    <!-- HistoryScreen.kt / HealthViewModel.kt: tilbakestill et beskyttet felt -->
+    <string name="action_reset_to_health_connect">Tilbakestill til Health Connect</string>
+    <string name="msg_field_reset_to_health_connect">Feltet hentes på nytt fra Health Connect.</string>
+
+    <!-- coach/CoachEngine.kt: ernæring inn i AI-treneren -->
+    <string name="coach_correlation_light_meals_sleep">Du sover i snitt %1$s timer mer på dager med lette måltider.</string>
+    <string name="coach_correlation_light_meals_stress">Stresset ditt er i snitt %1$s poeng lavere på dager med lette måltider.</string>
+
+    <!-- RecordsScreen.kt: del rekorder som bilde/PDF -->
+    <string name="records_share_period_label">Hele historikken</string>
+
+    <!-- TodayScreen.kt: hint om flere treningsøkter samme dag -->
+    <string name="metric_training_extra_sessions">(+%1$d til)</string>
+
+    <!-- widget/WidgetConfigActivity.kt / WidgetMetric.kt: konfigurerbar widget -->
+    <string name="widget_config_title">Velg widget-innhold</string>
+    <string name="widget_config_metric1_label">Første måling</string>
+    <string name="widget_config_metric2_label">Andre måling</string>
+    <string name="widget_config_label_weight">Vekt</string>
+    <string name="widget_metric_placeholder">–</string>
+    <string name="widget_resting_hr_format">%1$d bpm hvilepuls</string>
+    <string name="widget_hrv_format">%1$d ms HRV</string>
+    <string name="widget_stress_format">%1$d stress</string>
+    <string name="widget_body_battery_format">%1$d Body Battery</string>
+    <string name="widget_training_format">%1$d min trening</string>
+    <string name="widget_weight_format">%1$s kg</string>
+
+    <!-- HistoryScreen.kt: foldbar kalenderoversikt -->
+    <string name="history_calendar_toggle">Kalenderoversikt</string>
+
+    <!-- SettingsScreen.kt / GoalPreferences.kt: egne mål-terskler -->
+    <string name="settings_goals_title">Egne mål</string>
+    <string name="settings_goals_description">Juster terskelverdiene som brukes i "Dagens mål" på I dag-fanen.</string>
+    <string name="settings_goals_steps_label">Skrittmål</string>
+    <string name="settings_goals_training_label">Treningsmål (minutter)</string>
+    <string name="settings_goals_sleep_label">Søvnmål (timer)</string>
+    <string name="msg_goals_saved">Mål lagret.</string>
+
+    <!-- TrendsScreen.kt / coach/PeriodComparison.kt: sammenlign valgfrie perioder -->
+    <string name="period_comparison_title">Sammenlign perioder</string>
+    <string name="period_comparison_week">Uke</string>
+    <string name="period_comparison_month">Måned</string>
+    <string name="period_comparison_a">Periode A</string>
+    <string name="period_comparison_b">Periode B</string>
+    <string name="period_comparison_choose_date">Velg dato</string>
+    <string name="period_comparison_steps">Skritt: %1$s vs. %2$s</string>
+    <string name="period_comparison_sleep">Snittsøvn: %1$s t vs. %2$s t</string>
+    <string name="period_comparison_score">Snitt helse-score: %1$s vs. %2$s</string>
+
+    <!-- RecordsScreen.kt / coach/YearInReview.kt: årsoversikt -->
+    <string name="records_all_time_title">Alle-tiders rekorder</string>
+    <string name="year_review_title">Året %1$d</string>
+    <string name="year_review_days_logged">Dager registrert</string>
+    <string name="year_review_total_steps">Totalt antall skritt</string>
+    <string name="year_review_avg_steps">Snitt skritt per dag</string>
+    <string name="year_review_avg_sleep">Snittsøvn</string>
+    <string name="year_review_avg_score">Snitt helse-score</string>
+    <string name="year_review_total_training">Total treningstid</string>
+    <string name="year_review_most_common_training">Vanligste treningstype</string>
+    <string name="year_review_highest_hrv">Høyeste HRV</string>
+    <string name="year_review_lowest_resting_hr">Laveste hvilepuls</string>
+    <string name="year_review_longest_steps_streak">Lengste streak, skrittmål</string>
+
+    <!-- MainActivity.kt / SettingsScreen.kt: lenke til personvernerklæringen -->
+    <string name="action_read_privacy_policy">Les personvernerklæringen</string>
+
+    <!-- billing/ProGate.kt: HealthLog Pro-oppfordring -->
+    <string name="pro_upsell_title">%1$s er en Pro-funksjon</string>
+    <string name="pro_upsell_description">Lås opp med et engangskjøp av HealthLog Pro – ingen abonnement.</string>
+    <string name="action_upgrade_to_pro">Bli Pro</string>
+    <string name="action_upgrade_to_pro_priced">Bli Pro – %1$s</string>
+
+    <!-- Snittpuls for hele dagen (fra Health Connect, ikke bare hvilepuls) -->
+    <string name="metric_label_avg_heart_rate">Snittpuls</string>
+
+    <!-- TodayScreen.kt: puls-gjennom-dagen-graf, hentet live fra Health Connect -->
+    <string name="heart_rate_chart_title">Puls gjennom dagen</string>
+    <string name="heart_rate_chart_error">Kunne ikke hente pulsdata akkurat nå.</string>
+    <string name="heart_rate_chart_empty">Ingen pulsmålinger registrert i dag ennå.</string>
+    <string name="heart_rate_chart_summary">Snitt %1$d bpm · laveste %2$d · høyeste %3$d</string>
+    <string name="heart_rate_chart_content_description">Graf som viser pulsen din gjennom dagen</string>
+
+    <!-- Aktive minutter: skritt-rate uavhengig av formelt loggede treningsøkter -->
+    <string name="metric_label_active_minutes">Aktive minutter</string>
+
+    <!-- coach/CoachEngine.kt: aktiv dag (uten formell trening) vs. stress -->
+    <string name="coach_correlation_active_day_stress">Stresset ditt er i snitt %1$s poeng lavere på aktive dager, selv uten formell trening.</string>
+
+    <!-- HealthConnectManager.kt: søvnstadier (dyp/lett/REM/våken) fra Health Connect -->
+    <string name="sleep_stage_deep_short">Dyp</string>
+    <string name="sleep_stage_light_short">Lett</string>
+    <string name="sleep_stage_rem_short">REM</string>
+    <string name="sleep_stage_awake_short">Våken</string>
+
+    <!-- TrendsScreen.kt: samlet søvnmål-etikett, erstatter de to gamle (personlig/foreløpig) -->
+    <string name="goal_label_sleep_own">Ditt søvnmål</string>
+
+    <!-- SettingsScreen.kt: bytt plassering for automatisk sikkerhetskopi -->
+    <string name="action_change_backup_location">Endre plassering</string>
+
+    <!-- coach/CoachEngine.kt: enkel melding som trenger bare gårsdagens tall -->
+    <string name="coach_great_sleep_last_night">Du sov %1$s timer i natt - en god natt!</string>
+
+    <!-- TodayScreen.kt: detaljert nedbrytning av helse-scoren, vist ved trykk på kortet -->
+    <string name="health_score_detail_title">Hva ga poeng i dag</string>
+    <string name="health_score_detail_total">Totalt</string>
+    <string name="action_close">Lukk</string>
+
+    <string name="habit_default_alcohol">Alkohol</string>
+    <string name="habit_default_late_caffeine">Kaffe etter kl. 15</string>
+    <string name="habit_default_screen_in_bed">Skjerm i senga</string>
+    <string name="habit_default_late_dinner">Sen middag</string>
+    <string name="habit_section_label">Vane-merker (brukes av AI-treneren)</string>
+    <string name="habit_edit_tags">Rediger merker</string>
+    <string name="habit_editor_title">Vane-merker</string>
+    <string name="habit_editor_description">Merk dager med ting du vil se sammenhengen med. AI-treneren sammenligner søvnen og HRV-en natten etter. Fjerner du et merke her, blir det liggende på dagene der det allerede er brukt.</string>
+    <string name="habit_remove_tag">Fjern %1$s</string>
+    <string name="habit_new_tag_label">Nytt merke</string>
+    <string name="habit_add_tag">Legg til</string>
+    <string name="habit_day_summary">Merker: %1$s</string>
+    <string name="coach_habit_sleep_lower">Etter dager med «%1$s» sover du i snitt %2$s timer mindre natten etter.</string>
+    <string name="coach_habit_sleep_higher">Etter dager med «%1$s» sover du i snitt %2$s timer mer natten etter.</string>
+    <string name="coach_habit_hrv_lower">HRV-en din er i snitt %2$s ms lavere dagen etter «%1$s».</string>
+    <string name="coach_habit_hrv_higher">HRV-en din er i snitt %2$s ms høyere dagen etter «%1$s».</string>
+    <string name="coach_why_habit_next_day">%1$s etter «%2$s»: %3$s (%4$d ganger) · etter andre dager: %5$s (%6$d dager)</string>
+    <string name="today_customize">Tilpass</string>
+    <string name="today_customize_title">Tilpass I dag</string>
+    <string name="today_customize_description">Velg hvilke kort som vises, og flytt dem opp eller ned.</string>
+    <string name="today_card_weekly_summary">Ukeoppsummering (søndager)</string>
+    <string name="today_card_monthly_summary">Månedsoppsummering (siste dag i måneden)</string>
+    <string name="today_card_summary">Dagens status</string>
+    <string name="today_card_diary">Planer og dagsoppsummering</string>
+    <string name="today_card_readiness">Dagsform</string>
+    <string name="today_card_coach">AI-trener</string>
+    <string name="today_card_score_goals">Helse-score og Dagens mål</string>
+    <string name="today_card_heart_rate">Puls gjennom dagen</string>
+    <string name="today_card_sleep_debt">Søvnbalanse</string>
+    <string name="today_card_weight_trend">Vekttrend</string>
+    <string name="today_card_metrics">Helsemålinger</string>
+    <string name="action_move_up">Flytt opp</string>
+    <string name="action_move_down">Flytt ned</string>
+    <string name="action_reset_default">Tilbakestill</string>
+    <string name="label_weekly_summary_notification">Ukeoppsummering søndag kveld</string>
+    <string name="desc_weekly_summary_notification">Et varsel kl. 19 hver søndag med ukens helse-score, skritt og søvn sammenlignet med uka før.</string>
+    <string name="goal_label_weight">Vektmål</string>
+    <string name="chart_legend_rolling_average">Tykk linje: snitt siste 7 dager</string>
+    <string name="weight_projection_trend">Trend: %1$s kg per uke · snitt nå %2$s kg</string>
+    <string name="weight_projection_no_goal">Sett et vektmål i Innstillinger for å se når du kan nå det.</string>
+    <string name="weight_projection_reached">Du er ved målet ditt på %1$s kg.</string>
+    <string name="weight_projection_on_track">Med dagens tempo når du %1$s kg rundt %2$s.</string>
+    <string name="weight_projection_too_slow">Med dagens tempo tar det over to år å nå %1$s kg.</string>
+    <string name="weight_projection_away">Trenden går ikke mot målet ditt på %1$s kg akkurat nå.</string>
+    <string name="trends_habit_highlight_label">Marker dager med (lilla prikk nederst i grafene):</string>
+    <string name="weekly_activity_title">Aktivitet denne uka</string>
+    <string name="weekly_activity_progress">%1$d av %2$d min</string>
+    <string name="weekly_activity_done">Ukemålet er nådd – bra jobbet!</string>
+    <string name="weekly_activity_remaining">%1$d min igjen, %2$d dager igjen av uka.</string>
+    <string name="weekly_activity_remaining_today">%1$d min igjen – uka slutter i dag.</string>
+    <string name="weekly_activity_explanation">Aktive minutter og trening. Hard trening teller dobbelt, som i helserådene.</string>
+    <string name="today_card_weekly_activity">Aktivitet denne uka</string>
+    <string name="settings_goals_weekly_activity_label">Aktivitetsmål per uke (min)</string>
+    <string name="settings_goals_weight_label">Vektmål (kg)</string>
+    <string name="settings_goals_weight_hint">Valgfritt. La stå tomt for ingen vektmål.</string>
+    <string name="metric_title_body_fat">Kroppsfett</string>
+    <string name="period_comparison_steps_avg">Snitt skritt per dag: %1$s vs. %2$s</string>
+    <string name="period_label_week">Uke %1$d · %2$s–%3$s</string>
+    <string name="period_so_far">pågår – tall så langt</string>
+    <string name="action_previous_period">Forrige periode</string>
+    <string name="action_next_period">Neste periode</string>
+</resources>

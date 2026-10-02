@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Gjelder Android 6.0–11 (API 23–30). Ekskluderer selve databasefilen fra
+     Androids automatiske skybackup, slik at en gammel snapshot (f.eks. fra
+     tidlig testing med falske data) ikke kan gjenopprettes stille ved en
+     fersk installasjon. Vår egen "Lag sikkerhetskopi"-funksjon i appen er
+     upåvirket av dette - det er en helt separat, bevisst mekanisme. -->
+<full-backup-content>
+    <exclude domain="database" path="healthlog.db" />
+    <exclude domain="database" path="healthlog.db-wal" />
+    <exclude domain="database" path="healthlog.db-shm" />
+</full-backup-content>

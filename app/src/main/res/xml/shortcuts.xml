@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="quick_entry"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_add"
+        android:shortcutShortLabel="@string/shortcut_quick_entry_short"
+        android:shortcutLongLabel="@string/shortcut_quick_entry_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="no.healthlog.app"
+            android:targetClass="no.healthlog.app.MainActivity">
+            <extra android:name="open_entry_dialog" android:value="true" />
+        </intent>
+    </shortcut>
+</shortcuts>
