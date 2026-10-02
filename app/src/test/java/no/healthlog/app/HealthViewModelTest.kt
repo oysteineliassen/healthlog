@@ -13,10 +13,10 @@ class HealthViewModelTest {
     }
 
     @Test
-    fun `calculateHealthScore returns 100 when all criteria are met exactly at threshold`() {
+    fun `calculateHealthScore returns 100 when all criteria are met exactly at goal`() {
         val day = HealthDay(
             date = "2026-09-16",
-            sleepMinutes = 420,
+            sleepMinutes = 480,
             hrvMs = 40.0,
             stress = 30,
             steps = 8000,
@@ -38,16 +38,25 @@ class HealthViewModelTest {
     }
 
     @Test
-    fun `calculateHealthScore treats values just below threshold as not met`() {
+    fun `calculateHealthScore gives 0 points at or beyond the danger floor`() {
         val day = HealthDay(
             date = "2026-09-16",
-            sleepMinutes = 419,
-            hrvMs = 39.9,
-            stress = 31,
-            steps = 7999,
-            bodyBatteryMax = 74
+            sleepMinutes = 360, // 75% av 8t-målet
+            hrvMs = 20.0,
+            stress = 70,
+            steps = 2400, // 30% av 8000-målet
+            bodyBatteryMax = 40
         )
         assertEquals(0, calculateHealthScore(day))
+    }
+
+    @Test
+    fun `calculateHealthScore grades points between floor and goal`() {
+        // Halvveis mellom faregrense (6t) og mål (8t) gir halv uttelling
+        val day = HealthDay(date = "2026-09-16", sleepMinutes = 420)
+        assertEquals(10, calculateHealthScore(day))
+        // Rett under målet gir nesten full uttelling, ikke 0 som i gammel alt-eller-ingenting-modell
+        assertEquals(20, calculateHealthScore(HealthDay(date = "2026-09-16", sleepMinutes = 479)))
     }
 
     @Test
