@@ -73,6 +73,7 @@ class BackupSerializerTest {
             trainingSessions = "running:55:moderate",
             morningNote = "Morgen",
             eveningNote = "Kveld",
+            sleepReflection = "Sen middag, våknet tidlig",
             dayTag = "travel",
             nutritionLevel = "light",
             habitTags = "Alkohol|Sen middag",

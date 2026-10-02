@@ -19,7 +19,7 @@ class CsvExporterTest {
         val fields = csv.lines()[1].split(",")
         assertEquals("2026-09-16", fields[0])
         assertEquals("", fields[1]) // weightKg
-        assertEquals("manual", fields[27]) // source (default)
+        assertEquals("manual", fields[28]) // source (default)
     }
 
     @Test

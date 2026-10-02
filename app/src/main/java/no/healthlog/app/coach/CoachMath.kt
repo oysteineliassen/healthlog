@@ -119,6 +119,10 @@ internal data class GroupComparison(
  * - Syk/reise-dager holdes utenfor.
  * - Krever minst [minGroupSize] dager med verdi i hver gruppe (før var det 3, som er
  *   for lite til å skille et mønster fra tilfeldigheter).
+ *
+ * [valueFromNextDay]: hent verdien fra DAGEN ETTER i stedet for samme dag. Brukes for
+ * søvn og HRV, som lagres på dagen natten slutter - søvnen "på" en treningsdag er
+ * natten FØR økten, og kan ikke si noe om hva treningen gjorde med søvnen.
  */
 internal fun compareGroups(
     byDate: Map<LocalDate, HealthDay>,
@@ -127,6 +131,7 @@ internal fun compareGroups(
     minGroupSize: Int = 5,
     windowDays: Long = 180,
     halfLifeDays: Double = 45.0,
+    valueFromNextDay: Boolean = false,
     selector: (HealthDay) -> Double?
 ): GroupComparison? {
     val from = today.minusDays(windowDays)
@@ -135,7 +140,13 @@ internal fun compareGroups(
 
     for ((date, day) in byDate) {
         if (date.isAfter(today) || date.isBefore(from) || day.isAtypical()) continue
-        val value = selector(day) ?: continue
+        val valueDay = if (valueFromNextDay) {
+            if (!date.isBefore(today)) continue
+            byDate[date.plusDays(1)]?.takeIf { !it.isAtypical() } ?: continue
+        } else {
+            day
+        }
+        val value = selector(valueDay) ?: continue
         val age = ChronoUnit.DAYS.between(date, today).toDouble()
         val weight = 0.5.pow(age / halfLifeDays)
         if (condition(day)) withValues += value to weight else withoutValues += value to weight

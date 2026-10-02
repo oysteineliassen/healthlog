@@ -70,7 +70,8 @@ fun HistoryScreen(
             (selectedTagFilter == null || day.dayTag == selectedTagFilter) &&
                 (searchQuery.isBlank() ||
                     day.morningNote?.contains(searchQuery, ignoreCase = true) == true ||
-                    day.eveningNote?.contains(searchQuery, ignoreCase = true) == true) &&
+                    day.eveningNote?.contains(searchQuery, ignoreCase = true) == true ||
+                    day.sleepReflection?.contains(searchQuery, ignoreCase = true) == true) &&
                 (selectedTrainingTypes.isEmpty() || day.trainingType in selectedTrainingTypes) &&
                 (selectedHabitFilter == null || selectedHabitFilter in day.habitTagSet())
         }
@@ -491,6 +492,15 @@ private fun HistoryDayCard(
 
             val placeholder = stringResource(R.string.value_placeholder)
 
+            if (!day.sleepReflection.isNullOrBlank()) {
+                Text(
+                    text = stringResource(R.string.diary_sleep_prefix, day.sleepReflection),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontStyle = FontStyle.Italic
+                )
+                Spacer(Modifier.height(8.dp))
+            }
+
             if (!day.morningNote.isNullOrBlank()) {
                 Text(
                     text = stringResource(R.string.diary_morning_prefix, day.morningNote),
@@ -616,6 +626,10 @@ fun EditHistoryDialog(
 ) {
     var morningNote by rememberSaveable(day.date) {
         mutableStateOf(day.morningNote ?: "")
+    }
+
+    var sleepReflection by rememberSaveable(day.date) {
+        mutableStateOf(day.sleepReflection ?: "")
     }
 
     var dayTag by rememberSaveable(day.date) {
@@ -811,6 +825,16 @@ fun EditHistoryDialog(
                 }
 
                 HabitTagSelector(selected = habitTags, onChange = { habitTags = it })
+
+                OutlinedTextField(
+                    value = sleepReflection,
+                    onValueChange = { sleepReflection = it },
+                    label = { Text(stringResource(R.string.label_sleep_reflection)) },
+                    placeholder = { Text(stringResource(R.string.placeholder_sleep_reflection)) },
+                    minLines = 2,
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                    modifier = Modifier.fillMaxWidth()
+                )
 
                 OutlinedTextField(
                     value = morningNote,
@@ -1081,6 +1105,7 @@ fun EditHistoryDialog(
                             sleepScore = sleepScoreValue,
                             morningNote = morningNote.trim().ifBlank { null },
                             eveningNote = eveningNote.trim().ifBlank { null },
+                            sleepReflection = sleepReflection.trim().ifBlank { null },
                             dayTag = dayTag,
                             nutritionLevel = nutritionLevel,
                             habitTags = habitTags,

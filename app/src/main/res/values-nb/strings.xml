@@ -36,6 +36,9 @@
     <!-- HealthLogApp.kt: EntryDialog (og samme felt i HistoryScreen.kt sin EditHistoryDialog) -->
     <string name="entry_dialog_title">Registrer i dag</string>
     <string name="label_morning_plan">Planer for dagen</string>
+    <string name="label_sleep_reflection">Refleksjon over natten</string>
+    <string name="placeholder_sleep_reflection">Hvorfor ble natten bra eller dårlig? (sen middag, stress, støy, alkohol …)</string>
+    <string name="diary_sleep_prefix">Natten: %1$s</string>
     <string name="placeholder_morning_plan">Hva er planen i dag?</string>
     <string name="label_weight">Vekt (kg)</string>
     <string name="error_weight_range">Skriv inn en verdi mellom 20 og 300 kg</string>
@@ -279,6 +282,7 @@
     <string name="coach_why_weighting">Nyere dager teller mer enn eldre, slik at mønsteret gjenspeiler hvordan det er nå.</string>
     <string name="coach_why_recent_vs_previous">%1$s – snitt siste 14 dager: %2$s · de 14 dagene før: %3$s</string>
     <string name="coach_why_with_without">%1$s – %2$s: %3$s (%4$d dager) · øvrige dager: %5$s (%6$d dager)</string>
+    <string name="coach_why_with_without_next_day">%1$s natten etter %2$s: %3$s (%4$d dager) · etter øvrige dager: %5$s (%6$d dager)</string>
     <string name="coach_why_streak">%1$d dager på rad nå · forrige rekord: %2$d dager</string>
     <string name="coach_why_latest_vs_normal">%1$s nå: %2$s · din normal: %3$s</string>
     <string name="coach_why_latest">%1$s nå: %2$s</string>
@@ -328,8 +332,8 @@
     <string name="weekly_summary_prev_week">(forrige uke: %1$s)</string>
 
     <!-- coach/CoachEngine.kt: sammenhenger (runde 4) -->
-    <string name="coach_correlation_training_sleep">Du sover i snitt %1$s timer mer på dager du trener enn på dager du ikke gjør.</string>
-    <string name="coach_correlation_training_hrv">HRV-en din er i snitt %1$s ms høyere på dager du trener.</string>
+    <string name="coach_correlation_training_sleep">Du sover i snitt %1$s timer mer natten etter en treningsdag enn etter andre dager.</string>
+    <string name="coach_correlation_training_hrv">HRV-en din er i snitt %1$s ms høyere natten etter en treningsdag.</string>
     <string name="coach_correlation_rest_stress">Stresset ditt er i snitt %1$s poeng lavere på hviledager.</string>
 
     <!-- HrvGoal.kt / TrendsScreen.kt: personlig HRV-mål -->
@@ -430,8 +434,8 @@
     <string name="sleep_debt_description">Siste 14 dager, sammenlignet med søvnmålet ditt på %1$s timer.</string>
 
     <!-- coach/CoachEngine.kt: flere sammenhenger (stress vs. søvn/HRV) -->
-    <string name="coach_correlation_stress_sleep">Du sover i snitt %1$s timer mer på dager med lavt stress enn på dager med høyere stress.</string>
-    <string name="coach_correlation_stress_hrv">HRV-en din er i snitt %1$s ms høyere på dager med lavt stress.</string>
+    <string name="coach_correlation_stress_sleep">Du sover i snitt %1$s timer mer natten etter en dag med lavt stress enn etter mer stressende dager.</string>
+    <string name="coach_correlation_stress_hrv">HRV-en din er i snitt %1$s ms høyere natten etter en dag med lavt stress.</string>
 
     <!-- coach/MonthlySummary.kt / TodayScreen.kt: månedlig oppsummering -->
     <string name="monthly_summary_title">Månedlig oppsummering</string>
@@ -480,7 +484,7 @@
     <string name="msg_field_reset_to_health_connect">Feltet hentes på nytt fra Health Connect.</string>
 
     <!-- coach/CoachEngine.kt: ernæring inn i AI-treneren -->
-    <string name="coach_correlation_light_meals_sleep">Du sover i snitt %1$s timer mer på dager med lette måltider.</string>
+    <string name="coach_correlation_light_meals_sleep">Du sover i snitt %1$s timer mer natten etter en dag med lette måltider.</string>
     <string name="coach_correlation_light_meals_stress">Stresset ditt er i snitt %1$s poeng lavere på dager med lette måltider.</string>
 
     <!-- RecordsScreen.kt: del rekorder som bilde/PDF -->

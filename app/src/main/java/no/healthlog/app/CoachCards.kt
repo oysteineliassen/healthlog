@@ -152,7 +152,9 @@ fun CoachCard(all: List<HealthDay>) {
     val context = LocalContext.current
     val today = LocalDate.now()
 
-    val message = remember(all) {
+    // today er med i nøkkelen: står appen åpen over midnatt, skal morgendagens melding
+    // velges på nytt, ikke gjenbrukes fra i går.
+    val message = remember(all, today) {
         evaluateCoachMessage(
             all,
             CoachPreferences.getHistory(context),
@@ -162,7 +164,7 @@ fun CoachCard(all: List<HealthDay>) {
         )
     } ?: return
 
-    LaunchedEffect(message.id) {
+    LaunchedEffect(message.id, today) {
         CoachPreferences.recordShown(context, message.id, today)
     }
 
@@ -297,7 +299,7 @@ private fun coachFactText(fact: CoachFact): String = when (fact) {
         metricLabel(fact.metric), formatMetric(fact.metric, fact.recent), formatMetric(fact.metric, fact.previous)
     )
     is CoachFact.WithVsWithout -> stringResource(
-        R.string.coach_why_with_without,
+        if (fact.nextDay) R.string.coach_why_with_without_next_day else R.string.coach_why_with_without,
         metricLabel(fact.metric),
         conditionLabel(fact.condition),
         formatMetric(fact.metric, fact.comparison.withMean), fact.comparison.withDays,

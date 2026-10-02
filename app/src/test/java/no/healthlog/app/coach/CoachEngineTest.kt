@@ -83,6 +83,21 @@ class CoachEngineTest {
     }
 
     @Test
+    fun `a lone correlation is not repeated every other day when everything is on cooldown`() {
+        // Det rapporterte scenariet: søvn/trening-sammenhengen er eneste ekte melding.
+        val a = CoachMessage(CoachMessageId.POSITIVE_TRAINING_SLEEP_CORRELATION) // 7 dagers pause
+        val neutral = CoachMessage(CoachMessageId.NEUTRAL)
+        val history = mutableMapOf<CoachMessageId, LocalDate>()
+        val shown = (0L until 14L).map { offset ->
+            val day = today.plusDays(offset)
+            selectCoachMessage(listOf(a, neutral), history, day).also { history[it.id] = day }.id
+        }
+        // Gammel logikk: annenhver dag (7 av 14). Nå minst halve pausen mellom hver gang.
+        assertTrue(shown.count { it == CoachMessageId.POSITIVE_TRAINING_SLEEP_CORRELATION } <= 4)
+        assertFalse(shown.zipWithNext().any { (x, y) -> x == y && x == CoachMessageId.POSITIVE_TRAINING_SLEEP_CORRELATION })
+    }
+
+    @Test
     fun `a single candidate on cooldown is still shown`() {
         val a = CoachMessage(CoachMessageId.POSITIVE_TRAINING_SLEEP_CORRELATION)
         val history = mapOf(CoachMessageId.POSITIVE_TRAINING_SLEEP_CORRELATION to today.minusDays(1))
@@ -137,13 +152,15 @@ class CoachEngineTest {
 
     @Test
     fun `correlation reports group sizes and ignores sick days`() {
+        // Trening annenhver dag; natten ETTER en treningsdag gir 8 t søvn, ellers 7 t.
         val data = days(20) { ago, date ->
             val trained = ago % 2 == 0
+            val trainedYesterday = (ago + 1) % 2 == 0
             HealthDay(
                 date = date.toString(),
                 trainingMinutes = if (trained) 45 else 0,
-                sleepMinutes = if (trained) 480 else 420,
-                // To syke dager uten trening med ekstremt kort søvn - skal ikke telle med.
+                sleepMinutes = if (trainedYesterday) 480 else 420,
+                // To syke dager med ekstremt kort søvn - skal ikke telle med.
                 dayTag = if (ago == 1 || ago == 3) DayTags.SICK else null
             )
         }.map { if (it.dayTag == DayTags.SICK) it.copy(sleepMinutes = 120) else it }
@@ -151,9 +168,22 @@ class CoachEngineTest {
         val message = buildCoachCandidates(data, today, 480, 8000)!!
             .first { it.id == CoachMessageId.POSITIVE_TRAINING_SLEEP_CORRELATION }
         val fact = message.facts.filterIsInstance<CoachFact.WithVsWithout>().single()
-        assertEquals(10, fact.comparison.withDays)
-        assertEquals(8, fact.comparison.withoutDays) // 10 uten trening minus 2 syke
+        assertTrue(fact.nextDay)
+        // Dag-par der verken dagen eller natten etter er syk: 5..19 dager siden.
+        assertEquals(7, fact.comparison.withDays)
+        assertEquals(8, fact.comparison.withoutDays)
         assertEquals(1.0, message.doubleArg!!, 0.01) // 8 t mot 7 t - syke dager ville trukket "uten" ned
+    }
+
+    @Test
+    fun `sleep the night before training does not count as an effect of training`() {
+        // Lang søvn lagret på SAMME dag som treningen (natten før økten), vanlig søvn
+        // natten etter. Den gamle utregningen meldte "du sover mer når du trener".
+        val data = days(30) { ago, date ->
+            val trained = ago % 2 == 0
+            HealthDay(date = date.toString(), trainingMinutes = if (trained) 45 else 0, sleepMinutes = if (trained) 500 else 420)
+        }
+        assertFalse(CoachMessageId.POSITIVE_TRAINING_SLEEP_CORRELATION in ids(buildCoachCandidates(data, today, 480, 8000)))
     }
 
     @Test

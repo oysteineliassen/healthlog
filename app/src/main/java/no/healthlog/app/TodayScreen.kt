@@ -411,6 +411,15 @@ fun SummaryCard(title: String, day: HealthDay?) {
 fun DiaryCard(day: HealthDay?) {
     Card(shape = RoundedCornerShape(22.dp)) {
         Column(Modifier.padding(20.dp)) {
+            // Vises bare når den er skrevet - ingen "tom"-tekst, så kortet ikke blir
+            // lengre for de som ikke bruker feltet.
+            if (!day?.sleepReflection.isNullOrBlank()) {
+                Text(stringResource(R.string.label_sleep_reflection), fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(10.dp))
+                Text(day?.sleepReflection ?: "", style = MaterialTheme.typography.bodyMedium)
+                Spacer(Modifier.height(18.dp))
+            }
+
             Text(stringResource(R.string.label_morning_plan), fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(10.dp))
             if (day?.morningNote.isNullOrBlank()) {

@@ -237,6 +237,7 @@ fun EntryDialog(
     var nutritionLevel by rememberSaveable { mutableStateOf(initial?.nutritionLevel) }
     var habitTags by rememberSaveable { mutableStateOf(initial.habitTagSet().toList()) }
     var eveningNote by rememberSaveable { mutableStateOf(initial?.eveningNote ?: "") }
+    var sleepReflection by rememberSaveable { mutableStateOf(initial?.sleepReflection ?: "") }
     var weight by rememberSaveable { mutableStateOf(initial?.weightKg?.toString() ?: "") }
     var waist by rememberSaveable { mutableStateOf(initial?.waistCm?.toString() ?: "") }
     var hrv by rememberSaveable { mutableStateOf(initial?.hrvMs?.toString() ?: "") }
@@ -310,6 +311,16 @@ fun EntryDialog(
                 }
 
                 HabitTagSelector(selected = habitTags, onChange = { habitTags = it })
+
+                OutlinedTextField(
+                    value = sleepReflection,
+                    onValueChange = { sleepReflection = it },
+                    label = { Text(stringResource(R.string.label_sleep_reflection)) },
+                    placeholder = { Text(stringResource(R.string.placeholder_sleep_reflection)) },
+                    minLines = 2,
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                    modifier = Modifier.fillMaxWidth()
+                )
 
                 OutlinedTextField(
                     value = morningNote,
@@ -420,6 +431,7 @@ fun EntryDialog(
                             sleepScore = sleepScoreValue,
                             morningNote = morningNote.trim().ifBlank { null },
                             eveningNote = eveningNote.trim().ifBlank { null },
+                            sleepReflection = sleepReflection.trim().ifBlank { null },
                             dayTag = dayTag,
                             nutritionLevel = nutritionLevel,
                             habitTags = habitTags

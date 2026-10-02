@@ -36,6 +36,9 @@
     <!-- HealthLogApp.kt: EntryDialog (and the same fields in HistoryScreen.kt's EditHistoryDialog) -->
     <string name="entry_dialog_title">Log today</string>
     <string name="label_morning_plan">Plans for the day</string>
+    <string name="label_sleep_reflection">Reflection on the night</string>
+    <string name="placeholder_sleep_reflection">Why was the night good or bad? (late dinner, stress, noise, alcohol…)</string>
+    <string name="diary_sleep_prefix">Night: %1$s</string>
     <string name="placeholder_morning_plan">What\'s the plan today?</string>
     <string name="label_weight">Weight (kg)</string>
     <string name="error_weight_range">Enter a value between 20 and 300 kg</string>
@@ -279,6 +282,7 @@
     <string name="coach_why_weighting">Recent days count more than older ones, so the pattern reflects how things are now.</string>
     <string name="coach_why_recent_vs_previous">%1$s – average last 14 days: %2$s · the 14 days before: %3$s</string>
     <string name="coach_why_with_without">%1$s – %2$s: %3$s (%4$d days) · other days: %5$s (%6$d days)</string>
+    <string name="coach_why_with_without_next_day">%1$s the night after %2$s: %3$s (%4$d days) · after other days: %5$s (%6$d days)</string>
     <string name="coach_why_streak">%1$d days in a row now · previous record: %2$d days</string>
     <string name="coach_why_latest_vs_normal">%1$s now: %2$s · your normal: %3$s</string>
     <string name="coach_why_latest">%1$s now: %2$s</string>
@@ -328,8 +332,8 @@
     <string name="weekly_summary_prev_week">(last week: %1$s)</string>
 
     <!-- coach/CoachEngine.kt: correlations (round 4) -->
-    <string name="coach_correlation_training_sleep">You sleep %1$s hours more on average on days you exercise than on days you don\'t.</string>
-    <string name="coach_correlation_training_hrv">Your HRV is %1$s ms higher on average on days you exercise.</string>
+    <string name="coach_correlation_training_sleep">You sleep %1$s hours more on average the night after a training day than after other days.</string>
+    <string name="coach_correlation_training_hrv">Your HRV is %1$s ms higher on average the night after a training day.</string>
     <string name="coach_correlation_rest_stress">Your stress is %1$s points lower on average on rest days.</string>
 
     <!-- HrvGoal.kt / TrendsScreen.kt: personalized HRV goal -->
@@ -430,8 +434,8 @@
     <string name="sleep_debt_description">Last 14 days, compared to your sleep goal of %1$s hours.</string>
 
     <!-- coach/CoachEngine.kt: more correlations (stress vs. sleep/HRV) -->
-    <string name="coach_correlation_stress_sleep">You sleep %1$s hours more on average on low-stress days than on higher-stress days.</string>
-    <string name="coach_correlation_stress_hrv">Your HRV is %1$s ms higher on average on low-stress days.</string>
+    <string name="coach_correlation_stress_sleep">You sleep %1$s hours more on average the night after a low-stress day than after more stressful days.</string>
+    <string name="coach_correlation_stress_hrv">Your HRV is %1$s ms higher on average the night after a low-stress day.</string>
 
     <!-- coach/MonthlySummary.kt / TodayScreen.kt: monthly summary -->
     <string name="monthly_summary_title">Monthly summary</string>
@@ -480,7 +484,7 @@
     <string name="msg_field_reset_to_health_connect">The field will be fetched again from Health Connect.</string>
 
     <!-- coach/CoachEngine.kt: nutrition in the AI coach -->
-    <string name="coach_correlation_light_meals_sleep">You sleep %1$s hours more on average on days with light meals.</string>
+    <string name="coach_correlation_light_meals_sleep">You sleep %1$s hours more on average the night after a day with light meals.</string>
     <string name="coach_correlation_light_meals_stress">Your stress is %1$s points lower on average on days with light meals.</string>
 
     <!-- RecordsScreen.kt: share records as image/PDF -->

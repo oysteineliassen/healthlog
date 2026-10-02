@@ -43,6 +43,9 @@ data class HealthDay(
     val trainingSessions: String? = null,
     val morningNote: String? = null,
     val eveningNote: String? = null,
+    // Egen refleksjon over natten som lagres på denne dagen (søvn lagres på dagen natten
+    // slutter): hvorfor ble den bra/dårlig? Fritekst - brukes i Historikk og AI-prompten.
+    val sleepReflection: String? = null,
     val dayTag: String? = null,
     val nutritionLevel: String? = null,
     // Egne vane-merker (f.eks. "Alkohol|Sen middag"). null = ingenting registrert den

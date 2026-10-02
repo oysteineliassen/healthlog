@@ -55,7 +55,13 @@ enum class CoachCondition { TRAINED, REST_DAY, LOW_STRESS, LIGHT_MEALS, ACTIVE_D
  */
 sealed class CoachFact {
     data class RecentVsPrevious(val metric: CoachMetric, val recent: Double, val previous: Double) : CoachFact()
-    data class WithVsWithout(val condition: CoachCondition, val metric: CoachMetric, val comparison: GroupComparisonFact) : CoachFact()
+    /** [nextDay]: verdien er hentet fra natten/dagen ETTER dagene som sammenlignes. */
+    data class WithVsWithout(
+        val condition: CoachCondition,
+        val metric: CoachMetric,
+        val comparison: GroupComparisonFact,
+        val nextDay: Boolean = false
+    ) : CoachFact()
     data class Streak(val current: Int, val previousRecord: Int) : CoachFact()
     data class LatestVsNormal(val metric: CoachMetric, val latest: Double, val normal: Double?) : CoachFact()
     data class RecentAverage(val metric: CoachMetric, val days: Int, val average: Double) : CoachFact()
@@ -169,7 +175,9 @@ internal fun cooldownDays(id: CoachMessageId): Long = when (id) {
  *    hver gang nye data synkes inn i løpet av dagen.
  * 2. Ellers den høyest prioriterte som ikke har pause (se [cooldownDays]).
  * 3. Har alle pause (også den nøytrale): den "ekte" meldingen som ble vist for
- *    lengst siden - en gjentakelse er bedre enn samme "ingenting å melde" flere dager.
+ *    lengst siden, men bare hvis minst halve pausen er gått. Før gjaldt ikke den
+ *    grensa, og var det bare én ekte melding (typisk en sammenheng som søvn/trening)
+ *    ble den vist annenhver dag i ukevis - pausen på 7 dager hadde ingen effekt.
  */
 internal fun selectCoachMessage(
     candidates: List<CoachMessage>,
@@ -184,7 +192,12 @@ internal fun selectCoachMessage(
     }?.let { return it }
 
     val nonNeutral = candidates.filter { it.id != CoachMessageId.NEUTRAL }
-    return nonNeutral.minByOrNull { history[it.id] ?: LocalDate.MIN } ?: candidates.first()
+    val oldest = nonNeutral.minByOrNull { history[it.id] ?: LocalDate.MIN }
+    if (oldest != null) {
+        val elapsed = history[oldest.id]?.let { ChronoUnit.DAYS.between(it, today) } ?: Long.MAX_VALUE
+        if (elapsed * 2 >= cooldownDays(oldest.id)) return oldest
+    }
+    return candidates.firstOrNull { it.id == CoachMessageId.NEUTRAL } ?: oldest ?: candidates.first()
 }
 
 /**
@@ -452,9 +465,10 @@ internal fun buildCoachCandidates(
         metric: CoachMetric,
         selector: (HealthDay) -> Double?,
         higherIsBetter: Boolean,
-        minDiff: Double
+        minDiff: Double,
+        nextDay: Boolean = false
     ) {
-        val result = compareGroups(byDate, today, test, selector = selector) ?: return
+        val result = compareGroups(byDate, today, test, valueFromNextDay = nextDay, selector = selector) ?: return
         val diff = if (higherIsBetter) result.withMean - result.withoutMean else result.withoutMean - result.withMean
         if (diff < minDiff) return
         candidates += CoachMessage(
@@ -462,7 +476,8 @@ internal fun buildCoachCandidates(
             facts = listOf(
                 CoachFact.WithVsWithout(
                     condition, metric,
-                    GroupComparisonFact(result.withMean, result.withDays, result.withoutMean, result.withoutDays)
+                    GroupComparisonFact(result.withMean, result.withDays, result.withoutMean, result.withoutDays),
+                    nextDay
                 ),
                 CoachFact.BasedOnDays(result.withDays + result.withoutDays)
             )
@@ -473,12 +488,13 @@ internal fun buildCoachCandidates(
     val hrv = { day: HealthDay -> day.hrvMs }
     val stress = { day: HealthDay -> day.stress?.toDouble() }
 
-    correlation(CoachMessageId.POSITIVE_TRAINING_SLEEP_CORRELATION, CoachCondition.TRAINED, ::trainedMeaningfully, CoachMetric.SLEEP_HOURS, sleepHours, true, 0.3)
-    correlation(CoachMessageId.POSITIVE_TRAINING_HRV_CORRELATION, CoachCondition.TRAINED, ::trainedMeaningfully, CoachMetric.HRV_MS, hrv, true, 3.0)
+    // Søvn og HRV hentes fra natten ETTER (nextDay = true) - se compareGroups.
+    correlation(CoachMessageId.POSITIVE_TRAINING_SLEEP_CORRELATION, CoachCondition.TRAINED, ::trainedMeaningfully, CoachMetric.SLEEP_HOURS, sleepHours, true, 0.3, nextDay = true)
+    correlation(CoachMessageId.POSITIVE_TRAINING_HRV_CORRELATION, CoachCondition.TRAINED, ::trainedMeaningfully, CoachMetric.HRV_MS, hrv, true, 3.0, nextDay = true)
     correlation(CoachMessageId.POSITIVE_REST_DAY_STRESS_CORRELATION, CoachCondition.REST_DAY, { it.dayTag == DayTags.REST }, CoachMetric.STRESS, stress, false, 6.0)
-    correlation(CoachMessageId.POSITIVE_LOW_STRESS_SLEEP_CORRELATION, CoachCondition.LOW_STRESS, ::lowStress, CoachMetric.SLEEP_HOURS, sleepHours, true, 0.3)
-    correlation(CoachMessageId.POSITIVE_LOW_STRESS_HRV_CORRELATION, CoachCondition.LOW_STRESS, ::lowStress, CoachMetric.HRV_MS, hrv, true, 3.0)
-    correlation(CoachMessageId.POSITIVE_LIGHT_MEALS_SLEEP_CORRELATION, CoachCondition.LIGHT_MEALS, { it.nutritionLevel == NutritionLevel.LIGHT }, CoachMetric.SLEEP_HOURS, sleepHours, true, 0.3)
+    correlation(CoachMessageId.POSITIVE_LOW_STRESS_SLEEP_CORRELATION, CoachCondition.LOW_STRESS, ::lowStress, CoachMetric.SLEEP_HOURS, sleepHours, true, 0.3, nextDay = true)
+    correlation(CoachMessageId.POSITIVE_LOW_STRESS_HRV_CORRELATION, CoachCondition.LOW_STRESS, ::lowStress, CoachMetric.HRV_MS, hrv, true, 3.0, nextDay = true)
+    correlation(CoachMessageId.POSITIVE_LIGHT_MEALS_SLEEP_CORRELATION, CoachCondition.LIGHT_MEALS, { it.nutritionLevel == NutritionLevel.LIGHT }, CoachMetric.SLEEP_HOURS, sleepHours, true, 0.3, nextDay = true)
     correlation(CoachMessageId.POSITIVE_LIGHT_MEALS_STRESS_CORRELATION, CoachCondition.LIGHT_MEALS, { it.nutritionLevel == NutritionLevel.LIGHT }, CoachMetric.STRESS, stress, false, 6.0)
     // Bevisst en EGEN sammenligning fra trenings-sammenhengene over - activeDay fanger
     // opp bevegelse gjennom dagen som aldri ble logget som en formell treningsøkt.

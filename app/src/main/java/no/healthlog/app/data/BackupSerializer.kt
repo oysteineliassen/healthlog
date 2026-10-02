@@ -47,6 +47,7 @@ fun healthDaysToJson(days: List<HealthDay>): String {
         obj.putOpt("trainingSessions", day.trainingSessions)
         obj.putOpt("morningNote", day.morningNote)
         obj.putOpt("eveningNote", day.eveningNote)
+        obj.putOpt("sleepReflection", day.sleepReflection)
         obj.putOpt("dayTag", day.dayTag)
         obj.putOpt("nutritionLevel", day.nutritionLevel)
         obj.putOpt("habitTags", day.habitTags)
@@ -104,6 +105,7 @@ fun jsonToHealthDays(json: String): List<HealthDay> {
                 // Eldre sikkerhetskopier (før dagboken ble delt i to) hadde bare "note" -
                 // faller tilbake til den som kveldsnotat hvis de nye feltene mangler.
                 eveningNote = obj.optStringOrNull("eveningNote") ?: obj.optStringOrNull("note"),
+                sleepReflection = obj.optStringOrNull("sleepReflection"),
                 dayTag = obj.optStringOrNull("dayTag"),
                 nutritionLevel = obj.optStringOrNull("nutritionLevel"),
                 habitTags = obj.optStringOrNull("habitTags"),
