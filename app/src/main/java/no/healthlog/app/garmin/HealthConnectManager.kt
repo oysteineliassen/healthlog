@@ -230,18 +230,12 @@ class HealthConnectManager(private val context: Context) {
             .groupBy { it.startTime.atZone(zone).toLocalDate() }
             .mapValues { (_, records) -> records.sumOf { it.count }.toInt() }
 
-        // "Aktive minutter": summerer varigheten av alle skritt-databolker der
-        // skritt-raten tilsier rask gange-tempo eller mer (≥40 skritt/min) - fullstendig
-        // UAVHENGIG av formelt loggede treningsøkter. Fanger opp f.eks. en lang gåtur
-        // som aldri ble registrert som "trening" i Garmin.
+        // "Aktive minutter" fra skritt-tempo, uavhengig av loggede treningsøkter - se
+        // activeMinutesFromSteps for grensen.
         val activeMinutesByDay = stepsRecords
             .groupBy { it.startTime.atZone(zone).toLocalDate() }
             .mapValues { (_, records) ->
-                records.sumOf { record ->
-                    val minutes = Duration.between(record.startTime, record.endTime).toMinutes().coerceAtLeast(1)
-                    val stepsPerMinute = record.count.toDouble() / minutes
-                    if (stepsPerMinute >= 40.0) minutes else 0L
-                }.toInt()
+                activeMinutesFromSteps(records.map { Duration.between(it.startTime, it.endTime).toMinutes() to it.count })
             }
 
         val sleepRecords = readAllRecords(SleepSessionRecord::class, range)
