@@ -232,20 +232,24 @@ fun EntryDialog(
     onSave: (ManualEntryInput) -> Unit,
     onDelete: () -> Unit
 ) {
-    var morningNote by rememberSaveable { mutableStateOf(initial?.morningNote ?: "") }
-    var dayTag by rememberSaveable { mutableStateOf(initial?.dayTag) }
-    var nutritionLevel by rememberSaveable { mutableStateOf(initial?.nutritionLevel) }
-    var habitTags by rememberSaveable { mutableStateOf(initial.habitTagSet().toList()) }
-    var eveningNote by rememberSaveable { mutableStateOf(initial?.eveningNote ?: "") }
-    var sleepReflection by rememberSaveable { mutableStateOf(initial?.sleepReflection ?: "") }
-    var weight by rememberSaveable { mutableStateOf(initial?.weightKg?.toString() ?: "") }
-    var waist by rememberSaveable { mutableStateOf(initial?.waistCm?.toString() ?: "") }
-    var hrv by rememberSaveable { mutableStateOf(initial?.hrvMs?.toString() ?: "") }
-    var stress by rememberSaveable { mutableStateOf(initial?.stress?.toString() ?: "") }
-    var bodyBatteryMax by rememberSaveable { mutableStateOf(initial?.bodyBatteryMax?.toString() ?: "") }
-    var bodyBatteryMin by rememberSaveable { mutableStateOf(initial?.bodyBatteryMin?.toString() ?: "") }
-    var sleepScore by rememberSaveable { mutableStateOf(initial?.sleepScore?.toString() ?: "") }
-    var showDeleteConfirm by rememberSaveable {
+    // Nøkkelen initial?.date: åpnes dialogen fra et varsel mens appen starter, er
+    // dagens rad ikke lest fra databasen ennå (initial = null). Når den kommer, byttes
+    // nøkkelen fra null til datoen og feltene fylles ut på nytt - ellers sto dialogen
+    // tom, og Lagre kunne slette notater du allerede hadde skrevet i dag.
+    var morningNote by rememberSaveable(initial?.date) { mutableStateOf(initial?.morningNote ?: "") }
+    var dayTag by rememberSaveable(initial?.date) { mutableStateOf(initial?.dayTag) }
+    var nutritionLevel by rememberSaveable(initial?.date) { mutableStateOf(initial?.nutritionLevel) }
+    var habitTags by rememberSaveable(initial?.date) { mutableStateOf(initial.habitTagSet().toList()) }
+    var eveningNote by rememberSaveable(initial?.date) { mutableStateOf(initial?.eveningNote ?: "") }
+    var sleepReflection by rememberSaveable(initial?.date) { mutableStateOf(initial?.sleepReflection ?: "") }
+    var weight by rememberSaveable(initial?.date) { mutableStateOf(initial?.weightKg?.toString() ?: "") }
+    var waist by rememberSaveable(initial?.date) { mutableStateOf(initial?.waistCm?.toString() ?: "") }
+    var hrv by rememberSaveable(initial?.date) { mutableStateOf(initial?.hrvMs?.toString() ?: "") }
+    var stress by rememberSaveable(initial?.date) { mutableStateOf(initial?.stress?.toString() ?: "") }
+    var bodyBatteryMax by rememberSaveable(initial?.date) { mutableStateOf(initial?.bodyBatteryMax?.toString() ?: "") }
+    var bodyBatteryMin by rememberSaveable(initial?.date) { mutableStateOf(initial?.bodyBatteryMin?.toString() ?: "") }
+    var sleepScore by rememberSaveable(initial?.date) { mutableStateOf(initial?.sleepScore?.toString() ?: "") }
+    var showDeleteConfirm by rememberSaveable(initial?.date) {
         mutableStateOf(false)
     }
 
