@@ -1,5 +1,6 @@
 package no.healthlog.app
 
+import android.os.Build
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -51,12 +52,14 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        handleIntent(intent)
         val db = AppDatabase.getInstance(applicationContext)
         val repo = HealthRepository(db.healthDayDao())
         val healthConnectManager = HealthConnectManager(applicationContext)
         val billingManager = BillingManager(applicationContext)
         vmFactory = VMFactory(repo, applicationContext, healthConnectManager)
+        // Ved skjermrotasjon o.l. leveres samme intent på nytt - en delt Garmin-fil skal
+        // bare importeres første gang.
+        handleIntent(intent, importSharedFiles = savedInstanceState == null)
         setContent {
             val vm: HealthViewModel = viewModel(factory = vmFactory)
             val openEntryOnLaunch by openEntryFlow.collectAsState()
@@ -102,10 +105,17 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        handleIntent(intent)
+        handleIntent(intent, importSharedFiles = true)
     }
 
-    private fun handleIntent(intent: Intent) {
+    private fun handleIntent(intent: Intent, importSharedFiles: Boolean) {
+        if (importSharedFiles) {
+            val shared = sharedFileUris(intent)
+            if (shared.isNotEmpty()) {
+                ViewModelProvider(this, vmFactory)[HealthViewModel::class.java].importGarminFiles(shared)
+            }
+        }
+
         // Health Connect sender denne når brukeren trykker "finn ut mer om hvordan
         // dataene dine brukes" i tillatelsesdialogen - åpner personvernerklæringen
         // direkte i nettleseren i stedet for å bare la MainActivity åpne som normalt.
@@ -123,6 +133,20 @@ class MainActivity : ComponentActivity() {
         if (openEntry) {
             openEntryFlow.value = true
         }
+    }
+
+    /** Filene som er delt til / åpnet med appen (Garmin-eksport). */
+    private fun sharedFileUris(intent: Intent): List<Uri> = when (intent.action) {
+        Intent.ACTION_SEND -> listOfNotNull(
+            if (Build.VERSION.SDK_INT >= 33) intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
+            else @Suppress("DEPRECATION") intent.getParcelableExtra(Intent.EXTRA_STREAM)
+        )
+        Intent.ACTION_SEND_MULTIPLE -> (
+            if (Build.VERSION.SDK_INT >= 33) intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM, Uri::class.java)
+            else @Suppress("DEPRECATION") intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM)
+        ).orEmpty()
+        Intent.ACTION_VIEW -> listOfNotNull(intent.data?.takeIf { it.scheme == "content" })
+        else -> emptyList()
     }
 
     companion object {

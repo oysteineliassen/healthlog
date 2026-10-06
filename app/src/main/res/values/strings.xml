@@ -208,7 +208,7 @@
     <!-- SettingsScreen.kt: Backup card -->
     <string name="settings_backup_title">Backup</string>
     <string name="settings_garmin_files_title">Garmin files</string>
-    <string name="settings_garmin_files_description">Garmin does not share sleep score, overnight HRV, Body Battery or stress with Health Connect. Export a day in Garmin Connect (zip with .fit files) and import it here – you can pick several files at once. Fields you have corrected manually are kept.</string>
+    <string name="settings_garmin_files_description">Garmin does not share sleep score, overnight HRV, Body Battery or stress with Health Connect. Export a day in Garmin Connect (zip with .fit files) and import it here – you can pick several files at once, or share the zip straight to HealthLog from Downloads/Garmin Connect. Fields you have corrected manually are kept.</string>
     <string name="action_import_garmin">Import Garmin files</string>
     <string name="garmin_import_done">Imported Garmin data for %1$d days.</string>
     <string name="garmin_import_none">Found no Garmin data in the selected files.</string>

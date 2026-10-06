@@ -208,7 +208,7 @@
     <!-- SettingsScreen.kt: Sikkerhetskopi-boksen -->
     <string name="settings_backup_title">Sikkerhetskopi</string>
     <string name="settings_garmin_files_title">Garmin-filer</string>
-    <string name="settings_garmin_files_description">Garmin deler ikke søvnscore, HRV for natten, Body Battery eller stress med Health Connect. Eksporter en dag i Garmin Connect (zip med .fit-filer) og importer den her – du kan velge flere filer samtidig. Felter du har rettet manuelt beholdes.</string>
+    <string name="settings_garmin_files_description">Garmin deler ikke søvnscore, HRV for natten, Body Battery eller stress med Health Connect. Eksporter en dag i Garmin Connect (zip med .fit-filer) og importer den her – du kan velge flere filer samtidig, eller dele zip-filen rett til HealthLog fra Nedlastinger/Garmin Connect. Felter du har rettet manuelt beholdes.</string>
     <string name="action_import_garmin">Importer Garmin-filer</string>
     <string name="garmin_import_done">Importerte Garmin-data for %1$d dager.</string>
     <string name="garmin_import_none">Fant ingen Garmin-data i filene du valgte.</string>
