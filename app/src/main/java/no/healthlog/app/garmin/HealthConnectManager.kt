@@ -226,14 +226,18 @@ class HealthConnectManager(private val context: Context) {
         val stepsRecords = readAllRecords(StepsRecord::class, range)
         Log.d(TAG, "readRange steps: ${stepsRecords.size} rådata-poster mellom $startDate og $endDateInclusive")
         stepsRecords.forEach { Log.d(TAG, "  steg-post: startTime=${it.startTime} count=${it.count}") }
-        val stepsByDay = stepsRecords
+        // Skriver både telefonen og klokka skritt til Health Connect, ligger de samme
+        // skrittene der to ganger. Per dag brukes derfor bare ÉN kilde - den med flest
+        // skritt (normalt klokka, som også teller når telefonen ligger igjen).
+        val stepsRecordsByDay = stepsRecords
             .groupBy { it.startTime.atZone(zone).toLocalDate() }
+            .mapValues { (_, records) -> recordsFromMainSource(records, { it.metadata.dataOrigin.packageName }, { it.count }) }
+        val stepsByDay = stepsRecordsByDay
             .mapValues { (_, records) -> records.sumOf { it.count }.toInt() }
 
         // "Aktive minutter" fra skritt-tempo, uavhengig av loggede treningsøkter - se
         // activeMinutesFromSteps for grensen.
-        val activeMinutesByDay = stepsRecords
-            .groupBy { it.startTime.atZone(zone).toLocalDate() }
+        val activeMinutesByDay = stepsRecordsByDay
             .mapValues { (_, records) ->
                 activeMinutesFromSteps(records.map { Duration.between(it.startTime, it.endTime).toMinutes() to it.count })
             }
