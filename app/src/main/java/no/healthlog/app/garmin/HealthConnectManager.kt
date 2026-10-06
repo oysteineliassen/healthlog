@@ -239,7 +239,7 @@ class HealthConnectManager(private val context: Context) {
         // activeMinutesFromSteps for grensen.
         val activeMinutesByDay = stepsRecordsByDay
             .mapValues { (_, records) ->
-                activeMinutesFromSteps(records.map { Duration.between(it.startTime, it.endTime).toMinutes() to it.count })
+                activeMinutesFromSteps(records.map { Duration.between(it.startTime, it.endTime).seconds to it.count })
             }
 
         val sleepRecords = readAllRecords(SleepSessionRecord::class, range)

@@ -6,25 +6,27 @@ import org.junit.Test
 class ActiveMinutesTest {
 
     @Test
-    fun `short periods use the pace directly`() {
-        assertEquals(5, activeMinutesFromSteps(listOf(5L to 550L)))   // 110/min
-        assertEquals(0, activeMinutesFromSteps(listOf(5L to 300L)))   // 60/min
-        assertEquals(1, activeMinutesFromSteps(listOf(0L to 150L)))   // 0 min regnes som 1
+    fun `short Garmin periods under a minute are measured in seconds`() {
+        // 20 min rask gange levert som 40 perioder à 30 s med 55 skritt (110/min).
+        // Før ble hver regnet som 1 min med 55 skritt/min -> 0 aktive minutter.
+        assertEquals(20, activeMinutesFromSteps(List(40) { 30L to 55L }))
     }
 
     @Test
-    fun `a brisk walk inside a long Garmin period is not lost in the average`() {
-        // 60 min: 20 min rask gange (2200) + 40 min rolig (800) = 3000 skritt, snitt 50/min.
-        assertEquals(20, activeMinutesFromSteps(listOf(60L to 3000L)))
+    fun `slow periods do not count`() {
+        assertEquals(0, activeMinutesFromSteps(List(40) { 30L to 30L })) // 60/min
     }
 
     @Test
-    fun `ordinary pottering in a long period gives no active minutes`() {
-        assertEquals(0, activeMinutesFromSteps(listOf(60L to 1000L)))
+    fun `a brisk walk inside a long period is estimated`() {
+        // 60 min: 20 min rask gange (2200) + 40 min rolig (800) = 3000 skritt.
+        assertEquals(20, activeMinutesFromSteps(listOf(3600L to 3000L)))
+        assertEquals(0, activeMinutesFromSteps(listOf(3600L to 1000L)))
+        assertEquals(15, activeMinutesFromSteps(listOf(900L to 2000L))) // aldri mer enn lengden
     }
 
     @Test
-    fun `a long period of continuous brisk walking counts fully, but never more than its length`() {
-        assertEquals(15, activeMinutesFromSteps(listOf(15L to 2000L)))
+    fun `period without duration counts as one minute`() {
+        assertEquals(1, activeMinutesFromSteps(listOf(0L to 150L)))
     }
 }
