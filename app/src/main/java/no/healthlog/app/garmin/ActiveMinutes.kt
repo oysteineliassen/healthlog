@@ -26,13 +26,16 @@ private const val SHORT_PERIOD_SECONDS = 5 * 60L
  * - Lange perioder: anslår hvor mange minutter som må ha vært rask gange for å gi så
  *   mange skritt: (skritt - 20/min i bakgrunn) / (110 - 20), maks periodens lengde.
  * Periodene summeres som brøkdeler av minutter og rundes av til slutt.
+ *
+ * [threshold] kan settes i Innstillinger -> Mål (standard 100): Garmin skriver én periode
+ * per minutt, så grensen avgjør direkte hvilke gangminutter som teller.
  */
-fun activeMinutesFromSteps(records: List<Pair<Long, Long>>): Int =
+fun activeMinutesFromSteps(records: List<Pair<Long, Long>>, threshold: Double = ACTIVE_STEPS_PER_MINUTE): Int =
     records.sumOf { (seconds, steps) ->
         val s = if (seconds <= 0) 60L else seconds // uten varighet: regn som ett minutt
         val minutes = s / 60.0
         if (s <= SHORT_PERIOD_SECONDS) {
-            if (steps / minutes >= ACTIVE_STEPS_PER_MINUTE) minutes else 0.0
+            if (steps / minutes >= threshold) minutes else 0.0
         } else {
             ((steps - BACKGROUND_STEPS_PER_MINUTE * minutes) / (BRISK_STEPS_PER_MINUTE - BACKGROUND_STEPS_PER_MINUTE))
                 .coerceIn(0.0, minutes)

@@ -510,6 +510,9 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
                     var maxHeartRateText by remember {
                         mutableStateOf(GoalPreferences.getMaxHeartRate(context)?.toString() ?: "")
                     }
+                    var activeStepsText by remember {
+                        mutableStateOf(GoalPreferences.getActiveStepsPerMinute(context).toString())
+                    }
 
                     OutlinedTextField(
                         value = stepsGoalText,
@@ -571,6 +574,17 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
                         modifier = Modifier.fillMaxWidth()
                     )
 
+                    Spacer(Modifier.height(10.dp))
+
+                    OutlinedTextField(
+                        value = activeStepsText,
+                        onValueChange = { activeStepsText = it },
+                        label = { Text(stringResource(R.string.settings_goals_active_steps_label)) },
+                        supportingText = { Text(stringResource(R.string.settings_goals_active_steps_hint)) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
                     Spacer(Modifier.height(14.dp))
 
                     Button(onClick = {
@@ -585,6 +599,8 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
                         } else {
                             weightText.toDoubleOrNull()?.takeIf { it in ValidationRanges.weightKg }?.let { GoalPreferences.setWeightGoalKg(context, it) }
                         }
+                        activeStepsText.trim().toIntOrNull()?.takeIf { it in 50..160 }
+                            ?.let { GoalPreferences.setActiveStepsPerMinute(context, it) }
                         // Makspuls: tomt fjerner den (standard brukes), urimelige tall ignoreres.
                         val maxHr = maxHeartRateText.trim()
                         if (maxHr.isEmpty()) {

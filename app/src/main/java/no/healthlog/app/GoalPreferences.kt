@@ -16,8 +16,20 @@ private const val KEY_WEEKLY_ACTIVITY_GOAL = "goal_weekly_activity_minutes"
 private const val DEFAULT_WEEKLY_ACTIVITY_GOAL = 150
 
 private const val KEY_MAX_HEART_RATE = "max_heart_rate"
+private const val KEY_ACTIVE_STEPS_PER_MINUTE = "active_steps_per_minute"
+const val DEFAULT_ACTIVE_STEPS_PER_MINUTE = 100
 
 object GoalPreferences {
+
+    /** Skritt per minutt som gjør et minutt "aktivt" (se activeMinutesFromSteps). */
+    fun getActiveStepsPerMinute(context: Context): Int =
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .getInt(KEY_ACTIVE_STEPS_PER_MINUTE, DEFAULT_ACTIVE_STEPS_PER_MINUTE)
+
+    fun setActiveStepsPerMinute(context: Context, value: Int) {
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .edit().putInt(KEY_ACTIVE_STEPS_PER_MINUTE, value).apply()
+    }
 
     /** Valgfritt - null betyr ikke satt (da antas DEFAULT_MAX_HEART_RATE ved intensitet). */
     fun getMaxHeartRate(context: Context): Int? =

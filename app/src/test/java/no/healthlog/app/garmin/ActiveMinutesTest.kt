@@ -29,4 +29,11 @@ class ActiveMinutesTest {
     fun `period without duration counts as one minute`() {
         assertEquals(1, activeMinutesFromSteps(listOf(0L to 150L)))
     }
+
+    @Test
+    fun `garmin one-minute periods follow the chosen threshold`() {
+        val walk = List(30) { 60L to 92L } // 30 min gange i 92 skritt/min
+        assertEquals(0, activeMinutesFromSteps(walk))
+        assertEquals(30, activeMinutesFromSteps(walk, threshold = 90.0))
+    }
 }

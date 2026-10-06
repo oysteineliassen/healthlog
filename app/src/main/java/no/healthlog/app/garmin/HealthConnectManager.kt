@@ -239,7 +239,10 @@ class HealthConnectManager(private val context: Context) {
         // activeMinutesFromSteps for grensen.
         val activeMinutesByDay = stepsRecordsByDay
             .mapValues { (_, records) ->
-                activeMinutesFromSteps(records.map { Duration.between(it.startTime, it.endTime).seconds to it.count })
+                activeMinutesFromSteps(
+                    records.map { Duration.between(it.startTime, it.endTime).seconds to it.count },
+                    GoalPreferences.getActiveStepsPerMinute(context).toDouble()
+                )
             }
 
         val sleepRecords = readAllRecords(SleepSessionRecord::class, range)
@@ -479,7 +482,15 @@ class HealthConnectManager(private val context: Context) {
             sb.append("\nKilde $source: ${list.size} perioder, ${list.sumOf { it.count }} skritt\n")
             sb.append("Lengde: min ${seconds.min()} s, median ${seconds.sorted()[seconds.size / 2]} s, maks ${seconds.max()} s\n")
             val pace = list.map { r -> r.count * 60.0 / Duration.between(r.startTime, r.endTime).seconds.coerceAtLeast(1) }
-            sb.append("Tempo: maks ${pace.max().toInt()} skritt/min, perioder ≥100/min: ${pace.count { it >= 100 }}\n")
+            sb.append("Tempo: maks ${pace.max().toInt()} skritt/min\n")
+            // Minutter per tempo-intervall - brukes til å velge grensen for aktive minutter.
+            val bands = listOf(0 to 40, 40 to 60, 60 to 80, 80 to 90, 90 to 100, 100 to 120, 120 to 140, 140 to 1000)
+            bands.forEach { (lo, hi) ->
+                val minutes = list.zip(pace).filter { (_, p) -> p >= lo && p < hi }
+                    .sumOf { (r, _) -> Duration.between(r.startTime, r.endTime).seconds } / 60
+                val name = if (hi >= 1000) "$lo+" else "$lo-${hi - 1}"
+                sb.append("  $name skritt/min: $minutes min\n")
+            }
             sb.append("Største perioder (skritt):\n")
             list.sortedByDescending { it.count }.take(12).sortedBy { it.startTime }.forEach { r ->
                 val s = Duration.between(r.startTime, r.endTime).seconds
