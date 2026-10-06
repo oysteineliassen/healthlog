@@ -137,4 +137,35 @@ class BackupSerializerTest {
         assertEquals(1, restored.size)
         assertEquals("2026-01-01", restored.first().date)
     }
+
+    @Test
+    fun `settings survive a backup round-trip, but backup state and scheduled toggles are left out`() {
+        val settings = mapOf(
+            "goal_steps" to 9000,
+            "max_heart_rate" to 188,
+            "ai_coach_enabled" to true,
+            "goal_weight_kg" to "80.0",
+            "some_set" to setOf("b", "a"),
+            "some_float" to 1.5f,
+            "auto_backup_uri" to "content://x",
+            "backup_last_success_time_millis" to 123L,
+            "reminder_enabled_MORNING" to true,
+            "reminder_hour_MORNING" to 7
+        )
+        val json = healthDaysToJson(emptyList(), settings)
+        val restored = jsonToBackupSettings(json)
+        assertEquals(
+            mapOf(
+                "goal_steps" to 9000,
+                "max_heart_rate" to 188,
+                "ai_coach_enabled" to true,
+                "goal_weight_kg" to "80.0",
+                "some_set" to setOf("a", "b"),
+                "some_float" to 1.5f,
+                "reminder_hour_MORNING" to 7
+            ),
+            restored
+        )
+        assertEquals(emptyMap<String, Any>(), jsonToBackupSettings(healthDaysToJson(emptyList())))
+    }
 }

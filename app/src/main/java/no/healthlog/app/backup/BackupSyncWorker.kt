@@ -35,7 +35,7 @@ class BackupSyncWorker(
 
         return try {
             val repo = HealthRepository(AppDatabase.getInstance(applicationContext).healthDayDao())
-            val json = healthDaysToJson(repo.getAllOnce())
+            val json = healthDaysToJson(repo.getAllOnce(), SettingsBackup.export(applicationContext))
 
             applicationContext.contentResolver.openOutputStream(uri, "wt")?.use { stream ->
                 stream.write(json.toByteArray())

@@ -9,6 +9,7 @@
     <string name="msg_refresh_needs_permission">Gi HealthLog tilgang til Health Connect i Innstillinger først.</string>
     <string name="health_connect_fetched_range">Hentet %1$d dager med historikk fra Health Connect</string>
     <string name="backup_restored">Gjenopprettet %1$d dager fra sikkerhetskopi.</string>
+    <string name="backup_restored_with_settings">Gjenopprettet %1$d dager og innstillingene dine. Start appen på nytt for at alle innstillinger skal tre i kraft.</string>
     <string name="backup_read_failed">Kunne ikke lese sikkerhetskopifilen: %1$s</string>
 
     <!-- HealthViewModel.kt: helse-score-status -->

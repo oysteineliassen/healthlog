@@ -9,6 +9,7 @@
     <string name="msg_refresh_needs_permission">Give HealthLog access to Health Connect in Settings first.</string>
     <string name="health_connect_fetched_range">Fetched %1$d days of history from Health Connect</string>
     <string name="backup_restored">Restored %1$d days from backup.</string>
+    <string name="backup_restored_with_settings">Restored %1$d days and your settings. Restart the app for all settings to take effect.</string>
     <string name="backup_read_failed">Could not read the backup file: %1$s</string>
 
     <!-- HealthViewModel.kt: health score status -->

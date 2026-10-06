@@ -15,10 +15,61 @@ private fun JSONObject.optIntOrNull(key: String): Int? =
 private fun JSONObject.optStringOrNull(key: String): String? =
     if (has(key) && !isNull(key)) getString(key) else null
 
-fun healthDaysToJson(days: List<HealthDay>): String {
+/**
+ * Innstillinger som IKKE tas med i sikkerhetskopien: tilstand for selve backupen (filens
+ * tilgang følger ikke med til en ny installasjon), engangsflagg for tillatelser, og
+ * av/på for planlagte varsler - de må slås på igjen i appen så jobbene faktisk planlegges.
+ */
+private val EXCLUDED_SETTING_PREFIXES = listOf(
+    "backup_", "auto_backup_uri", "hc_optional_permissions_asked", "reminder_enabled_", "weekly_summary_"
+)
+
+fun isBackedUpSetting(key: String): Boolean = EXCLUDED_SETTING_PREFIXES.none { key.startsWith(it) }
+
+private fun settingsToJson(settings: Map<String, *>): JSONObject {
+    val obj = JSONObject()
+    settings.filterKeys(::isBackedUpSetting).toSortedMap().forEach { (key, value) ->
+        val (type, json) = when (value) {
+            is Boolean -> "boolean" to value
+            is Int -> "int" to value
+            is Long -> "long" to value
+            is Float -> "float" to value.toDouble()
+            is String -> "string" to value
+            is Set<*> -> "stringSet" to JSONArray(value.filterIsInstance<String>().sorted())
+            else -> return@forEach
+        }
+        obj.put(key, JSONObject().put("type", type).put("value", json))
+    }
+    return obj
+}
+
+/** Innstillingene i en sikkerhetskopi (tomt for eldre kopier uten dem). */
+fun jsonToBackupSettings(json: String): Map<String, Any> {
+    val root = JSONObject(json)
+    val obj = root.optJSONObject("settings") ?: return emptyMap()
+    val result = mutableMapOf<String, Any>()
+    obj.keys().forEach { key ->
+        if (!isBackedUpSetting(key)) return@forEach
+        val entry = obj.optJSONObject(key) ?: return@forEach
+        val value: Any = when (entry.optString("type")) {
+            "boolean" -> entry.getBoolean("value")
+            "int" -> entry.getInt("value")
+            "long" -> entry.getLong("value")
+            "float" -> entry.getDouble("value").toFloat()
+            "string" -> entry.getString("value")
+            "stringSet" -> entry.getJSONArray("value").let { a -> (0 until a.length()).map { a.getString(it) }.toSet() }
+            else -> return@forEach
+        }
+        result[key] = value
+    }
+    return result
+}
+
+fun healthDaysToJson(days: List<HealthDay>, settings: Map<String, *> = emptyMap<String, Any>()): String {
     val root = JSONObject()
     root.put("version", BACKUP_VERSION)
     root.put("exportedAt", Instant.now().toString())
+    if (settings.isNotEmpty()) root.put("settings", settingsToJson(settings))
 
     val array = JSONArray()
     days.forEach { day ->

@@ -1,5 +1,6 @@
 package no.healthlog.app
 
+import no.healthlog.app.backup.SettingsBackup
 import android.net.Uri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -107,7 +108,7 @@ class HealthViewModel(
     }
 
     fun exportBackupJson(): String =
-        healthDaysToJson(days.value)
+        healthDaysToJson(days.value, SettingsBackup.export(appContext))
 
     fun exportCsv(): String =
         healthDaysToCsv(days.value)
@@ -144,7 +145,12 @@ class HealthViewModel(
             try {
                 val parsed = jsonToHealthDays(json)
                 val count = repo.importBackup(parsed)
-                message = appContext.getString(R.string.backup_restored, count)
+                val settings = jsonToBackupSettings(json)
+                SettingsBackup.restore(appContext, settings)
+                message = appContext.getString(
+                    if (settings.isEmpty()) R.string.backup_restored else R.string.backup_restored_with_settings,
+                    count
+                )
             } catch (e: Exception) {
                 FirebaseCrashlytics.getInstance().recordException(e)
                 message = appContext.getString(R.string.backup_read_failed, e.message)
