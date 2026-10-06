@@ -463,6 +463,32 @@ class HealthConnectManager(private val context: Context) {
      * gitt ennå eller Health Connect ikke er tilgjengelig - kalleren avgjør selv om det
      * skal feile stille (se HealthViewModel.saveManual).
      */
+    /**
+     * Diagnose: hvordan skrittene for [date] faktisk ligger i Health Connect (lengde og
+     * tempo per periode, per kilde). Brukes til å stille inn utregningen av aktive
+     * minutter etter hvordan Garmin skriver dataene, i stedet for å gjette.
+     */
+    suspend fun stepsDiagnostics(date: LocalDate): String {
+        val zone = ZoneId.systemDefault()
+        val range = TimeRangeFilter.between(date.atStartOfDay(zone).toInstant(), date.plusDays(1).atStartOfDay(zone).toInstant())
+        val records = readAllRecords(StepsRecord::class, range).sortedBy { it.startTime }
+        val timeFormat = java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss")
+        val sb = StringBuilder("Skritt $date: ${records.size} perioder, ${records.sumOf { it.count }} skritt\n")
+        records.groupBy { it.metadata.dataOrigin.packageName }.forEach { (source, list) ->
+            val seconds = list.map { Duration.between(it.startTime, it.endTime).seconds }
+            sb.append("\nKilde $source: ${list.size} perioder, ${list.sumOf { it.count }} skritt\n")
+            sb.append("Lengde: min ${seconds.min()} s, median ${seconds.sorted()[seconds.size / 2]} s, maks ${seconds.max()} s\n")
+            val pace = list.map { r -> r.count * 60.0 / Duration.between(r.startTime, r.endTime).seconds.coerceAtLeast(1) }
+            sb.append("Tempo: maks ${pace.max().toInt()} skritt/min, perioder ≥100/min: ${pace.count { it >= 100 }}\n")
+            sb.append("Største perioder (skritt):\n")
+            list.sortedByDescending { it.count }.take(12).sortedBy { it.startTime }.forEach { r ->
+                val s = Duration.between(r.startTime, r.endTime).seconds
+                sb.append("  ${r.startTime.atZone(zone).format(timeFormat)}  ${s}s  ${r.count} skritt  ${(r.count * 60.0 / s.coerceAtLeast(1)).toInt()}/min\n")
+            }
+        }
+        return sb.toString()
+    }
+
     suspend fun writeWeight(date: LocalDate, weightKg: Double) {
         val zone = ZoneId.systemDefault()
         val time = date.atTime(12, 0).atZone(zone).toInstant()

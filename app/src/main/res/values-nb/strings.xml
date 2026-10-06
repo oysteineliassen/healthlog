@@ -221,6 +221,12 @@
     <!-- SettingsScreen.kt: Sikkerhetskopi-boksen -->
     <string name="settings_backup_title">Sikkerhetskopi</string>
     <string name="settings_garmin_files_title">Garmin-filer</string>
+    <string name="settings_steps_diag_title">Skrittdiagnose</string>
+    <string name="settings_steps_diag_description">Viser hvordan skrittene dine ligger i Health Connect (lengde og tempo per periode). Brukes til å stille inn aktive minutter etter hvordan klokka di skriver data.</string>
+    <string name="settings_steps_diag_today">I dag</string>
+    <string name="settings_steps_diag_yesterday">I går</string>
+    <string name="settings_steps_diag_copy">Kopier</string>
+    <string name="settings_steps_diag_copied">Diagnosen er kopiert.</string>
     <string name="settings_garmin_files_description">Garmin deler ikke søvnscore, HRV for natten, Body Battery eller stress med Health Connect. Eksporter en dag i Garmin Connect (zip med .fit-filer) og importer den her – du kan velge flere filer samtidig, eller dele zip-filen rett til HealthLog fra Nedlastinger/Garmin Connect. Felter du har rettet manuelt beholdes.</string>
     <string name="action_import_garmin">Importer Garmin-filer</string>
     <string name="garmin_import_done">Importerte Garmin-data for %1$d dager.</string>

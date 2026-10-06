@@ -1,5 +1,7 @@
 package no.healthlog.app
 
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import no.healthlog.app.reminder.AiCoachReminderScheduler
 import no.healthlog.app.coach.AiCoachPreferences
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -737,6 +739,29 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
         item {
             Card(shape = RoundedCornerShape(20.dp)) {
                 Column(Modifier.padding(18.dp)) {
+                    Text(stringResource(R.string.settings_steps_diag_title), fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        stringResource(R.string.settings_steps_diag_description),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(10.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedButton(onClick = { vm.loadStepsDiagnostics(LocalDate.now()) }) {
+                            Text(stringResource(R.string.settings_steps_diag_today))
+                        }
+                        OutlinedButton(onClick = { vm.loadStepsDiagnostics(LocalDate.now().minusDays(1)) }) {
+                            Text(stringResource(R.string.settings_steps_diag_yesterday))
+                        }
+                    }
+                }
+            }
+        }
+
+        item {
+            Card(shape = RoundedCornerShape(20.dp)) {
+                Column(Modifier.padding(18.dp)) {
                     Text(
                         stringResource(R.string.settings_garmin_files_title),
                         fontWeight = FontWeight.Bold,
@@ -916,6 +941,31 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
                 modifier = Modifier.fillMaxWidth().padding(top = 4.dp)
             )
         }
+    }
+
+    vm.stepsDiagnostics?.let { text ->
+        AlertDialog(
+            onDismissRequest = { vm.clearStepsDiagnostics() },
+            title = { Text(stringResource(R.string.settings_steps_diag_title)) },
+            text = {
+                Text(
+                    text,
+                    style = MaterialTheme.typography.bodySmall,
+                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                    modifier = Modifier.verticalScroll(rememberScrollState())
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    context.getSystemService(android.content.ClipboardManager::class.java)
+                        ?.setPrimaryClip(android.content.ClipData.newPlainText("Skrittdiagnose", text))
+                    vm.showMessage(context.getString(R.string.settings_steps_diag_copied))
+                }) { Text(stringResource(R.string.settings_steps_diag_copy)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { vm.clearStepsDiagnostics() }) { Text(stringResource(R.string.action_close)) }
+            }
+        )
     }
 
     if (pendingImportJson != null) {

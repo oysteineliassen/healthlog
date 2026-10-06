@@ -221,6 +221,12 @@
     <!-- SettingsScreen.kt: Backup card -->
     <string name="settings_backup_title">Backup</string>
     <string name="settings_garmin_files_title">Garmin files</string>
+    <string name="settings_steps_diag_title">Step diagnostics</string>
+    <string name="settings_steps_diag_description">Shows how your steps are stored in Health Connect (period length and pace). Used to tune active minutes to how your watch writes data.</string>
+    <string name="settings_steps_diag_today">Today</string>
+    <string name="settings_steps_diag_yesterday">Yesterday</string>
+    <string name="settings_steps_diag_copy">Copy</string>
+    <string name="settings_steps_diag_copied">Diagnostics copied.</string>
     <string name="settings_garmin_files_description">Garmin does not share sleep score, overnight HRV, Body Battery or stress with Health Connect. Export a day in Garmin Connect (zip with .fit files) and import it here – you can pick several files at once, or share the zip straight to HealthLog from Downloads/Garmin Connect. Fields you have corrected manually are kept.</string>
     <string name="action_import_garmin">Import Garmin files</string>
     <string name="garmin_import_done">Imported Garmin data for %1$d days.</string>

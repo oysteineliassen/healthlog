@@ -296,6 +296,18 @@ class HealthViewModel(
         }
     }
 
+    /** Diagnose av skritt-dataene for en dag (se HealthConnectManager.stepsDiagnostics). */
+    var stepsDiagnostics by mutableStateOf<String?>(null)
+        private set
+
+    fun loadStepsDiagnostics(date: LocalDate) {
+        safeLaunch { stepsDiagnostics = healthConnectManager.stepsDiagnostics(date) }
+    }
+
+    fun clearStepsDiagnostics() {
+        stepsDiagnostics = null
+    }
+
     fun syncRecentOnOpen() {
         applyFastingPeriods()
         val now = System.currentTimeMillis()
