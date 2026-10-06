@@ -17,11 +17,13 @@ jobs:
       - name: Tester
         run: ./gradlew testDebugUnitTest --console=plain
       - name: Bygg APK
-        run: ./gradlew assembleDebug --console=plain
+        run: ./gradlew assembleRelease --console=plain
+      - name: Gi APK-en et navn med versjon
+        run: cp app/build/outputs/apk/release/app-release.apk "HealthLog-1.0.${GITHUB_RUN_NUMBER}.apk"
       - uses: actions/upload-artifact@v4
         with:
-          name: HealthLog-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: HealthLog-1.0.${{ github.run_number }}
+          path: HealthLog-1.0.${{ github.run_number }}.apk
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

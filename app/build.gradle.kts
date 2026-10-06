@@ -18,11 +18,13 @@ android {
         targetSdk = 36
         // Byggnummeret fra GitHub Actions, så hver ny APK har høyere versjon enn forrige.
         versionCode = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 1
-        versionName = "1.0"
+        versionName = "1.0.${System.getenv("GITHUB_RUN_NUMBER") ?: "lokal"}"
     }
 
-    // Fast debug-nøkkel i repoet: uten den lager hver CI-maskin sin egen, og Android
-    // nekter da å oppdatere appen (krever avinstallering). Bare for debug - ikke hemmelig.
+    // Fast nøkkel i repoet: uten den lager hver CI-maskin sin egen, og Android nekter da
+    // å oppdatere appen (krever avinstallering). Brukes også for release-bygget, siden
+    // appen bare installeres direkte (ikke via Play) - da kan release oppdatere en
+    // installert debug-versjon uten avinstallering. Ikke hemmelig; ikke bruk den i Play.
     signingConfigs {
         getByName("debug") {
             storeFile = file("debug.keystore")
@@ -34,6 +36,10 @@ android {
 
     buildTypes {
         release {
+            signingConfig = signingConfigs.getByName("debug")
+            // Ikke R8/kodekrymping: Room, Health Connect og Firebase trenger keep-regler
+            // som bare kan kontrolleres ved å kjøre appen. Krymping uten testing på
+            // telefon kunne gitt krasj som CI ikke fanger.
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }

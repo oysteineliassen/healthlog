@@ -202,6 +202,7 @@
 
     <!-- SettingsScreen.kt: overskrift og Garmin/Health Connect-boksen -->
     <string name="settings_title">Innstillinger</string>
+    <string name="settings_version">Versjon %1$s</string>
     <string name="settings_garmin_title">Garmin via Health Connect</string>
     <string name="settings_garmin_description">Henter skritt, søvn, hvilepuls og vekt fra Garmin Connect via Health Connect. Body Battery, stress og HRV deles ikke via Health Connect – registrer dem manuelt eller importer Garmin-filer (se under).</string>
     <string name="action_sync_today">Hent fra Health Connect i dag</string>

@@ -905,40 +905,16 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
             }
         }
 
-        // MIDLERTIDIG - fjern denne item-blokken igjen når du har bekreftet at
-        // testrapporten faktisk dukker opp i Firebase-konsollen (Crashlytics ->
-        // Non-fatals). Ikke ment å bli værende i en ferdig app.
         item {
-            Card(shape = RoundedCornerShape(20.dp)) {
-                Column(Modifier.padding(18.dp)) {
-                    Text(
-                        "Test krasjrapportering (midlertidig)",
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    Spacer(Modifier.height(6.dp))
-
-                    Text(
-                        "Sender en test-hendelse til Firebase Crashlytics. Lukk appen helt og åpne den igjen - da lastes den opp. Sjekk etter 5-10 min i Crashlytics, med hendelsestype-filteret satt til \"Non-fatal\".",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-
-                    Spacer(Modifier.height(14.dp))
-
-                    OutlinedButton(onClick = {
-                        val crashlytics = com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance()
-                        android.util.Log.d("HealthLogTest", "Sender testrapport til Crashlytics...")
-                        crashlytics.log("Testknapp trykket i Innstillinger")
-                        crashlytics.recordException(Exception("HealthLog testrapport - kan slettes"))
-                        crashlytics.sendUnsentReports()
-                        android.util.Log.d("HealthLogTest", "sendUnsentReports() kalt uten å kaste feil.")
-                        vm.showMessage("Testrapport sendt (se Logcat med tag HealthLogTest for bekreftelse).")
-                    }) {
-                        Text("Send testrapport")
-                    }
-                }
+            val versionName = remember {
+                runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }.getOrNull()
             }
+            Text(
+                stringResource(R.string.settings_version, versionName ?: "?"),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.fillMaxWidth().padding(top = 4.dp)
+            )
         }
     }
 

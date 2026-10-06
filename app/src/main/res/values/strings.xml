@@ -202,6 +202,7 @@
 
     <!-- SettingsScreen.kt: title and the Garmin/Health Connect card -->
     <string name="settings_title">Settings</string>
+    <string name="settings_version">Version %1$s</string>
     <string name="settings_garmin_title">Garmin via Health Connect</string>
     <string name="settings_garmin_description">Fetches steps, sleep, resting heart rate, and weight from Garmin Connect via Health Connect. Body Battery, stress, and HRV aren\'t shared via Health Connect – log them manually or import Garmin files (see below).</string>
     <string name="action_sync_today">Fetch from Health Connect today</string>

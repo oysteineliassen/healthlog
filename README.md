@@ -6,7 +6,7 @@ Garmin, dagbok, trender, rekorder og en regelbasert coach.
 ## Bygg
 
 GitHub Actions kjører enhetstestene og bygger en debug-APK ved hver push – last den ned
-under **Actions → siste kjøring → Artifacts → HealthLog-debug-apk**.
+under **Actions → siste kjøring → Artifacts → HealthLog-1.0.<nummer>**.
 
 Lokalt (Android Studio eller kommandolinje):
 
