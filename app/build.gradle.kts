@@ -37,10 +37,16 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("debug")
-            // Ikke R8/kodekrymping: Room, Health Connect og Firebase trenger keep-regler
-            // som bare kan kontrolleres ved å kjøre appen. Krymping uten testing på
-            // telefon kunne gitt krasj som CI ikke fanger.
-            isMinifyEnabled = false
+            // R8 krymper bibliotekene (mest ikonpakken) og fjerner ubrukte ressurser.
+            // Appens egen kode beholdes urørt (se proguard-rules.pro), så refleksjon og
+            // stakkspor i krasjrapporter fungerer som før.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            // Appkoden er ikke obfuskert, så mapping-fil trengs ikke - og opplastingen
+            // ville krevd nettilgang til Firebase fra byggemaskinen.
+            configure<com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension> {
+                mappingFileUploadEnabled = false
+            }
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
