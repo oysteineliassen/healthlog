@@ -100,6 +100,7 @@ fun healthDaysToJson(days: List<HealthDay>, settings: Map<String, *> = emptyMap<
         obj.putOpt("morningNote", day.morningNote)
         obj.putOpt("eveningNote", day.eveningNote)
         obj.putOpt("sleepReflection", day.sleepReflection)
+        obj.putOpt("sleepFactors", day.sleepFactors)
         obj.putOpt("dayTag", day.dayTag)
         obj.putOpt("nutritionLevel", day.nutritionLevel)
         obj.putOpt("habitTags", day.habitTags)
@@ -158,6 +159,7 @@ fun jsonToHealthDays(json: String): List<HealthDay> {
                 // faller tilbake til den som kveldsnotat hvis de nye feltene mangler.
                 eveningNote = obj.optStringOrNull("eveningNote") ?: obj.optStringOrNull("note"),
                 sleepReflection = obj.optStringOrNull("sleepReflection"),
+                sleepFactors = obj.optStringOrNull("sleepFactors"),
                 dayTag = obj.optStringOrNull("dayTag"),
                 nutritionLevel = obj.optStringOrNull("nutritionLevel"),
                 habitTags = obj.optStringOrNull("habitTags"),

@@ -46,6 +46,8 @@ data class HealthDay(
     // Egen refleksjon over natten som lagres på denne dagen (søvn lagres på dagen natten
     // slutter): hvorfor ble den bra/dårlig? Fritekst - brukes i Historikk og AI-prompten.
     val sleepReflection: String? = null,
+    // Faste årsaker for natten ("late_meal|kids"), se SleepFactors. null = ikke registrert.
+    val sleepFactors: String? = null,
     val dayTag: String? = null,
     val nutritionLevel: String? = null,
     // Egne vane-merker (f.eks. "Alkohol|Sen middag"). null = ingenting registrert den
@@ -65,6 +67,12 @@ fun HealthDay?.manualOverrideSet(): Set<String> =
 
 fun Set<String>.toManualOverridesString(): String? =
     if (isEmpty()) null else joinToString(",")
+
+fun HealthDay?.sleepFactorSet(): Set<String> =
+    this?.sleepFactors?.split("|")?.map { it.trim() }?.filter { it.isNotEmpty() }?.toSet() ?: emptySet()
+
+/** Tomt sett gir null - ingen årsaker valgt er det samme som ikke registrert. */
+fun Set<String>.toSleepFactorsString(): String? = if (isEmpty()) null else sorted().joinToString("|")
 
 fun HealthDay?.habitTagSet(): Set<String> =
     this?.habitTags?.split("|")?.map { it.trim() }?.filter { it.isNotEmpty() }?.toSet() ?: emptySet()

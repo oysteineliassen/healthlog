@@ -5,6 +5,7 @@ import no.healthlog.app.NutritionLevel
 import no.healthlog.app.TrainingIntensity
 import no.healthlog.app.data.HealthDay
 import no.healthlog.app.data.habitTagSet
+import no.healthlog.app.data.sleepFactorSet
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import kotlin.math.pow
@@ -198,5 +199,37 @@ internal fun compareNextDay(
     fun weightedMean(values: List<Pair<Double, Double>>): Double =
         values.sumOf { it.first * it.second } / values.sumOf { it.second }
 
+    return GroupComparison(weightedMean(withValues), withValues.size, weightedMean(withoutValues), withoutValues.size)
+}
+
+/**
+ * Netter (dager) med søvn-årsaken [factor] mot netter uten den. Bare dager der du tok
+ * stilling til natten (valgte årsaker eller skrev en refleksjon) regnes med - en natt
+ * uten noe registrert er ukjent, ikke "uten sen middag". Krever færre dager i "med"-
+ * gruppen enn de andre sammenligningene, siden årsakene er sjeldnere.
+ */
+internal fun compareSleepFactor(
+    byDate: Map<LocalDate, HealthDay>,
+    today: LocalDate,
+    factor: String,
+    minWithDays: Int = 4,
+    minWithoutDays: Int = 5,
+    windowDays: Long = 180,
+    halfLifeDays: Double = 45.0,
+    selector: (HealthDay) -> Double?
+): GroupComparison? {
+    val from = today.minusDays(windowDays)
+    val withValues = mutableListOf<Pair<Double, Double>>()
+    val withoutValues = mutableListOf<Pair<Double, Double>>()
+    for ((date, day) in byDate) {
+        if (date.isBefore(from) || date.isAfter(today) || day.isAtypical()) continue
+        val reflected = day.sleepFactors != null || !day.sleepReflection.isNullOrBlank()
+        if (!reflected) continue
+        val value = selector(day) ?: continue
+        val weight = 0.5.pow(ChronoUnit.DAYS.between(date, today).toDouble() / halfLifeDays)
+        if (factor in day.sleepFactorSet()) withValues += value to weight else withoutValues += value to weight
+    }
+    if (withValues.size < minWithDays || withoutValues.size < minWithoutDays) return null
+    fun weightedMean(values: List<Pair<Double, Double>>) = values.sumOf { it.first * it.second } / values.sumOf { it.second }
     return GroupComparison(weightedMean(withValues), withValues.size, weightedMean(withoutValues), withoutValues.size)
 }

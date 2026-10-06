@@ -57,6 +57,7 @@ data class ManualEntryInput(
     val morningNote: String?,
     val eveningNote: String?,
     val sleepReflection: String?,
+    val sleepFactors: List<String>,
     val dayTag: String?,
     val nutritionLevel: String?,
     // null = ikke med i dialogen (behold det som er lagret), tom liste = ingen merker.
@@ -207,6 +208,7 @@ class HealthViewModel(
                     morningNote = input.morningNote,
                     eveningNote = input.eveningNote,
                     sleepReflection = input.sleepReflection,
+                    sleepFactors = input.sleepFactors.toSet().toSleepFactorsString(),
                     dayTag = input.dayTag,
                     nutritionLevel = input.nutritionLevel,
                     habitTags = input.habitTags?.toSet()?.toHabitTagsString() ?: old?.habitTags,

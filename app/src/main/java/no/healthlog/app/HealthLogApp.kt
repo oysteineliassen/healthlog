@@ -25,6 +25,7 @@ import no.healthlog.app.billing.BillingManager
 import no.healthlog.app.garmin.HealthConnectManager
 import no.healthlog.app.data.HealthDay
 import no.healthlog.app.data.habitTagSet
+import no.healthlog.app.data.sleepFactorSet
 import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -242,6 +243,7 @@ fun EntryDialog(
     var habitTags by rememberSaveable(initial?.date) { mutableStateOf(initial.habitTagSet().toList()) }
     var eveningNote by rememberSaveable(initial?.date) { mutableStateOf(initial?.eveningNote ?: "") }
     var sleepReflection by rememberSaveable(initial?.date) { mutableStateOf(initial?.sleepReflection ?: "") }
+    var sleepFactors by rememberSaveable(initial?.date) { mutableStateOf(initial.sleepFactorSet().toList()) }
     var weight by rememberSaveable(initial?.date) { mutableStateOf(initial?.weightKg?.toString() ?: "") }
     var waist by rememberSaveable(initial?.date) { mutableStateOf(initial?.waistCm?.toString() ?: "") }
     var hrv by rememberSaveable(initial?.date) { mutableStateOf(initial?.hrvMs?.toString() ?: "") }
@@ -325,6 +327,8 @@ fun EntryDialog(
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     modifier = Modifier.fillMaxWidth()
                 )
+
+                SleepFactorSelector(selected = sleepFactors, onChange = { sleepFactors = it })
 
                 OutlinedTextField(
                     value = morningNote,
@@ -436,6 +440,7 @@ fun EntryDialog(
                             morningNote = morningNote.trim().ifBlank { null },
                             eveningNote = eveningNote.trim().ifBlank { null },
                             sleepReflection = sleepReflection.trim().ifBlank { null },
+                            sleepFactors = sleepFactors,
                             dayTag = dayTag,
                             nutritionLevel = nutritionLevel,
                             habitTags = habitTags

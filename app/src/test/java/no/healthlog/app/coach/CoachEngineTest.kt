@@ -280,4 +280,20 @@ class CoachEngineTest {
         }
         assertEquals(50.0, normalFor(byDate(data), today) { it.hrvMs }!!.mean, 0.01)
     }
+
+    @Test
+    fun `sleep factor with shorter nights is reported, unreflected nights do not count`() {
+        // 24 dager: hver 4. natt "barn våknet" og 6 t søvn, ellers 7,5 t. Dager uten
+        // refleksjon (hver 3.) har 4 t søvn og skal ikke trekke ned "uten"-gruppen.
+        val data = days(24) { ago, date ->
+            when {
+                ago % 4 == 0 -> HealthDay(date = date.toString(), sleepMinutes = 360, sleepFactors = "kids")
+                ago % 3 == 0 -> HealthDay(date = date.toString(), sleepMinutes = 240)
+                else -> HealthDay(date = date.toString(), sleepMinutes = 450, sleepReflection = "Grei natt")
+            }
+        }
+        val message = buildCoachCandidates(data, today, 480, 8000)!!.first { it.id == CoachMessageId.SLEEP_FACTOR_SLEEP_LOWER }
+        assertEquals("kids", message.textArg)
+        assertEquals(1.5, message.doubleArg!!, 0.01)
+    }
 }

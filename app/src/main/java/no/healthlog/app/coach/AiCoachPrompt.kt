@@ -2,6 +2,7 @@ package no.healthlog.app.coach
 
 import no.healthlog.app.data.HealthDay
 import no.healthlog.app.data.habitTagSet
+import no.healthlog.app.data.sleepFactorSet
 import java.time.LocalDate
 import java.util.Locale
 
@@ -96,6 +97,7 @@ fun buildAiCoachPrompt(
 
     val notes = period.mapNotNull { d ->
         val parts = listOfNotNull(
+            d.sleepFactorSet().sorted().takeIf { it.isNotEmpty() }?.let { "Årsaker natten: ${it.joinToString(", ")}" },
             d.sleepReflection?.takeIf { it.isNotBlank() }?.let { "Natten: ${clean(it)}" },
             d.morningNote?.takeIf { it.isNotBlank() }?.let { "Plan: ${clean(it)}" },
             d.eveningNote?.takeIf { it.isNotBlank() }?.let { "Kveld: ${clean(it)}" }

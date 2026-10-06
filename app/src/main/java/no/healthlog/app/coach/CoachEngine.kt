@@ -5,6 +5,7 @@ import no.healthlog.app.NutritionLevel
 import no.healthlog.app.calculateHealthScore
 import no.healthlog.app.data.HealthDay
 import no.healthlog.app.data.habitTagSet
+import no.healthlog.app.data.sleepFactorSet
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import kotlin.math.max
@@ -40,6 +41,7 @@ enum class CoachMessageId {
     HABIT_SLEEP_HIGHER,
     HABIT_HRV_LOWER,
     HABIT_HRV_HIGHER,
+    SLEEP_FACTOR_SLEEP_LOWER,
     NEUTRAL
 }
 
@@ -70,6 +72,8 @@ sealed class CoachFact {
     data class BasedOnDays(val days: Int) : CoachFact()
     /** Verdien dagen etter dager MED [tag] mot dagen etter dager uten. */
     data class HabitNextDay(val tag: String, val metric: CoachMetric, val comparison: GroupComparisonFact) : CoachFact()
+    /** Netter med søvn-årsaken [factor] mot netter du reflekterte over uten den. */
+    data class SleepFactorEffect(val factor: String, val metric: CoachMetric, val comparison: GroupComparisonFact) : CoachFact()
 }
 
 /** Offentlig speiling av GroupComparison (som er internal i CoachMath). */
@@ -166,7 +170,8 @@ internal fun cooldownDays(id: CoachMessageId): Long = when (id) {
     CoachMessageId.HABIT_SLEEP_LOWER,
     CoachMessageId.HABIT_SLEEP_HIGHER,
     CoachMessageId.HABIT_HRV_LOWER,
-    CoachMessageId.HABIT_HRV_HIGHER -> 7
+    CoachMessageId.HABIT_HRV_HIGHER,
+    CoachMessageId.SLEEP_FACTOR_SLEEP_LOWER -> 7
 }
 
 /**
@@ -454,6 +459,28 @@ internal fun buildCoachCandidates(
         CoachMetric.HRV_MS, { it.hrvMs }, 3.0,
         CoachMessageId.HABIT_HRV_LOWER, CoachMessageId.HABIT_HRV_HIGHER
     )
+
+    // --- Søvn-årsaker ---
+    // Årsakene du krysser av på natten (sen middag, barn våknet ...) mot netter du
+    // reflekterte over uten dem. Samme dag, siden årsakene registreres for natten som
+    // lagres på den dagen. Bare den årsaken med størst negativt utslag blir kandidat.
+    run {
+        val best = byDate.values.flatMap { it.sleepFactorSet() }.toSet().mapNotNull { factor ->
+            compareSleepFactor(byDate, today, factor) { it.sleepMinutes?.let { m -> m / 60.0 } }?.let { factor to it }
+        }.minByOrNull { (_, c) -> c.withMean - c.withoutMean } ?: return@run
+        val (factor, c) = best
+        val diff = c.withoutMean - c.withMean
+        if (diff < 0.3) return@run
+        candidates += CoachMessage(
+            CoachMessageId.SLEEP_FACTOR_SLEEP_LOWER,
+            doubleArg = diff,
+            textArg = factor,
+            facts = listOf(
+                CoachFact.SleepFactorEffect(factor, CoachMetric.SLEEP_HOURS, GroupComparisonFact(c.withMean, c.withDays, c.withoutMean, c.withoutDays)),
+                CoachFact.BasedOnDays(c.withDays + c.withoutDays)
+            )
+        )
+    }
 
     // --- Sammenhenger ---
     // Vises kun når sammenhengen peker i en oppmuntrende retning - peker den motsatt

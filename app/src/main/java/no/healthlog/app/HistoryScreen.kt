@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import no.healthlog.app.data.HealthDay
 import no.healthlog.app.data.habitTagSet
+import no.healthlog.app.data.sleepFactorSet
 import no.healthlog.app.data.manualOverrideSet
 import no.healthlog.app.data.trainingSessionList
 import java.time.Instant
@@ -492,9 +493,14 @@ private fun HistoryDayCard(
 
             val placeholder = stringResource(R.string.value_placeholder)
 
-            if (!day.sleepReflection.isNullOrBlank()) {
+            val factorLabels = day.sleepFactorSet().map { sleepFactorLabel(it) }
+            if (!day.sleepReflection.isNullOrBlank() || factorLabels.isNotEmpty()) {
                 Text(
-                    text = stringResource(R.string.diary_sleep_prefix, day.sleepReflection),
+                    text = stringResource(
+                        R.string.diary_sleep_prefix,
+                        listOfNotNull(factorLabels.joinToString(", ").ifEmpty { null }, day.sleepReflection?.takeIf { it.isNotBlank() })
+                            .joinToString(" – ")
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
                     fontStyle = FontStyle.Italic
                 )
@@ -630,6 +636,10 @@ fun EditHistoryDialog(
 
     var sleepReflection by rememberSaveable(day.date) {
         mutableStateOf(day.sleepReflection ?: "")
+    }
+
+    var sleepFactors by rememberSaveable(day.date) {
+        mutableStateOf(day.sleepFactorSet().toList())
     }
 
     var dayTag by rememberSaveable(day.date) {
@@ -835,6 +845,8 @@ fun EditHistoryDialog(
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     modifier = Modifier.fillMaxWidth()
                 )
+
+                SleepFactorSelector(selected = sleepFactors, onChange = { sleepFactors = it })
 
                 OutlinedTextField(
                     value = morningNote,
@@ -1106,6 +1118,7 @@ fun EditHistoryDialog(
                             morningNote = morningNote.trim().ifBlank { null },
                             eveningNote = eveningNote.trim().ifBlank { null },
                             sleepReflection = sleepReflection.trim().ifBlank { null },
+                            sleepFactors = sleepFactors,
                             dayTag = dayTag,
                             nutritionLevel = nutritionLevel,
                             habitTags = habitTags,

@@ -16,7 +16,7 @@ fun healthDaysToCsv(days: List<HealthDay>): String {
     val header = listOf(
         "date", "weightKg", "waistCm", "bodyFatPercent", "hrvMs", "sleepMinutes", "deepSleepMinutes", "lightSleepMinutes", "remSleepMinutes", "sleepAwakeMinutes", "sleepScore",
         "restingHeartRate", "avgHeartRate", "bodyBatteryMax", "bodyBatteryMin", "stress", "steps", "activeMinutes",
-        "trainingMinutes", "trainingIntensity", "trainingType", "trainingSessions", "morningNote", "eveningNote", "sleepReflection", "dayTag", "nutritionLevel", "habitTags", "source", "updatedAt"
+        "trainingMinutes", "trainingIntensity", "trainingType", "trainingSessions", "morningNote", "eveningNote", "sleepReflection", "sleepFactors", "dayTag", "nutritionLevel", "habitTags", "source", "updatedAt"
     ).joinToString(",")
 
     val rows = days.sortedBy { it.date }.map { day ->
@@ -46,6 +46,7 @@ fun healthDaysToCsv(days: List<HealthDay>): String {
             csvEscape(day.morningNote ?: ""),
             csvEscape(day.eveningNote ?: ""),
             csvEscape(day.sleepReflection ?: ""),
+            day.sleepFactors ?: "",
             day.dayTag ?: "",
             day.nutritionLevel ?: "",
             csvEscape(day.habitTags ?: ""),

@@ -241,6 +241,8 @@ private fun coachMessageText(message: CoachMessage): String {
             stringResource(R.string.coach_habit_hrv_lower, message.textArg.orEmpty(), "%.0f".format(dbl))
         CoachMessageId.HABIT_HRV_HIGHER ->
             stringResource(R.string.coach_habit_hrv_higher, message.textArg.orEmpty(), "%.0f".format(dbl))
+        CoachMessageId.SLEEP_FACTOR_SLEEP_LOWER ->
+            stringResource(R.string.coach_sleep_factor_lower, sleepFactorLabel(message.textArg.orEmpty()), "%.1f".format(dbl))
         CoachMessageId.NEUTRAL -> stringResource(R.string.coach_neutral)
     }
 }
@@ -274,7 +276,7 @@ private fun CoachWhyDialog(message: CoachMessage, messageText: String, onDismiss
                         }
                         Spacer(Modifier.height(8.dp))
                     }
-                    if (message.facts.any { it is CoachFact.WithVsWithout || it is CoachFact.HabitNextDay }) {
+                    if (message.facts.any { it is CoachFact.WithVsWithout || it is CoachFact.HabitNextDay || it is CoachFact.SleepFactorEffect }) {
                         Text(
                             stringResource(R.string.coach_why_weighting),
                             style = MaterialTheme.typography.bodySmall,
@@ -324,6 +326,13 @@ private fun coachFactText(fact: CoachFact): String = when (fact) {
     )
     is CoachFact.DaysSince -> stringResource(R.string.coach_why_days_since, fact.lastEntry.format(dateFormatter))
     is CoachFact.BasedOnDays -> stringResource(R.string.coach_why_based_on, fact.days)
+    is CoachFact.SleepFactorEffect -> stringResource(
+        R.string.coach_why_sleep_factor,
+        metricLabel(fact.metric),
+        sleepFactorLabel(fact.factor),
+        formatMetric(fact.metric, fact.comparison.withMean), fact.comparison.withDays,
+        formatMetric(fact.metric, fact.comparison.withoutMean), fact.comparison.withoutDays
+    )
     is CoachFact.HabitNextDay -> stringResource(
         R.string.coach_why_habit_next_day,
         metricLabel(fact.metric),
