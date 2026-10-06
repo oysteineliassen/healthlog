@@ -2,7 +2,9 @@ package no.healthlog.app.coach
 
 import no.healthlog.app.data.HealthDay
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.LocalDate
 
@@ -54,5 +56,21 @@ class FastingTest {
         assertEquals(30.0, stress.before!!.average, 0.01)
         assertNull(stress.during)
         assertNull(stress.after)
+    }
+
+    @Test
+    fun `report shows change from before to during and the AI prompt holds the days around the fast`() {
+        val days = (-7..12).map { offset ->
+            val date = start.plusDays(offset.toLong())
+            HealthDay(date = date.toString(), weightKg = if (date in period) 79.0 else 81.0, eveningNote = if (offset == 2) "Tung dag;\nsliten" else null)
+        }
+        val rows = fastingComparison(days, period, today = start.plusDays(12))
+        val report = fastingReportText(period, rows, "Faste", Triple("før", "under", "etter")) { it.name }
+        assertTrue(report.contains("WEIGHT: før 81.0 · under 79.0 (-2.0) · etter 81.0"))
+        val prompt = buildFastingAiPrompt(days, period, start.plusDays(12), report)
+        assertTrue(prompt.contains("2026-10-14;ja;"))
+        assertTrue(prompt.contains("Tung dag, sliten"))
+        assertTrue(prompt.contains("2026-10-05;"))
+        assertFalse(prompt.contains("2026-10-04;"))
     }
 }

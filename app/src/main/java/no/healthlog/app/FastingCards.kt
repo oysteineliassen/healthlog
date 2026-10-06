@@ -1,11 +1,15 @@
 package no.healthlog.app
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Intent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -14,7 +18,9 @@ import no.healthlog.app.coach.FastingComparisonRow
 import no.healthlog.app.coach.FastingMetric
 import no.healthlog.app.coach.FastingPeriod
 import no.healthlog.app.coach.FastingPhaseValue
+import no.healthlog.app.coach.buildFastingAiPrompt
 import no.healthlog.app.coach.fastingComparison
+import no.healthlog.app.coach.fastingReportText
 import no.healthlog.app.coach.relevantFastingPeriod
 import no.healthlog.app.data.HealthDay
 import java.time.Instant
@@ -79,6 +85,43 @@ fun FastingCard(all: List<HealthDay>, periods: List<FastingPeriod>) {
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+
+            // Rapport og AI-prompt gir mening fra fasten har startet.
+            if (!today.isBefore(period.start)) {
+                val context = LocalContext.current
+                val title = stringResource(R.string.fasting_card_title)
+                val columns = Triple(
+                    stringResource(R.string.fasting_col_before),
+                    stringResource(R.string.fasting_col_during),
+                    stringResource(R.string.fasting_col_after)
+                )
+                val labels = FastingMetric.entries.associateWith { fastingMetricLabel(it) }
+                val report = fastingReportText(period, rows, title, columns) { labels.getValue(it) }
+                var copied by remember { mutableStateOf(false) }
+                Spacer(Modifier.height(10.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(onClick = {
+                        val send = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(Intent.EXTRA_TEXT, report)
+                        }
+                        context.startActivity(Intent.createChooser(send, context.getString(R.string.fasting_share_title)))
+                    }) { Text(stringResource(R.string.fasting_share_report)) }
+                    OutlinedButton(onClick = {
+                        val prompt = buildFastingAiPrompt(all, period, today, report)
+                        context.getSystemService(ClipboardManager::class.java)
+                            ?.setPrimaryClip(ClipData.newPlainText("HealthLog faste-prompt", prompt))
+                        copied = true
+                    }) { Text(stringResource(R.string.fasting_copy_ai_prompt)) }
+                }
+                if (copied) {
+                    Text(
+                        stringResource(R.string.ai_coach_prompt_copied),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
         }
     }
 }

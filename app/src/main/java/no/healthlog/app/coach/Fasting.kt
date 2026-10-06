@@ -81,3 +81,69 @@ fun fastingComparison(allDays: List<HealthDay>, period: FastingPeriod, today: Lo
         )
     }
 }
+
+private fun FastingMetric.format(v: Double): String = when (this) {
+    FastingMetric.SLEEP_HOURS, FastingMetric.WEIGHT -> String.format(java.util.Locale.ROOT, "%.1f", v)
+    else -> String.format(java.util.Locale.ROOT, "%.0f", v)
+}
+
+/**
+ * Tekstrapport for en faste til deling: én linje per måling med før/under/etter og
+ * endringen fra før til under. [label] gir målingens navn på brukerens språk, [title]
+ * og [columns] (før/under/etter) likeså.
+ */
+fun fastingReportText(
+    period: FastingPeriod,
+    rows: List<FastingComparisonRow>,
+    title: String,
+    columns: Triple<String, String, String>,
+    label: (FastingMetric) -> String
+): String {
+    val sb = StringBuilder()
+    sb.appendLine("$title: ${period.start} – ${period.end} (${period.days})")
+    sb.appendLine()
+    rows.filter { it.before != null || it.during != null || it.after != null }.forEach { row ->
+        fun v(p: FastingPhaseValue?) = p?.let { row.metric.format(it.average) } ?: "–"
+        val change = if (row.before != null && row.during != null) {
+            val d = row.during.average - row.before.average
+            " (" + (if (d >= 0) "+" else "") + row.metric.format(d) + ")"
+        } else ""
+        sb.appendLine("${label(row.metric)}: ${columns.first} ${v(row.before)} · ${columns.second} ${v(row.during)}$change · ${columns.third} ${v(row.after)}")
+    }
+    return sb.toString().trimEnd()
+}
+
+/** Prompt for en egen AI-gjennomgang av fasten, med dagsdata fra uka før til uka etter. */
+fun buildFastingAiPrompt(allDays: List<HealthDay>, period: FastingPeriod, today: LocalDate, report: String): String {
+    val from = period.start.minusDays(7)
+    val to = minOf(period.end.plusDays(8), today)
+    val days = allDays.filter { d ->
+        runCatching { LocalDate.parse(d.date) }.getOrNull()?.let { !it.isBefore(from) && !it.isAfter(to) } == true
+    }.sortedBy { it.date }
+    val sb = StringBuilder()
+    sb.appendLine("Jeg har gjennomført en faste (fasteimiterende diett) ${period.start} – ${period.end} (${period.days} dager). Under er målinger fra Garmin-klokka mi fra uka før til uka etter, eksportert fra appen HealthLog.")
+    sb.appendLine()
+    sb.appendLine("Vurder hvordan kroppen responderte (HRV, hvilepuls, søvn, stress, Body Battery, vekt), hvor raskt jeg kom tilbake til normalen, og hva jeg bør tenke på neste gang. Søvn, HRV og hvilepuls står på datoen natten slutter. Ikke still medisinske diagnoser. Svar på norsk, under 350 ord, med overskriftene:")
+    listOf("Kort oppsummering", "Under fasten", "Etter fasten", "Til neste gang").forEach { sb.appendLine("## $it") }
+    sb.appendLine()
+    sb.appendLine("OPPSUMMERING:")
+    sb.appendLine(report)
+    sb.appendLine()
+    sb.appendLine("DAGSDATA (dato;faste;søvn_t;hrv_ms;hvilepuls;stress;bb_maks;vekt_kg;notat):")
+    days.forEach { d ->
+        val date = LocalDate.parse(d.date)
+        val note = listOfNotNull(d.sleepReflection, d.eveningNote).joinToString(" | ").replace(Regex("\\s+"), " ").replace(";", ",")
+        sb.appendLine(listOf(
+            d.date,
+            if (date in period) "ja" else "",
+            d.sleepMinutes?.let { String.format(java.util.Locale.ROOT, "%.2f", it / 60.0) } ?: "",
+            d.hrvMs?.let { String.format(java.util.Locale.ROOT, "%.0f", it) } ?: "",
+            d.restingHeartRate?.toString() ?: "",
+            d.stress?.toString() ?: "",
+            d.bodyBatteryMax?.toString() ?: "",
+            d.weightKg?.let { String.format(java.util.Locale.ROOT, "%.1f", it) } ?: "",
+            note
+        ).joinToString(";"))
+    }
+    return sb.toString().trimEnd()
+}

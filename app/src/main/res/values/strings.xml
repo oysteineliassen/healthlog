@@ -646,6 +646,9 @@
     <string name="fasting_col_during">During</string>
     <string name="fasting_col_after">Week after</string>
     <string name="fasting_card_note">HRV, resting HR and sleep use the nights after each day. Fasting days are kept out of your normal in the coach.</string>
+    <string name="fasting_share_report">Share report</string>
+    <string name="fasting_share_title">Share fasting report</string>
+    <string name="fasting_copy_ai_prompt">Copy AI prompt</string>
     <string name="fasting_metric_hrv">HRV (ms)</string>
     <string name="fasting_metric_resting_hr">Resting HR</string>
     <string name="fasting_metric_sleep">Sleep (h)</string>

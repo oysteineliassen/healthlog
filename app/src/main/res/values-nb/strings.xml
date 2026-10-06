@@ -646,6 +646,9 @@
     <string name="fasting_col_during">Under</string>
     <string name="fasting_col_after">Uka etter</string>
     <string name="fasting_card_note">HRV, hvilepuls og søvn bruker nettene etter hver dag. Fastedager holdes utenfor normalen din i coachen.</string>
+    <string name="fasting_share_report">Del rapport</string>
+    <string name="fasting_share_title">Del fasterapport</string>
+    <string name="fasting_copy_ai_prompt">Kopier AI-prompt</string>
     <string name="fasting_metric_hrv">HRV (ms)</string>
     <string name="fasting_metric_resting_hr">Hvilepuls</string>
     <string name="fasting_metric_sleep">Søvn (t)</string>
