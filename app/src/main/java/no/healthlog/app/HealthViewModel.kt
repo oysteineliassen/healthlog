@@ -1,5 +1,7 @@
 package no.healthlog.app
 
+import no.healthlog.app.coach.FastingPeriod
+import no.healthlog.app.coach.FastingPreferences
 import no.healthlog.app.backup.SettingsBackup
 import android.net.Uri
 import kotlinx.coroutines.Dispatchers
@@ -233,7 +235,53 @@ class HealthViewModel(
      * (den har ingen fast tid, se HealthConnectSyncWorker). Gjør ingenting uten tillatelser,
      * viser ingen melding, og kjører maks hvert 10. minutt.
      */
+    /** Fasteperiodene (lagret i innstillingene) - observerbar så kortene oppdateres. */
+    var fastingPeriods by mutableStateOf(FastingPreferences.get(appContext))
+        private set
+
+    fun addFastingPeriod(period: FastingPeriod) {
+        val updated = (fastingPeriods.filterNot { it.start == period.start } + period).sortedBy { it.start }
+        FastingPreferences.set(appContext, updated)
+        fastingPeriods = updated
+        applyFastingPeriods()
+    }
+
+    fun removeFastingPeriod(period: FastingPeriod) {
+        val updated = fastingPeriods - period
+        FastingPreferences.set(appContext, updated)
+        fastingPeriods = updated
+        // Fjern faste-markeringen som perioden satte (dager du har valgt noe annet på røres ikke).
+        safeLaunch {
+            period.dates().forEach { date ->
+                val day = repo.get(date.toString()) ?: return@forEach
+                if (day.nutritionLevel == NutritionLevel.FASTING && updated.none { date in it }) {
+                    repo.upsert(day.copy(nutritionLevel = null))
+                }
+            }
+        }
+    }
+
+    /**
+     * Markerer dagene i fasteperiodene som "Faste" (kosthold) fram til og med i dag, så
+     * de holdes utenfor normalen i coachen. Framtidige dager markeres når de kommer.
+     * Dager der du selv har valgt et annet kosthold endres ikke.
+     */
+    fun applyFastingPeriods() {
+        val today = LocalDate.now()
+        safeLaunch {
+            fastingPeriods.flatMap { it.dates() }.filter { !it.isAfter(today) }.forEach { date ->
+                val day = repo.get(date.toString())
+                if (day == null) {
+                    repo.upsert(HealthDay(date = date.toString(), nutritionLevel = NutritionLevel.FASTING))
+                } else if (day.nutritionLevel == null) {
+                    repo.upsert(day.copy(nutritionLevel = NutritionLevel.FASTING))
+                }
+            }
+        }
+    }
+
     fun syncRecentOnOpen() {
+        applyFastingPeriods()
         val now = System.currentTimeMillis()
         if (now - lastOpenSyncMillis < 10 * 60 * 1000L) return
         lastOpenSyncMillis = now

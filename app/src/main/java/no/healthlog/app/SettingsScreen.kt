@@ -674,6 +674,8 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
             }
         }
 
+        item { FastingSettingsCard(vm) }
+
         item {
             Card(shape = RoundedCornerShape(20.dp)) {
                 Column(Modifier.padding(18.dp)) {

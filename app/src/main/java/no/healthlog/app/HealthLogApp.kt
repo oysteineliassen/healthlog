@@ -106,7 +106,7 @@ fun HealthLogApp(
     ) { padding ->
         Box(Modifier.padding(padding)) {
             val tabContent: @Composable () -> Unit = { when (tab) {
-                0 -> TodayScreen(todayEntry, days, billingManager, healthConnectManager, refreshKey = vm.refreshCount)
+                0 -> TodayScreen(todayEntry, days, billingManager, healthConnectManager, refreshKey = vm.refreshCount, fastingPeriods = vm.fastingPeriods)
                 1 -> TrendsScreen(days, billingManager)
                 2 -> HistoryScreen(
                     days = days,

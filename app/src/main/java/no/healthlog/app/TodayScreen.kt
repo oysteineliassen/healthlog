@@ -1,5 +1,6 @@
 package no.healthlog.app
 
+import no.healthlog.app.coach.FastingPeriod
 import no.healthlog.app.coach.AiCoachPreferences
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.Canvas
@@ -300,7 +301,8 @@ fun TodayScreen(
     all: List<HealthDay>,
     billingManager: BillingManager,
     healthConnectManager: HealthConnectManager,
-    refreshKey: Int = 0
+    refreshKey: Int = 0,
+    fastingPeriods: List<FastingPeriod> = emptyList()
 ) {
     val date = LocalDate.now().format(dateFormatter)
     val context = LocalContext.current
@@ -342,6 +344,7 @@ fun TodayScreen(
                 "summary" -> item(key = id) { SummaryCard(stringResource(R.string.summary_card_title), today) }
                 "diary" -> item(key = id) { DiaryCard(today) }
                 "readiness" -> item(key = id) { ReadinessCard(all) }
+                "fasting" -> item(key = id) { FastingCard(all, fastingPeriods) }
                 "coach" -> item(key = id) { CoachCard(all) }
                 "ai_coach" -> if (aiCoachEnabled) item(key = id) { AiCoachCard(all) }
                 "score_goals" -> item(key = id) {
