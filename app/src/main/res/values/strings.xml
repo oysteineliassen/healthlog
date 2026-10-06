@@ -282,6 +282,10 @@
     <string name="coach_positive_steps_streak">%1$d days in a row over 8,000 steps – solid streak.</string>
     <string name="coach_positive_score_streak">Your health score has been high for a while now.</string>
     <string name="coach_neutral">Steady period – nothing major to report.</string>
+    <string name="coach_neutral_2">No big changes lately – steady habits are what move the numbers over time.</string>
+    <string name="coach_neutral_3">Your numbers are within your normal. A good day to keep the routine going.</string>
+    <string name="coach_neutral_4">Nothing stands out right now. Jot down how the night was – it helps the coach find patterns.</string>
+    <string name="coach_neutral_5">Stable week so far. Small, consistent steps beat big swings.</string>
     <string name="readiness_title">Readiness</string>
     <string name="readiness_level_good">Good</string>
     <string name="readiness_level_moderate">Moderate</string>

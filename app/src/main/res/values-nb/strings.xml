@@ -282,6 +282,10 @@
     <string name="coach_positive_steps_streak">%1$d dager på rad over 8000 skritt – solid streak.</string>
     <string name="coach_positive_score_streak">Helse-scoren har ligget høyt en stund nå.</string>
     <string name="coach_neutral">Stabil periode – ingen store endringer å melde.</string>
+    <string name="coach_neutral_2">Ingen store endringer i det siste – jevne vaner er det som flytter tallene over tid.</string>
+    <string name="coach_neutral_3">Tallene dine er innenfor din normal. En god dag for å holde rutinen.</string>
+    <string name="coach_neutral_4">Ingenting skiller seg ut nå. Noter gjerne hvordan natten var – det hjelper coachen å finne mønstre.</string>
+    <string name="coach_neutral_5">Stabil uke så langt. Små, jevne steg slår store svingninger.</string>
     <string name="readiness_title">Dagsform</string>
     <string name="readiness_level_good">God</string>
     <string name="readiness_level_moderate">Middels</string>

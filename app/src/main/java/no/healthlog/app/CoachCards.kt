@@ -33,6 +33,14 @@ import no.healthlog.app.data.HealthDay
 import java.time.LocalDate
 import kotlin.math.roundToInt
 
+private val NEUTRAL_VARIANTS = listOf(
+    R.string.coach_neutral,
+    R.string.coach_neutral_2,
+    R.string.coach_neutral_3,
+    R.string.coach_neutral_4,
+    R.string.coach_neutral_5
+)
+
 private val ReadinessGreen = Color(0xFF2E7D32)
 private val ReadinessAmber = Color(0xFFE08A00)
 private val ReadinessRed = Color(0xFFC62828)
@@ -243,7 +251,10 @@ private fun coachMessageText(message: CoachMessage): String {
             stringResource(R.string.coach_habit_hrv_higher, message.textArg.orEmpty(), "%.0f".format(dbl))
         CoachMessageId.SLEEP_FACTOR_SLEEP_LOWER ->
             stringResource(R.string.coach_sleep_factor_lower, sleepFactorLabel(message.textArg.orEmpty()), "%.1f".format(dbl))
-        CoachMessageId.NEUTRAL -> stringResource(R.string.coach_neutral)
+        // Varianter etter dato, så "ingenting å melde"-dager ikke ser helt like ut.
+        CoachMessageId.NEUTRAL -> stringResource(
+            NEUTRAL_VARIANTS[(LocalDate.now().toEpochDay() % NEUTRAL_VARIANTS.size).toInt()]
+        )
     }
 }
 
