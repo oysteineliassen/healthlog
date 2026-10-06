@@ -21,7 +21,8 @@ private fun JSONObject.optStringOrNull(key: String): String? =
  * av/på for planlagte varsler - de må slås på igjen i appen så jobbene faktisk planlegges.
  */
 private val EXCLUDED_SETTING_PREFIXES = listOf(
-    "backup_", "auto_backup_uri", "hc_optional_permissions_asked", "reminder_enabled_", "weekly_summary_"
+    "backup_", "auto_backup_uri", "hc_optional_permissions_asked", "reminder_enabled_", "weekly_summary_",
+    "ai_coach_reminder"
 )
 
 fun isBackedUpSetting(key: String): Boolean = EXCLUDED_SETTING_PREFIXES.none { key.startsWith(it) }

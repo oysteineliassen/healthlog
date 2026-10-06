@@ -8,6 +8,7 @@ private const val KEY_ENABLED = "ai_coach_enabled"
 private const val KEY_ANSWER = "ai_coach_answer"
 private const val KEY_ANSWER_DATE = "ai_coach_answer_date"
 private const val KEY_PERIOD_DAYS = "ai_coach_period_days"
+private const val KEY_REMINDER = "ai_coach_reminder_enabled"
 
 /** Valgfri ekstern AI-trener (prompt ut, svar inn) - av som standard. */
 object AiCoachPreferences {
@@ -18,6 +19,12 @@ object AiCoachPreferences {
 
     fun setEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_ENABLED, enabled).apply()
+    }
+
+    fun isReminderEnabled(context: Context): Boolean = prefs(context).getBoolean(KEY_REMINDER, false)
+
+    fun setReminderEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_REMINDER, enabled).apply()
     }
 
     fun getPeriodDays(context: Context): Int = prefs(context).getInt(KEY_PERIOD_DAYS, 28)

@@ -1,5 +1,6 @@
 package no.healthlog.app
 
+import no.healthlog.app.reminder.AiCoachReminderScheduler
 import no.healthlog.app.coach.AiCoachPreferences
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -315,6 +316,19 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
     var pendingImportJson by remember { mutableStateOf<String?>(null) }
 
     var aiCoachEnabled by remember { mutableStateOf(AiCoachPreferences.isEnabled(context)) }
+    var aiReminderEnabled by remember { mutableStateOf(AiCoachPreferences.isReminderEnabled(context)) }
+
+    fun setAiReminder(enabled: Boolean) {
+        aiReminderEnabled = enabled
+        AiCoachPreferences.setReminderEnabled(context, enabled)
+        if (enabled) AiCoachReminderScheduler.schedule(context) else AiCoachReminderScheduler.cancel(context)
+    }
+
+    val aiReminderPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) setAiReminder(true) else vm.showMessage(context.getString(R.string.msg_notification_permission_denied))
+    }
 
     val garminImportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenMultipleDocuments()
@@ -693,12 +707,29 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
                         Switch(checked = aiCoachEnabled, onCheckedChange = {
                             aiCoachEnabled = it
                             AiCoachPreferences.setEnabled(context, it)
+                            if (!it && aiReminderEnabled) setAiReminder(false)
                         })
                     }
 
                     Spacer(Modifier.height(8.dp))
 
                     Text(stringResource(R.string.settings_ai_coach_description))
+
+                    if (aiCoachEnabled) {
+                        Spacer(Modifier.height(10.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(stringResource(R.string.settings_ai_reminder_label), modifier = Modifier.weight(1f))
+                            Switch(checked = aiReminderEnabled, onCheckedChange = { on ->
+                                val needsPermission = on && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                                    ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+                                if (needsPermission) aiReminderPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS) else setAiReminder(on)
+                            })
+                        }
+                    }
                 }
             }
         }

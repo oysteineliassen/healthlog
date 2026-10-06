@@ -29,7 +29,7 @@ import java.time.temporal.ChronoUnit
 
 private val AI_PERIOD_CHOICES = listOf(14, 28, 90)
 
-private fun buildPrompt(context: Context, all: List<HealthDay>, periodDays: Int): String =
+fun buildAiPromptForApp(context: Context, all: List<HealthDay>, periodDays: Int): String =
     buildAiCoachPrompt(
         all,
         LocalDate.now(),
@@ -105,7 +105,7 @@ fun AiCoachCard(all: List<HealthDay>) {
             Spacer(Modifier.height(4.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Button(onClick = {
-                    val prompt = buildPrompt(context, all, periodDays)
+                    val prompt = buildAiPromptForApp(context, all, periodDays)
                     context.getSystemService(ClipboardManager::class.java)
                         ?.setPrimaryClip(ClipData.newPlainText("HealthLog AI-prompt", prompt))
                     info = context.getString(R.string.ai_coach_prompt_copied)
@@ -113,7 +113,7 @@ fun AiCoachCard(all: List<HealthDay>) {
                     Text(stringResource(R.string.ai_coach_copy_prompt))
                 }
                 OutlinedButton(onClick = {
-                    val prompt = buildPrompt(context, all, periodDays)
+                    val prompt = buildAiPromptForApp(context, all, periodDays)
                     val send = Intent(Intent.ACTION_SEND).apply {
                         type = "text/plain"
                         putExtra(Intent.EXTRA_TEXT, prompt)

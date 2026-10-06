@@ -644,6 +644,9 @@
     <string name="today_card_ai_coach">AI insight (external)</string>
     <string name="settings_ai_coach_title">AI insight (external)</string>
     <string name="settings_ai_coach_description">Shows a card on Today that creates a ready-made prompt with your data. Paste it into Claude, ChatGPT, Copilot or similar, and paste the answer back into the app. Nothing is sent anywhere by the app itself – you choose what to share.</string>
+    <string name="settings_ai_reminder_label">Reminder Sunday evening (copies the week\'s prompt)</string>
+    <string name="ai_reminder_title">Time for this week\'s AI insight</string>
+    <string name="ai_reminder_text">Tap to copy the prompt with this week\'s data, then paste it into your AI assistant.</string>
     <string name="ai_coach_title">AI insight</string>
     <string name="ai_coach_empty">Copy the prompt, paste it into your AI assistant, and paste the answer back here.</string>
     <string name="ai_coach_answer_from">Answer from %1$s</string>

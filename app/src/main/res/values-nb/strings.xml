@@ -644,6 +644,9 @@
     <string name="today_card_ai_coach">AI-innsikt (ekstern)</string>
     <string name="settings_ai_coach_title">AI-innsikt (ekstern)</string>
     <string name="settings_ai_coach_description">Viser et kort på I dag som lager en ferdig prompt med dataene dine. Lim den inn i Claude, ChatGPT, Copilot o.l., og lim svaret tilbake i appen. Appen sender ingenting selv – du velger hva som deles.</string>
+    <string name="settings_ai_reminder_label">Påminnelse søndag kveld (kopierer ukens prompt)</string>
+    <string name="ai_reminder_title">Tid for ukens AI-innsikt</string>
+    <string name="ai_reminder_text">Trykk for å kopiere prompten med ukens data, og lim den inn i AI-assistenten din.</string>
     <string name="ai_coach_title">AI-innsikt</string>
     <string name="ai_coach_empty">Kopier prompten, lim den inn i AI-assistenten din, og lim svaret inn her.</string>
     <string name="ai_coach_answer_from">Svar fra %1$s</string>

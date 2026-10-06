@@ -1,5 +1,8 @@
 package no.healthlog.app
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import no.healthlog.app.coach.AiCoachPreferences
 import no.healthlog.app.coach.FastingPeriod
 import no.healthlog.app.coach.FastingPreferences
 import no.healthlog.app.backup.SettingsBackup
@@ -277,6 +280,17 @@ class HealthViewModel(
                     repo.upsert(day.copy(nutritionLevel = NutritionLevel.FASTING))
                 }
             }
+        }
+    }
+
+    /** Fra søndagsvarselet: kopier ukens AI-prompt (alle data lest direkte, ikke fra UI-tilstanden). */
+    fun copyAiPromptToClipboard() {
+        safeLaunch {
+            val all = repo.getAllOnce()
+            val prompt = buildAiPromptForApp(appContext, all, AiCoachPreferences.getPeriodDays(appContext))
+            appContext.getSystemService(ClipboardManager::class.java)
+                ?.setPrimaryClip(ClipData.newPlainText("HealthLog AI-prompt", prompt))
+            message = appContext.getString(R.string.ai_coach_prompt_copied)
         }
     }
 

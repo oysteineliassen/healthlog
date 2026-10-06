@@ -128,6 +128,10 @@ class MainActivity : ComponentActivity() {
         // App-snarveien (shortcuts.xml) setter denne via en <extra>-tag, som ikke er
         // garantert å bevare boolsk type - sjekker derfor begge representasjonene i
         // stedet for å stole blindt på getBooleanExtra alene.
+        if (importSharedFiles && intent.getBooleanExtra(EXTRA_COPY_AI_PROMPT, false)) {
+            ViewModelProvider(this, vmFactory)[HealthViewModel::class.java].copyAiPromptToClipboard()
+        }
+
         val openEntry = intent.getBooleanExtra(EXTRA_OPEN_ENTRY, false) ||
             intent.getStringExtra(EXTRA_OPEN_ENTRY) == "true"
         if (openEntry) {
@@ -152,6 +156,8 @@ class MainActivity : ComponentActivity() {
     companion object {
         /** Widgetens "+"-knapp og app-snarveien setter denne for å åpne rett til registrerings-dialogen. */
         const val EXTRA_OPEN_ENTRY = "open_entry_dialog"
+        /** AI-påminnelsen: kopier ukens prompt når appen åpnes. */
+        const val EXTRA_COPY_AI_PROMPT = "copy_ai_prompt"
 
         /** Delt med SettingsScreen sin egen "Personvernerklæring"-lenke, slik at URL-en kun står ett sted. */
         const val PRIVACY_POLICY_URL = "https://claude.ai/artifact/7LAkehfQ2qw1a5c11SvGbs"
