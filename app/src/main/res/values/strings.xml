@@ -720,7 +720,7 @@
     <string name="settings_goals_max_hr_label">Max heart rate (optional)</string>
     <string name="settings_goals_max_hr_hint">Used to rate workout intensity (heart rate reserve). Empty = 185 is assumed. Takes effect from the next sync.</string>
     <string name="settings_goals_active_steps_label">Active minutes: steps per minute</string>
-    <string name="settings_goals_active_steps_hint">A minute counts as active at this pace. 100 = brisk walking (research standard). Step diagnostics shows your own pace. Sync a date range again afterwards.</string>
+    <string name="settings_goals_active_steps_hint">A minute counts as active at this pace, or when your heart rate is in the moderate zone while walking (uphill, stairs). 100 = brisk walking (research standard). Step diagnostics shows your own pace. Sync a date range again afterwards.</string>
     <string name="metric_title_body_fat">Body fat</string>
     <string name="period_comparison_steps_avg">Average steps per day: %1$s vs. %2$s</string>
     <string name="period_label_week">Week %1$d · %2$s–%3$s</string>

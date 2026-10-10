@@ -5,35 +5,60 @@ import org.junit.Test
 
 class ActiveMinutesTest {
 
+    private fun minutes(n: Int, steps: Long, hr: Double? = null) = List(n) { StepPeriod(60, steps, hr) }
+
     @Test
-    fun `short Garmin periods under a minute are measured in seconds`() {
-        // 20 min rask gange levert som 40 perioder à 30 s med 55 skritt (110/min).
-        // Før ble hver regnet som 1 min med 55 skritt/min -> 0 aktive minutter.
-        assertEquals(20, activeMinutesFromSteps(List(40) { 30L to 55L }))
+    fun `brisk minutes count and slow ones do not`() {
+        assertEquals(20, activeMinutesFromSteps(minutes(20, 110)))
+        assertEquals(0, activeMinutesFromSteps(minutes(20, 60)))
     }
 
     @Test
-    fun `slow periods do not count`() {
-        assertEquals(0, activeMinutesFromSteps(List(40) { 30L to 30L })) // 60/min
+    fun `short periods under a minute are measured in seconds`() {
+        assertEquals(20, activeMinutesFromSteps(List(40) { StepPeriod(30, 55) })) // 110/min
     }
 
     @Test
-    fun `a brisk walk inside a long period is estimated`() {
-        // 60 min: 20 min rask gange (2200) + 40 min rolig (800) = 3000 skritt.
-        assertEquals(20, activeMinutesFromSteps(listOf(3600L to 3000L)))
-        assertEquals(0, activeMinutesFromSteps(listOf(3600L to 1000L)))
-        assertEquals(15, activeMinutesFromSteps(listOf(900L to 2000L))) // aldri mer enn lengden
+    fun `uphill walking with low cadence counts when heart rate is in the moderate zone`() {
+        // Hvile 56, maks 185: moderat fra 56 + 0,4 * 129 = 107,6 bpm.
+        val uphill = minutes(15, 70, hr = 125.0)
+        assertEquals(15, activeMinutesFromSteps(uphill, restingHeartRate = 56))
+        // Samme tempo med lav puls teller ikke.
+        assertEquals(0, activeMinutesFromSteps(minutes(15, 70, hr = 95.0), restingHeartRate = 56))
     }
 
     @Test
-    fun `period without duration counts as one minute`() {
-        assertEquals(1, activeMinutesFromSteps(listOf(0L to 150L)))
+    fun `high heart rate while sitting still does not count`() {
+        assertEquals(0, activeMinutesFromSteps(minutes(10, 10, hr = 120.0), restingHeartRate = 56))
+    }
+
+    @Test
+    fun `heart rate is ignored without a resting heart rate for the day`() {
+        assertEquals(0, activeMinutesFromSteps(minutes(10, 70, hr = 130.0), restingHeartRate = null))
+    }
+
+    @Test
+    fun `own max heart rate moves the heart rate limit`() {
+        // Maks 200: moderat fra 56 + 0,4 * 144 = 113,6 bpm.
+        assertEquals(0, activeMinutesFromSteps(minutes(10, 70, hr = 110.0), restingHeartRate = 56, maxHeartRate = 200))
+        assertEquals(10, activeMinutesFromSteps(minutes(10, 70, hr = 115.0), restingHeartRate = 56, maxHeartRate = 200))
+    }
+
+    @Test
+    fun `long periods from other sources are estimated from the step count`() {
+        assertEquals(20, activeMinutesFromSteps(listOf(StepPeriod(3600, 3000))))
+        assertEquals(0, activeMinutesFromSteps(listOf(StepPeriod(3600, 1000))))
+        assertEquals(15, activeMinutesFromSteps(listOf(StepPeriod(900, 2000))))
     }
 
     @Test
     fun `garmin one-minute periods follow the chosen threshold`() {
-        val walk = List(30) { 60L to 92L } // 30 min gange i 92 skritt/min
-        assertEquals(0, activeMinutesFromSteps(walk))
-        assertEquals(30, activeMinutesFromSteps(walk, threshold = 90.0))
+        assertEquals(0, activeMinutesFromSteps(minutes(30, 92)))
+        assertEquals(30, activeMinutesFromSteps(minutes(30, 92), threshold = 90.0))
+    }
+
+    @Test
+    fun `period without duration counts as one minute`() {
+        assertEquals(1, activeMinutesFromSteps(listOf(StepPeriod(0, 150))))
     }
 }

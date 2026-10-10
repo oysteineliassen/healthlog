@@ -720,7 +720,7 @@
     <string name="settings_goals_max_hr_label">Makspuls (valgfritt)</string>
     <string name="settings_goals_max_hr_hint">Brukes til å vurdere intensiteten på økter (pulsreserve). Tomt = 185 antas. Gjelder fra neste synk.</string>
     <string name="settings_goals_active_steps_label">Aktive minutter: skritt per minutt</string>
-    <string name="settings_goals_active_steps_hint">Et minutt teller som aktivt fra dette tempoet. 100 = rask gange (vanlig grense i forskningen). Skrittdiagnosen viser ditt eget tempo. Synk et datointervall på nytt etterpå.</string>
+    <string name="settings_goals_active_steps_hint">Et minutt teller som aktivt fra dette tempoet, eller når pulsen er i moderat sone mens du går (motbakke, trapper). 100 = rask gange (vanlig grense i forskningen). Skrittdiagnosen viser ditt eget tempo. Synk et datointervall på nytt etterpå.</string>
     <string name="metric_title_body_fat">Kroppsfett</string>
     <string name="period_comparison_steps_avg">Snitt skritt per dag: %1$s vs. %2$s</string>
     <string name="period_label_week">Uke %1$d · %2$s–%3$s</string>

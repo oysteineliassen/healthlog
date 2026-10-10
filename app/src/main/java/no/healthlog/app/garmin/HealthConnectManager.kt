@@ -235,16 +235,6 @@ class HealthConnectManager(private val context: Context) {
         val stepsByDay = stepsRecordsByDay
             .mapValues { (_, records) -> records.sumOf { it.count }.toInt() }
 
-        // "Aktive minutter" fra skritt-tempo, uavhengig av loggede treningsøkter - se
-        // activeMinutesFromSteps for grensen.
-        val activeMinutesByDay = stepsRecordsByDay
-            .mapValues { (_, records) ->
-                activeMinutesFromSteps(
-                    records.map { Duration.between(it.startTime, it.endTime).seconds to it.count },
-                    GoalPreferences.getActiveStepsPerMinute(context).toDouble()
-                )
-            }
-
         val sleepRecords = readAllRecords(SleepSessionRecord::class, range)
         Log.d(TAG, "readRange søvn: ${sleepRecords.size} rådata-poster")
         sleepRecords.forEach { Log.d(TAG, "  søvn-post: startTime=${it.startTime} endTime=${it.endTime} stadier=${it.stages.size}") }
@@ -360,6 +350,29 @@ class HealthConnectManager(private val context: Context) {
         val heartRateSamples = heartRateRecords.flatMap { record ->
             record.samples.map { it.time to it.beatsPerMinute }
         }
+
+        // "Aktive minutter" fra skritt-tempo og puls, uavhengig av loggede treningsøkter -
+        // se activeMinutesFromSteps. Pulsen per skritt-periode er snittet av målingene i
+        // samme tidsrom (Garmin skriver skritt per minutt, så det blir minuttpulsen).
+        val heartRateByMinute = heartRateSamples
+            .groupBy { (time, _) -> time.epochSecond / 60 }
+            .mapValues { (_, samples) -> samples.map { (_, bpm) -> bpm }.average() }
+        val activeStepsThreshold = GoalPreferences.getActiveStepsPerMinute(context).toDouble()
+        val maxHeartRateSetting = GoalPreferences.getMaxHeartRate(context)
+        val activeMinutesByDay = stepsRecordsByDay
+            .mapValues { (date, records) ->
+                activeMinutesFromSteps(
+                    records.map { r ->
+                        val fromMinute = r.startTime.epochSecond / 60
+                        val toMinute = (r.endTime.epochSecond - 1) / 60
+                        val hr = (fromMinute..maxOf(fromMinute, toMinute)).mapNotNull { heartRateByMinute[it] }
+                        StepPeriod(Duration.between(r.startTime, r.endTime).seconds, r.count, hr.takeIf { it.isNotEmpty() }?.average())
+                    },
+                    activeStepsThreshold,
+                    restingHrByDay[date],
+                    maxHeartRateSetting
+                )
+            }
 
         // Snittpuls for HELE dagen (i motsetning til bpmDuringExercise/bpmDuringSession
         // under, som kun ser på pulsen under selve treningsøktene) - grupperer alle
