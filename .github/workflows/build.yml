@@ -4,6 +4,9 @@ on:
   push:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -24,6 +27,19 @@ jobs:
         with:
           name: HealthLog-1.0.${{ github.run_number }}
           path: HealthLog-1.0.${{ github.run_number }}.apk
+      # Siste APK fra main legges også på grenen "apk" (én commit, overskrives hver gang),
+      # så den kan lastes ned direkte uten å gå via Actions/Artifacts.
+      - name: Publiser APK på grenen apk
+        if: github.ref == 'refs/heads/main'
+        run: |
+          mkdir -p /tmp/apk && cp "HealthLog-1.0.${GITHUB_RUN_NUMBER}.apk" /tmp/apk/HealthLog.apk
+          cd /tmp/apk
+          echo "HealthLog 1.0.${GITHUB_RUN_NUMBER} ($(date -u +%F)) fra ${GITHUB_SHA}" > VERSION.txt
+          git init -q -b apk
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add -A && git commit -q -m "HealthLog 1.0.${GITHUB_RUN_NUMBER}"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" apk
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
