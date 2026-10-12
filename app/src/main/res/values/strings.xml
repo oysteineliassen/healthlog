@@ -243,6 +243,8 @@
 
     <!-- SettingsScreen.kt: Export data and Privacy cards -->
     <string name="settings_export_title">Export data</string>
+    <string name="settings_tallerken_title">Export to Tallerken</string>
+    <string name="settings_tallerken_description">Creates a file with weight, waist, calories burned and steps for the last 90 days. Choose it in Tallerken under Profile → “Import from HealthLog”. Calories require the calorie permissions in Health Connect (asked at the next sync).</string>
     <string name="settings_export_description">Creates a CSV file for your own analysis in a spreadsheet (Excel, Sheets, etc.). This isn\'t meant as a backup – use the JSON export above for that.</string>
     <string name="action_export_csv">Export as CSV</string>
     <string name="settings_privacy_title">Privacy</string>

@@ -1,5 +1,6 @@
 package no.healthlog.app
 
+import no.healthlog.app.export.TallerkenDay
 import android.content.ClipData
 import android.content.ClipboardManager
 import no.healthlog.app.coach.AiCoachPreferences
@@ -306,6 +307,16 @@ class HealthViewModel(
 
     fun clearStepsDiagnostics() {
         stepsDiagnostics = null
+    }
+
+    /** Tallerken-eksport: egne vekt- og midjemål fra databasen vinner over Health Connect. */
+    suspend fun buildTallerkenJson(): String {
+        val manual = repo.getAllOnce()
+            .filter { it.weightKg != null || it.waistCm != null }
+            .mapNotNull { d ->
+                runCatching { LocalDate.parse(d.date) }.getOrNull()?.let { TallerkenDay(it, weightKg = d.weightKg, waistCm = d.waistCm) }
+            }
+        return healthConnectManager.buildTallerkenExport(manual)
     }
 
     fun syncRecentOnOpen() {

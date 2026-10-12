@@ -243,6 +243,8 @@
 
     <!-- SettingsScreen.kt: Eksporter data og Personvern-boksene -->
     <string name="settings_export_title">Eksporter data</string>
+    <string name="settings_tallerken_title">Eksport til Tallerken</string>
+    <string name="settings_tallerken_description">Lager en fil med vekt, midjemål, forbrente kalorier og skritt for de siste 90 dagene. Velg fila i Tallerken under Profil → «Importer fra HealthLog». Kalorier krever kalori-tillatelsene i Health Connect (du blir spurt ved neste synk).</string>
     <string name="settings_export_description">Lager en CSV-fil for egen analyse i regneark (Excel, Sheets osv.). Dette er ikke ment som sikkerhetskopi – bruk JSON-eksporten over til det.</string>
     <string name="action_export_csv">Eksporter som CSV</string>
     <string name="settings_privacy_title">Personvern</string>

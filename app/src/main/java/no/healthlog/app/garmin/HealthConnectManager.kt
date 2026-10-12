@@ -1,5 +1,7 @@
 package no.healthlog.app.garmin
 
+import no.healthlog.app.export.TallerkenDay
+import no.healthlog.app.export.TallerkenExport
 import no.healthlog.app.GoalPreferences
 import android.content.Context
 import android.util.Log
@@ -31,7 +33,8 @@ import kotlin.reflect.KClass
 
 private const val TAG = "HealthConnectDebug"
 // "_v2": økt da kroppsfett kom til, slik at de som allerede er spurt om HRV spørres én gang til.
-private const val KEY_OPTIONAL_ASKED = "hc_optional_permissions_asked_v2"
+// v3: kalori-tillatelsene for Tallerken-eksporten kom til - alle spørres én gang til.
+private const val KEY_OPTIONAL_ASKED = "hc_optional_permissions_asked_v3"
 
 /**
  * Det Health Connect faktisk kan gi oss fra Garmin: skritt, søvnvarighet, hvilepuls, vekt
@@ -124,7 +127,8 @@ class HealthConnectManager(private val context: Context) {
     /** Valgfri: kroppsfett fra smartvekt. Samme begrunnelse som for HRV over. */
     val bodyFatPermission: String = HealthPermission.getReadPermission(BodyFatRecord::class)
 
-    val optionalPermissions: Set<String> get() = setOf(hrvPermission, bodyFatPermission)
+    /** Valgfrie: HRV, kroppsfett og kaloriene Tallerken-eksporten trenger (skritt/vekt er påkrevd fra før). */
+    val optionalPermissions: Set<String> get() = setOf(hrvPermission, bodyFatPermission) + TallerkenExport.PERMISSIONS
 
     /** Det tillatelsesdialogen ber om: de påkrevde + de valgfrie. */
     val permissionsToRequest: Set<String> get() = permissions + optionalPermissions
@@ -512,6 +516,10 @@ class HealthConnectManager(private val context: Context) {
         }
         return sb.toString()
     }
+
+    /** Eksportfil til Tallerken: HealthLog sine egne vekt/midje-mål + kalorier og skritt fra Health Connect. */
+    suspend fun buildTallerkenExport(manual: List<TallerkenDay>): String =
+        TallerkenExport.build(if (isAvailable()) client else null, manual)
 
     suspend fun writeWeight(date: LocalDate, weightKg: Double) {
         val zone = ZoneId.systemDefault()

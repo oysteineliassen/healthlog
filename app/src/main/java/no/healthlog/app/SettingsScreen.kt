@@ -1,5 +1,6 @@
 package no.healthlog.app
 
+import no.healthlog.app.export.TallerkenExportButton
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import no.healthlog.app.reminder.AiCoachReminderScheduler
@@ -891,6 +892,22 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
                             Text(stringResource(R.string.action_change_backup_location))
                         }
                     }
+                }
+            }
+        }
+
+        item {
+            Card(shape = RoundedCornerShape(20.dp)) {
+                Column(Modifier.padding(18.dp)) {
+                    Text(
+                        stringResource(R.string.settings_tallerken_title),
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Text(stringResource(R.string.settings_tallerken_description))
+                    Spacer(Modifier.height(14.dp))
+                    TallerkenExportButton(buildJson = { vm.buildTallerkenJson() })
                 }
             }
         }
