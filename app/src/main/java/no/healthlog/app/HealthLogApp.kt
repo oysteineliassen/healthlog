@@ -145,6 +145,7 @@ fun HealthLogApp(
     }
     if (showEntry) EntryDialog(
         initial = todayEntry,
+        previousDay = days.firstOrNull { it.date == LocalDate.now().minusDays(1).toString() },
 
         onDismiss = {
             showEntry = false
@@ -229,6 +230,8 @@ fun DeleteConfirmDialog(
 @Composable
 fun EntryDialog(
     initial: HealthDay?,
+    /** Gårsdagens rad - vane-merkene der gir forslag til årsaker for natten. */
+    previousDay: HealthDay? = null,
     onDismiss: () -> Unit,
     onSave: (ManualEntryInput) -> Unit,
     onDelete: () -> Unit
@@ -284,6 +287,30 @@ fun EntryDialog(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
+                EntrySectionHeader(stringResource(R.string.entry_section_night))
+
+                OutlinedTextField(
+                    value = sleepReflection,
+                    onValueChange = { sleepReflection = it },
+                    label = { Text(stringResource(R.string.label_sleep_reflection)) },
+                    placeholder = { Text(stringResource(R.string.placeholder_sleep_reflection)) },
+                    minLines = 2,
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                SleepFactorSelector(selected = sleepFactors, onChange = { sleepFactors = it })
+
+                SleepFactorSuggestions(
+                    previousDayHabits = previousDay.habitTagSet(),
+                    selected = sleepFactors,
+                    onAdd = { sleepFactors = sleepFactors + it }
+                )
+
+                HorizontalDivider(Modifier.padding(vertical = 4.dp))
+
+                EntrySectionHeader(stringResource(R.string.entry_section_day))
+
                 Row(
                     modifier = Modifier.horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -317,18 +344,6 @@ fun EntryDialog(
                 }
 
                 HabitTagSelector(selected = habitTags, onChange = { habitTags = it })
-
-                OutlinedTextField(
-                    value = sleepReflection,
-                    onValueChange = { sleepReflection = it },
-                    label = { Text(stringResource(R.string.label_sleep_reflection)) },
-                    placeholder = { Text(stringResource(R.string.placeholder_sleep_reflection)) },
-                    minLines = 2,
-                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                SleepFactorSelector(selected = sleepFactors, onChange = { sleepFactors = it })
 
                 OutlinedTextField(
                     value = morningNote,

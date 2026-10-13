@@ -60,3 +60,57 @@ fun SleepFactorSelector(selected: List<String>, onChange: (List<String>) -> Unit
         }
     }
 }
+
+/**
+ * Hvilke søvn-årsaker gårsdagens vane-merker peker på (vane-merkene er fritekst, så det
+ * matches på kjente ord). Brukes til å foreslå årsaker om morgenen - et merke som
+ * "Alkohol" i går kveld gir forslaget "Alkohol" for natten som fulgte.
+ */
+fun suggestedSleepFactors(habitTags: Set<String>): Set<String> {
+    val keywords = mapOf(
+        SleepFactors.ALCOHOL to listOf("alkohol", "vin", "øl", "alcohol", "wine", "beer"),
+        SleepFactors.LATE_MEAL to listOf("sen middag", "sent måltid", "sen mat", "kveldsmat", "late meal", "late dinner"),
+        SleepFactors.CAFFEINE to listOf("koffein", "kaffe", "cola", "energidrikk", "caffeine", "coffee"),
+        SleepFactors.SCREEN to listOf("skjerm", "mobil", "tv", "screen", "phone"),
+        SleepFactors.STRESS to listOf("stress"),
+        SleepFactors.LATE_BEDTIME to listOf("sen leggetid", "sent i seng", "sent oppe", "late bed")
+    )
+    val tags = habitTags.map { it.lowercase().trim() }
+    return keywords.filter { (_, words) -> tags.any { tag -> words.any { w -> tag == w || tag.contains(w) } } }.keys
+}
+
+/** Forslag fra gårsdagens vaner: én knapp per årsak som ikke allerede er valgt. */
+@Composable
+fun SleepFactorSuggestions(previousDayHabits: Set<String>, selected: List<String>, onAdd: (String) -> Unit) {
+    val suggestions = suggestedSleepFactors(previousDayHabits).filter { it !in selected }
+    if (suggestions.isEmpty()) return
+    androidx.compose.foundation.layout.Column {
+        Text(
+            stringResource(R.string.sleep_factor_suggestion_label),
+            style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
+            color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Row(
+            modifier = Modifier.horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            suggestions.forEach { id ->
+                androidx.compose.material3.AssistChip(
+                    onClick = { onAdd(id) },
+                    label = { Text("+ " + sleepFactorLabel(id)) }
+                )
+            }
+        }
+    }
+}
+
+/** Overskrift som deler registreringen i "Natten som var" og "Dagen". */
+@Composable
+fun EntrySectionHeader(text: String) {
+    Text(
+        text,
+        style = androidx.compose.material3.MaterialTheme.typography.titleSmall,
+        fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+        color = androidx.compose.material3.MaterialTheme.colorScheme.primary
+    )
+}

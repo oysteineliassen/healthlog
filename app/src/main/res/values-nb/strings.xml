@@ -40,6 +40,9 @@
     <string name="label_sleep_reflection">Refleksjon over natten</string>
     <string name="placeholder_sleep_reflection">Hvorfor ble natten bra eller dårlig? (sen middag, stress, støy, alkohol …)</string>
     <string name="diary_sleep_prefix">Natten: %1$s</string>
+    <string name="entry_section_night">Natten som var</string>
+    <string name="entry_section_day">Dagen</string>
+    <string name="sleep_factor_suggestion_label">Fra vanene dine i går kveld:</string>
     <string name="sleep_factor_late_meal">Sen middag</string>
     <string name="sleep_factor_caffeine">Koffein</string>
     <string name="sleep_factor_alcohol">Alkohol</string>

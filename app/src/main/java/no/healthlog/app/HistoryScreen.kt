@@ -359,6 +359,7 @@ fun HistoryScreen(
     selectedDay?.let { day ->
         EditHistoryDialog(
             day = day,
+            previousDay = sorted.firstOrNull { it.date == LocalDate.parse(day.date).minusDays(1).toString() },
 
             onDismiss = {
                 selectedDay = null
@@ -625,6 +626,7 @@ private fun HistoryDayCard(
 @Composable
 fun EditHistoryDialog(
     day: HealthDay,
+    previousDay: HealthDay? = null,
     onDismiss: () -> Unit,
     onSave: (ManualEntryInput) -> Unit,
     onDelete: () -> Unit,
@@ -802,6 +804,30 @@ fun EditHistoryDialog(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                EntrySectionHeader(stringResource(R.string.entry_section_night))
+
+                OutlinedTextField(
+                    value = sleepReflection,
+                    onValueChange = { sleepReflection = it },
+                    label = { Text(stringResource(R.string.label_sleep_reflection)) },
+                    placeholder = { Text(stringResource(R.string.placeholder_sleep_reflection)) },
+                    minLines = 2,
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                SleepFactorSelector(selected = sleepFactors, onChange = { sleepFactors = it })
+
+                SleepFactorSuggestions(
+                    previousDayHabits = previousDay.habitTagSet(),
+                    selected = sleepFactors,
+                    onAdd = { sleepFactors = sleepFactors + it }
+                )
+
+                HorizontalDivider(Modifier.padding(vertical = 4.dp))
+
+                EntrySectionHeader(stringResource(R.string.entry_section_day))
+
                 Row(
                     modifier = Modifier.horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -835,18 +861,6 @@ fun EditHistoryDialog(
                 }
 
                 HabitTagSelector(selected = habitTags, onChange = { habitTags = it })
-
-                OutlinedTextField(
-                    value = sleepReflection,
-                    onValueChange = { sleepReflection = it },
-                    label = { Text(stringResource(R.string.label_sleep_reflection)) },
-                    placeholder = { Text(stringResource(R.string.placeholder_sleep_reflection)) },
-                    minLines = 2,
-                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                SleepFactorSelector(selected = sleepFactors, onChange = { sleepFactors = it })
 
                 OutlinedTextField(
                     value = morningNote,
