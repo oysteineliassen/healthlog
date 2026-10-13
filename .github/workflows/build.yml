@@ -7,6 +7,12 @@ on:
 permissions:
   contents: write
 
+# Et nytt bygg avbryter et eldre som fortsatt kjører på samme gren - ellers kan det
+# eldste bli ferdig sist og overskrive APK-en på grenen "apk" med gammel kode.
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
