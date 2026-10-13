@@ -33,6 +33,7 @@ jobs:
         with:
           name: HealthLog-1.0.${{ github.run_number }}
           path: HealthLog-1.0.${{ github.run_number }}.apk
+          retention-days: 3
       # Siste APK fra main legges også på grenen "apk" (én commit, overskrives hver gang),
       # så den kan lastes ned direkte uten å gå via Actions/Artifacts.
       - name: Publiser APK på grenen apk
@@ -51,3 +52,4 @@ jobs:
         with:
           name: test-rapport
           path: app/build/reports/tests/
+          retention-days: 7
