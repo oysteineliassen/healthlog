@@ -42,6 +42,7 @@
     <string name="diary_sleep_prefix">Night: %1$s</string>
     <string name="entry_section_night">The night that was</string>
     <string name="entry_section_day">The day</string>
+    <string name="entry_section_evening">The evening</string>
     <string name="sleep_factor_suggestion_label">From your habits yesterday evening:</string>
     <string name="sleep_factor_late_meal">Late meal</string>
     <string name="sleep_factor_caffeine">Caffeine</string>

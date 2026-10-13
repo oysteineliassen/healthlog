@@ -42,6 +42,7 @@
     <string name="diary_sleep_prefix">Natten: %1$s</string>
     <string name="entry_section_night">Natten som var</string>
     <string name="entry_section_day">Dagen</string>
+    <string name="entry_section_evening">Kvelden</string>
     <string name="sleep_factor_suggestion_label">Fra vanene dine i går kveld:</string>
     <string name="sleep_factor_late_meal">Sen middag</string>
     <string name="sleep_factor_caffeine">Koffein</string>

@@ -841,27 +841,6 @@ fun EditHistoryDialog(
                     }
                 }
 
-                Text(
-                    text = stringResource(R.string.nutrition_section_label_history),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Row(
-                    modifier = Modifier.horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    NutritionLevel.all.forEach { level ->
-                        FilterChip(
-                            selected = nutritionLevel == level,
-                            onClick = { nutritionLevel = if (nutritionLevel == level) null else level },
-                            label = { Text(nutritionLevelLabel(level)) }
-                        )
-                    }
-                }
-
-                HabitTagSelector(selected = habitTags, onChange = { habitTags = it })
-
                 OutlinedTextField(
                     value = morningNote,
                     onValueChange = { morningNote = it },
@@ -947,6 +926,29 @@ fun EditHistoryDialog(
                 )
 
                 HorizontalDivider(Modifier.padding(vertical = 4.dp))
+
+                EntrySectionHeader(stringResource(R.string.entry_section_evening))
+
+                Text(
+                    text = stringResource(R.string.nutrition_section_label_history),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    NutritionLevel.all.forEach { level ->
+                        FilterChip(
+                            selected = nutritionLevel == level,
+                            onClick = { nutritionLevel = if (nutritionLevel == level) null else level },
+                            label = { Text(nutritionLevelLabel(level)) }
+                        )
+                    }
+                }
+
+                HabitTagSelector(selected = habitTags, onChange = { habitTags = it })
 
                 OutlinedTextField(
                     value = eveningNote,
