@@ -76,7 +76,9 @@ fun suggestedSleepFactors(habitTags: Set<String>): Set<String> {
         SleepFactors.LATE_BEDTIME to listOf("sen leggetid", "sent i seng", "sent oppe", "late bed")
     )
     val tags = habitTags.map { it.lowercase().trim() }
-    return keywords.filter { (_, words) -> tags.any { tag -> words.any { w -> tag == w || tag.contains(w) } } }.keys
+    // Hele ord, ikke delstrenger - ellers ville "tv" truffet "utvikling" og "vin" "vinter".
+    fun matches(tag: String, word: String) = Regex("(?U)(^|\\W)${Regex.escape(word)}(\\W|$)").containsMatchIn(tag)
+    return keywords.filter { (_, words) -> tags.any { tag -> words.any { w -> matches(tag, w) } } }.keys
 }
 
 /** Forslag fra gårsdagens vaner: én knapp per årsak som ikke allerede er valgt. */

@@ -13,5 +13,7 @@ class SleepFactorSuggestionTest {
         )
         assertEquals(setOf(SleepFactors.CAFFEINE), suggestedSleepFactors(setOf("Kaffe etter kl 15")))
         assertEquals(emptySet<String>(), suggestedSleepFactors(setOf("Meditasjon")))
+        // Delord skal ikke treffe.
+        assertEquals(emptySet<String>(), suggestedSleepFactors(setOf("Utvikling", "Vintertur", "Følelser")))
     }
 }
