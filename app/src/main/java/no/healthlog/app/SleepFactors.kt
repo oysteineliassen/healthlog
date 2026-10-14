@@ -76,9 +76,26 @@ fun suggestedSleepFactors(habitTags: Set<String>): Set<String> {
         SleepFactors.LATE_BEDTIME to listOf("sen leggetid", "sent i seng", "sent oppe", "late bed")
     )
     val tags = habitTags.map { it.lowercase().trim() }
-    // Hele ord, ikke delstrenger - ellers ville "tv" truffet "utvikling" og "vin" "vinter".
-    fun matches(tag: String, word: String) = Regex("(?U)(^|\\W)${Regex.escape(word)}(\\W|$)").containsMatchIn(tag)
-    return keywords.filter { (_, words) -> tags.any { tag -> words.any { w -> matches(tag, w) } } }.keys
+    return keywords.filter { (_, words) -> tags.any { tag -> words.any { w -> containsWholeWord(tag, w) } } }.keys
+}
+
+/**
+ * Hele ord, ikke delstrenger - ellers ville "tv" truffet "utvikling" og "vin" "vinter".
+ * Bevisst uten regex: Unicode-ordgrenser i regex ((?U)) finnes i vanlig Java, men ikke
+ * på Android, og krasjet registreringsvinduet. Character.isLetterOrDigit tar æ/ø/å.
+ */
+internal fun containsWholeWord(text: String, word: String): Boolean {
+    var from = 0
+    while (true) {
+        val i = text.indexOf(word, from)
+        if (i < 0) return false
+        val before = text.getOrNull(i - 1)
+        val after = text.getOrNull(i + word.length)
+        val startOk = before == null || !before.isLetterOrDigit()
+        val endOk = after == null || !after.isLetterOrDigit()
+        if (startOk && endOk) return true
+        from = i + 1
+    }
 }
 
 /** Forslag fra gårsdagens vaner: én knapp per årsak som ikke allerede er valgt. */
