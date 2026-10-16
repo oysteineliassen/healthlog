@@ -13,7 +13,9 @@ class Ah100ProtocolTest {
 
     @Test
     fun authTokenXorsToZero() {
-        assertEquals(0, token.fold(0) { a, b -> a xor (b.toInt() and 0xFF) })
+        // Egen variabel: inne i assertEquals gjettet Kotlin Long for fold(0) og feilet på Int.
+        val checksum: Int = token.fold(0) { a, b -> a xor (b.toInt() and 0xFF) }
+        assertEquals(0, checksum)
         assertEquals(7, token.size)
         assertEquals(16, key.size)
     }
