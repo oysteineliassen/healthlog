@@ -71,7 +71,7 @@ class HealthRepository(
                 // har registrert selv overskrives aldri.
                 hrvMs = old?.hrvMs ?: hrvMs,
                 // Kroppsfett registreres aldri manuelt - nyeste fra Health Connect gjelder.
-                bodyFatPercent = bodyFatPercent ?: old?.bodyFatPercent,
+                bodyFatPercent = if ("bodyFatPercent" in overrides) old?.bodyFatPercent else (bodyFatPercent ?: old?.bodyFatPercent),
                 deepSleepMinutes = deepSleepMinutes ?: old?.deepSleepMinutes,
                 lightSleepMinutes = lightSleepMinutes ?: old?.lightSleepMinutes,
                 remSleepMinutes = remSleepMinutes ?: old?.remSleepMinutes,

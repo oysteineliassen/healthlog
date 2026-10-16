@@ -319,6 +319,35 @@ class HealthViewModel(
         return healthConnectManager.buildTallerkenExport(manual)
     }
 
+    /**
+     * Måling fra Huawei-vekta (scale/ScaleScreen): vekt og eventuelt fettprosent på dagens
+     * rad, slik manuell registrering gjør. Feltene merkes som manuelt satt, så en senere
+     * Health Connect-synk ikke overskriver dem, og vekta deles til Health Connect.
+     */
+    fun saveScaleReading(weightKg: Float, fatPercent: Float?) {
+        safeLaunch {
+            val date = LocalDate.now().toString()
+            val old = repo.get(date)
+            val overrides = old.manualOverrideSet().toMutableSet().apply {
+                add("weightKg")
+                if (fatPercent != null) add("bodyFatPercent")
+            }
+            // Avrundet til én desimal, slik vekta viser det (Float -> Double gir ellers 82.30000305).
+            val weight = Math.round(weightKg * 10.0) / 10.0
+            val fat = fatPercent?.let { Math.round(it * 10.0) / 10.0 }
+            repo.upsert(
+                (old ?: HealthDay(date = date)).copy(
+                    weightKg = weight,
+                    bodyFatPercent = fat ?: old?.bodyFatPercent,
+                    manualOverrides = overrides.toManualOverridesString()
+                )
+            )
+            message = appContext.getString(R.string.scale_saved)
+            HealthWidgetProvider.requestUpdate(appContext)
+            runCatching { healthConnectManager.writeWeight(LocalDate.parse(date), weight) }
+        }
+    }
+
     fun syncRecentOnOpen() {
         applyFastingPeriods()
         val now = System.currentTimeMillis()

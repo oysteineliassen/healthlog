@@ -1,5 +1,7 @@
 package no.healthlog.app
 
+import androidx.compose.ui.window.Dialog
+import no.healthlog.app.scale.ScaleScreen
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -39,6 +41,7 @@ fun HealthLogApp(
 ) {
     var tab by rememberSaveable { mutableIntStateOf(0) }
     var showEntry by rememberSaveable { mutableStateOf(false) }
+    var showScale by rememberSaveable { mutableStateOf(false) }
     val days by vm.days.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -107,7 +110,7 @@ fun HealthLogApp(
     ) { padding ->
         Box(Modifier.padding(padding)) {
             val tabContent: @Composable () -> Unit = { when (tab) {
-                0 -> TodayScreen(todayEntry, days, billingManager, healthConnectManager, refreshKey = vm.refreshCount, fastingPeriods = vm.fastingPeriods)
+                0 -> TodayScreen(todayEntry, days, billingManager, healthConnectManager, refreshKey = vm.refreshCount, fastingPeriods = vm.fastingPeriods, onWeigh = { showScale = true })
                 1 -> TrendsScreen(days, billingManager)
                 2 -> HistoryScreen(
                     days = days,
@@ -143,6 +146,28 @@ fun HealthLogApp(
             }
         }
     }
+    if (showScale) {
+        // Siste lagrede vekt brukes som hint i profilen vekta får (se Ah100ScaleClient).
+        val lastWeightKg = days.filter { it.weightKg != null }.maxByOrNull { it.date }?.weightKg?.toFloat()
+        Dialog(
+            onDismissRequest = { showScale = false },
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            Surface(Modifier.fillMaxSize()) {
+                Column {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                        TextButton(onClick = { showScale = false }) { Text(stringResource(R.string.action_close)) }
+                    }
+                    ScaleScreen(
+                        lastWeightKg = lastWeightKg,
+                        onSave = { r -> vm.saveScaleReading(r.weightKg, r.fatPercent) },
+                        onClose = { showScale = false }
+                    )
+                }
+            }
+        }
+    }
+
     if (showEntry) EntryDialog(
         initial = todayEntry,
         previousDay = days.firstOrNull { it.date == LocalDate.now().minusDays(1).toString() },

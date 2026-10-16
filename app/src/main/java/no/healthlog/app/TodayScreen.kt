@@ -302,7 +302,8 @@ fun TodayScreen(
     billingManager: BillingManager,
     healthConnectManager: HealthConnectManager,
     refreshKey: Int = 0,
-    fastingPeriods: List<FastingPeriod> = emptyList()
+    fastingPeriods: List<FastingPeriod> = emptyList(),
+    onWeigh: () -> Unit = {}
 ) {
     val date = LocalDate.now().format(dateFormatter)
     val context = LocalContext.current
@@ -329,6 +330,9 @@ fun TodayScreen(
                         fontWeight = FontWeight.Bold
                     )
                     Text(date, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                TextButton(onClick = onWeigh) {
+                    Text(stringResource(R.string.action_weigh))
                 }
                 TextButton(onClick = { showCustomize = true }) {
                     Text(stringResource(R.string.today_customize))

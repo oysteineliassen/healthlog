@@ -86,6 +86,7 @@
     <string name="diary_morning_prefix">Planer: %1$s</string>
     <string name="diary_evening_prefix">Kveld: %1$s</string>
     <string name="metric_weight">Vekt: %1$s</string>
+    <string name="history_body_fat">%1$s %% fett</string>
     <string name="metric_waist">Midje: %1$s</string>
     <string name="metric_resting_hr">Hvilepuls: %1$s</string>
     <string name="metric_hrv">HRV: %1$s</string>
@@ -641,6 +642,8 @@
     <string name="coach_habit_hrv_higher">HRV-en din er i snitt %2$s ms høyere dagen etter «%1$s».</string>
     <string name="coach_why_habit_next_day">%1$s etter «%2$s»: %3$s (%4$d ganger) · etter andre dager: %5$s (%6$d dager)</string>
     <string name="today_customize">Tilpass</string>
+    <string name="action_weigh">Vei deg</string>
+    <string name="scale_saved">Vekt lagret.</string>
     <string name="today_customize_title">Tilpass I dag</string>
     <string name="today_customize_description">Velg hvilke kort som vises, og flytt dem opp eller ned.</string>
     <string name="today_card_weekly_summary">Ukeoppsummering (søndager)</string>

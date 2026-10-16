@@ -529,7 +529,8 @@ private fun HistoryDayCard(
             Text(
                 text = stringResource(
                     R.string.metric_weight,
-                    day.weightKg?.let { "%.1f kg".format(it) } ?: placeholder
+                    (day.weightKg?.let { "%.1f kg".format(it) } ?: placeholder) +
+                        (day.bodyFatPercent?.let { " · " + stringResource(R.string.history_body_fat, "%.1f".format(it)) } ?: "")
                 )
             )
 

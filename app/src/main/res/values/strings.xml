@@ -86,6 +86,7 @@
     <string name="diary_morning_prefix">Plans: %1$s</string>
     <string name="diary_evening_prefix">Evening: %1$s</string>
     <string name="metric_weight">Weight: %1$s</string>
+    <string name="history_body_fat">%1$s %% fat</string>
     <string name="metric_waist">Waist: %1$s</string>
     <string name="metric_resting_hr">Resting HR: %1$s</string>
     <string name="metric_hrv">HRV: %1$s</string>
@@ -641,6 +642,8 @@
     <string name="coach_habit_hrv_higher">Your HRV is on average %2$s ms higher the day after “%1$s”.</string>
     <string name="coach_why_habit_next_day">%1$s after “%2$s”: %3$s (%4$d times) · after other days: %5$s (%6$d days)</string>
     <string name="today_customize">Customize</string>
+    <string name="action_weigh">Weigh in</string>
+    <string name="scale_saved">Weight saved.</string>
     <string name="today_customize_title">Customize Today</string>
     <string name="today_customize_description">Choose which cards to show, and move them up or down.</string>
     <string name="today_card_weekly_summary">Weekly summary (Sundays)</string>
