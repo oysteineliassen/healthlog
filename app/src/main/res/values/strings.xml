@@ -659,6 +659,13 @@
     <string name="body_comp_note">* Estimated from weight and body fat with fixed shares; may differ slightly from Huawei Health. The scale only sends weight, body fat and impedance.</string>
     <string name="body_comp_no_fat">Weigh in barefoot to get body fat and the rest of the composition.</string>
     <string name="body_comp_no_height">BMI needs your height – set it under Weigh in → Edit profile.</string>
+    <string name="body_comp_charts_title">Development</string>
+    <string name="body_comp_charts_empty">More graphs appear once you have weighed in barefoot (with body fat) at least twice.</string>
+    <string name="bmi_zone_low">Low</string>
+    <string name="bmi_zone_normal">Healthy</string>
+    <string name="bmi_zone_over">Overweight</string>
+    <string name="bmi_zone_obese">Obese</string>
+    <string name="bmi_zone_limits">&lt;18.5 · 18.5–25 · 25–30 · ≥30</string>
     <string name="today_customize_title">Customize Today</string>
     <string name="today_customize_description">Choose which cards to show, and move them up or down.</string>
     <string name="today_card_weekly_summary">Weekly summary (Sundays)</string>

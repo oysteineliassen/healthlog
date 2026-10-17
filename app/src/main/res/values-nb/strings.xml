@@ -659,6 +659,13 @@
     <string name="body_comp_note">* Beregnet ut fra vekt og fettprosent med faste andeler – kan avvike litt fra Huawei Health. Vekta sender bare vekt, fettprosent og impedans.</string>
     <string name="body_comp_no_fat">Vei deg barbent for å få fettprosent og resten av sammensetningen.</string>
     <string name="body_comp_no_height">BMI trenger høyden din – legg den inn under Vei deg → Endre profil.</string>
+    <string name="body_comp_charts_title">Utvikling</string>
+    <string name="body_comp_charts_empty">Flere grafer dukker opp når du har veid deg barbent (med fettprosent) minst to ganger.</string>
+    <string name="bmi_zone_low">Lav</string>
+    <string name="bmi_zone_normal">Sunn</string>
+    <string name="bmi_zone_over">Overvekt</string>
+    <string name="bmi_zone_obese">Fedme</string>
+    <string name="bmi_zone_limits">&lt;18,5 · 18,5–25 · 25–30 · ≥30</string>
     <string name="today_customize_title">Tilpass I dag</string>
     <string name="today_customize_description">Velg hvilke kort som vises, og flytt dem opp eller ned.</string>
     <string name="today_card_weekly_summary">Ukeoppsummering (søndager)</string>
