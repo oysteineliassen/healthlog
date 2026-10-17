@@ -294,6 +294,14 @@ fun TrendsScreen(days: List<HealthDay>, billingManager: BillingManager) {
     // ville det stått et tomt kort for alle uten.
     val bodyFatPoints = pointsFor { it.bodyFatPercent?.toFloat() }
     val hasBodyFatData = remember(sorted) { sorted.any { it.bodyFatPercent != null } }
+    // 7-dagers glidende snitt, som for vekt: fettprosent fra vekta svinger 1-2 poeng fra
+    // dag til dag med væskebalansen, så trenden sier mer enn enkeltmålingene.
+    val bodyFatSmoothed = if (isMonthly) {
+        emptyList()
+    } else {
+        rollingAverage(bodyFatPoints.map { it.date to it.value.toDouble() })
+            .map { (date, value) -> TrendPoint(date, value.toFloat()) }
+    }
     val bodyFatCards: List<Pair<String, @Composable () -> Unit>> = if (hasBodyFatData) {
         listOf(
             "body_fat" to @Composable {
@@ -305,6 +313,7 @@ fun TrendsScreen(days: List<HealthDay>, billingManager: BillingManager) {
                     isMonthly = isMonthly,
                     axisRange = AxisRange.Padded(2f),
                     taggedDates = taggedDates,
+                    smoothed = bodyFatSmoothed,
                     highlight = habitHighlight
                 )
             }
