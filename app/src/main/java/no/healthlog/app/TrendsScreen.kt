@@ -1,5 +1,6 @@
 package no.healthlog.app
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -253,6 +254,11 @@ fun TrendsScreen(days: List<HealthDay>, billingManager: BillingManager) {
             .map { (date, value) -> TrendPoint(date, value.toFloat()) }
     }
     val weightProjection = remember(sorted, weightGoal) { projectWeight(sorted, today, weightGoal) }
+    // Trykk på vektgrafen: kroppssammensetning for siste veiing (se BodyCompositionDialog).
+    var showBodyComposition by rememberSaveable { mutableStateOf(false) }
+    if (showBodyComposition) {
+        BodyCompositionDialog(sorted, onDismiss = { showBodyComposition = false })
+    }
 
     // Vane-merke valgt øverst - markeres med lilla prikker nederst i alle grafene.
     val allHabitTags = remember(sorted) { sorted.flatMap { it.habitTagSet() }.distinct().sorted() }
@@ -337,7 +343,8 @@ fun TrendsScreen(days: List<HealthDay>, billingManager: BillingManager) {
                 smoothed = weightSmoothed,
                 highlight = habitHighlight,
                 includeGoalInScale = true,
-                footer = weightProjection?.let { projection -> @Composable { WeightProjectionText(projection) } }
+                footer = weightProjection?.let { projection -> @Composable { WeightProjectionText(projection) } },
+                onClick = { showBodyComposition = true }
             )
         },
         "waist" to @Composable {
@@ -693,7 +700,9 @@ fun TrendCard(
     smoothed: List<TrendPoint> = emptyList(),
     highlight: ChartHighlight? = null,
     includeGoalInScale: Boolean = false,
-    footer: (@Composable () -> Unit)? = null
+    footer: (@Composable () -> Unit)? = null,
+    /** Trykk på kortet (f.eks. vekt -> kroppssammensetning). null = ikke trykkbart. */
+    onClick: (() -> Unit)? = null
 ) {
     val firstValue = points.firstOrNull()?.value
     val lastValue = points.lastOrNull()?.value
@@ -729,7 +738,8 @@ fun TrendCard(
     }
 
     Card(
-        shape = RoundedCornerShape(20.dp)
+        shape = RoundedCornerShape(20.dp),
+        modifier = if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier
     ) {
         Column(
             modifier = Modifier.padding(18.dp)
