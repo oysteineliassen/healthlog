@@ -1,6 +1,7 @@
 package no.healthlog.app
 
 import androidx.compose.ui.window.Dialog
+import no.healthlog.app.scale.PreviousWeighIn
 import no.healthlog.app.scale.ScaleScreen
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -161,7 +162,12 @@ fun HealthLogApp(
                     ScaleScreen(
                         lastWeightKg = lastWeightKg,
                         onSave = { r -> vm.saveScaleReading(r.weightKg, r.fatPercent) },
-                        onClose = { showScale = false }
+                        onClose = { showScale = false },
+                        previous = days.mapNotNull { d ->
+                            val date = runCatching { LocalDate.parse(d.date) }.getOrNull()
+                            val w = d.weightKg
+                            if (date == null || w == null) null else PreviousWeighIn(date, w, d.bodyFatPercent)
+                        }.sortedByDescending { it.date }.take(10)
                     )
                 }
             }

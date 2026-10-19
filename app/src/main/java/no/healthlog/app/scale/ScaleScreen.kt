@@ -18,6 +18,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -44,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 /**
@@ -59,13 +63,15 @@ fun ScaleScreen(
     onSave: (Ah100Protocol.Reading) -> Unit,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
+    /** Tidligere veiinger, nyeste først - vises under målingen så du kan sammenligne. */
+    previous: List<PreviousWeighIn> = emptyList(),
 ) {
     val context = LocalContext.current
     val store = remember { ScaleProfileStore(context) }
     var profile by remember { mutableStateOf(store.load()) }
 
     Column(
-        modifier.fillMaxSize().padding(16.dp),
+        modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text("Vei deg", style = MaterialTheme.typography.headlineMedium)
@@ -75,6 +81,7 @@ fun ScaleScreen(
         } else {
             WeighIn(p, lastWeightKg, onSave, onClose, onEditProfile = { profile = null })
         }
+        if (previous.isNotEmpty()) PreviousWeighIns(previous)
     }
 }
 
@@ -148,6 +155,43 @@ private fun WeighIn(
         style = MaterialTheme.typography.bodySmall,
     )
     OutlinedButton(onClick = onEditProfile) { Text("Endre profil") }
+}
+
+data class PreviousWeighIn(val date: LocalDate, val weightKg: Double, val fatPercent: Double?)
+
+@Composable
+private fun PreviousWeighIns(previous: List<PreviousWeighIn>) {
+    val nb = Locale("nb", "NO")
+    val dateFormat = DateTimeFormatter.ofPattern("EEE d. MMM", nb)
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text("Tidligere veiinger", style = MaterialTheme.typography.titleMedium)
+            previous.forEachIndexed { i, w ->
+                // Endring mot veiingen før denne (neste i lista, siden nyeste står først).
+                val change = previous.getOrNull(i + 1)?.let { w.weightKg - it.weightKg }
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Text(w.date.format(dateFormat), Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        change?.let { String.format(nb, "%+.1f", it) } ?: "",
+                        Modifier.width(56.dp),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        w.fatPercent?.let { String.format(nb, "%.1f %%", it) } ?: "–",
+                        Modifier.width(64.dp),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        String.format(nb, "%.1f kg", w.weightKg),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+            }
+        }
+    }
 }
 
 @Composable

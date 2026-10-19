@@ -159,6 +159,8 @@ private fun CompositionCharts(history: List<Pair<LocalDate, BodyComposition>>) {
         style = MaterialTheme.typography.titleMedium,
         modifier = Modifier.padding(top = 4.dp)
     )
+    CompositionChart(history, stringResource(R.string.body_comp_weight), "kg", 1, 1f) { it.weightKg }
+    CompositionChart(history, stringResource(R.string.body_comp_fat_percent), "%", 1, 1f) { it.fatPercent }
     CompositionChart(history, stringResource(R.string.body_comp_bmi), "", 1, 0.5f) { it.bmi }
     CompositionChart(history, stringResource(R.string.body_comp_fat_mass), "kg", 1, 1f) { it.fatMassKg }
     CompositionChart(history, stringResource(R.string.body_comp_muscle_mass) + " *", "kg", 1, 1f) { it.muscleMassKg }
