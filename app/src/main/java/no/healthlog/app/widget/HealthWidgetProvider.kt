@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import no.healthlog.app.MainActivity
 import no.healthlog.app.R
 import no.healthlog.app.calculateHealthScore
+import no.healthlog.app.personalHrvScoreRange
 import no.healthlog.app.healthScoreStatus
 import no.healthlog.app.data.AppDatabase
 import no.healthlog.app.data.HealthRepository
@@ -52,7 +53,7 @@ class HealthWidgetProvider : AppWidgetProvider() {
             try {
                 val repo = HealthRepository(AppDatabase.getInstance(context).healthDayDao())
                 val today = repo.get(LocalDate.now().toString())
-                val score = calculateHealthScore(today)
+                val score = calculateHealthScore(today, hrvRange = personalHrvScoreRange(repo.getAllOnce()))
 
                 val views = RemoteViews(context.packageName, R.layout.widget_health_score).apply {
                     setTextViewText(R.id.widget_score, score.toString())

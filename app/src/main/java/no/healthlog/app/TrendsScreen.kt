@@ -275,6 +275,13 @@ fun TrendsScreen(days: List<HealthDay>, billingManager: BillingManager) {
     }
     val waistPoints = pointsFor { it.waistCm?.toFloat() }
     val hrvPoints = pointsFor { it.hrvMs?.toFloat() }
+    // 7-dagers snitt, som for vekt: HRV svinger mye fra natt til natt, trenden sier mer.
+    val hrvSmoothed = if (isMonthly) {
+        emptyList()
+    } else {
+        rollingAverage(hrvPoints.map { it.date to it.value.toDouble() })
+            .map { (date, value) -> TrendPoint(date, value.toFloat()) }
+    }
     val restingHeartRatePoints =
         pointsFor { it.restingHeartRate?.toFloat() }
     val avgHeartRatePoints =
@@ -368,6 +375,7 @@ fun TrendsScreen(days: List<HealthDay>, billingManager: BillingManager) {
                 isMonthly = isMonthly,
                 axisRange = AxisRange.Padded(5f),
                 goalValue = hrvGoal.value,
+                smoothed = hrvSmoothed,
                 goalLabel = stringResource(
                     if (hrvGoal.isPersonalized) R.string.goal_label_hrv_personal else R.string.goal_label_hrv_generic
                 ),

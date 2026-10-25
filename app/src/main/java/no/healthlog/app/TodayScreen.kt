@@ -56,7 +56,7 @@ import java.time.YearMonth
 import java.time.ZoneId
 
 @Composable
-fun HealthScoreCard(day: HealthDay?, modifier: Modifier = Modifier) {
+fun HealthScoreCard(day: HealthDay?, modifier: Modifier = Modifier, allDays: List<HealthDay> = emptyList()) {
 
     val context = LocalContext.current
     // Samme mål (fra Innstillinger) brukes nå overalt i appen som regner ut helse-score
@@ -64,7 +64,8 @@ fun HealthScoreCard(day: HealthDay?, modifier: Modifier = Modifier) {
     val breakdown = calculateHealthScoreBreakdown(
         day,
         sleepGoalMinutes = GoalPreferences.getSleepGoalMinutes(context),
-        stepsGoal = GoalPreferences.getStepsGoal(context)
+        stepsGoal = GoalPreferences.getStepsGoal(context),
+        hrvRange = remember(allDays) { personalHrvScoreRange(allDays) }
     )
     val score = breakdown.total
     val status = healthScoreStatus(context, score)
@@ -356,7 +357,7 @@ fun TodayScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
-                        HealthScoreCard(today, modifier = Modifier.weight(1f))
+                        HealthScoreCard(today, modifier = Modifier.weight(1f), allDays = all)
                         DailyGoalsCard(today, modifier = Modifier.weight(1f))
                     }
                 }

@@ -3,6 +3,7 @@ package no.healthlog.app.coach
 import no.healthlog.app.DayTags
 import no.healthlog.app.NutritionLevel
 import no.healthlog.app.calculateHealthScore
+import no.healthlog.app.personalHrvScoreRange
 import no.healthlog.app.data.HealthDay
 import no.healthlog.app.data.habitTagSet
 import no.healthlog.app.data.sleepFactorSet
@@ -383,7 +384,8 @@ internal fun buildCoachCandidates(
             facts = listOf(CoachFact.Streak(stepsStreakToday, stepsRecordBefore))
         )
     }
-    val scoreOf = { day: HealthDay -> calculateHealthScore(day, sleepGoalMinutes, stepsGoal) }
+    val hrvRange = personalHrvScoreRange(allDays)
+    val scoreOf = { day: HealthDay -> calculateHealthScore(day, sleepGoalMinutes, stepsGoal, hrvRange) }
     if (streakEndingAt(byDate, today) { scoreOf(it) >= 80 } >= 3) {
         val last3 = (0L..2L).mapNotNull { byDate[today.minusDays(it)] }
         candidates += CoachMessage(

@@ -1,6 +1,7 @@
 package no.healthlog.app.coach
 
 import no.healthlog.app.calculateHealthScore
+import no.healthlog.app.personalHrvScoreRange
 import no.healthlog.app.data.HealthDay
 import java.time.LocalDate
 
@@ -32,6 +33,7 @@ fun buildWeeklySummary(
     val prevWeekStart = weekStart.minusDays(7)
     val prevWeekEnd = weekStart.minusDays(1)
 
+    val hrvRange = personalHrvScoreRange(allDays)
     val byDate = allDays.mapNotNull { day ->
         runCatching { LocalDate.parse(day.date) }.getOrNull()?.let { it to day }
     }.toMap()
@@ -46,7 +48,7 @@ fun buildWeeklySummary(
         stepsLastWeek = if (lastWeek.isEmpty()) null else lastWeek.sumOf { it.steps ?: 0 },
         avgSleepThisWeek = average(thisWeek) { it.sleepMinutes?.let { m -> m / 60.0 } },
         avgSleepLastWeek = average(lastWeek) { it.sleepMinutes?.let { m -> m / 60.0 } },
-        avgScoreThisWeek = average(thisWeek) { calculateHealthScore(it, sleepGoalMinutes, stepsGoal).toDouble() },
-        avgScoreLastWeek = average(lastWeek) { calculateHealthScore(it, sleepGoalMinutes, stepsGoal).toDouble() }
+        avgScoreThisWeek = average(thisWeek) { calculateHealthScore(it, sleepGoalMinutes, stepsGoal, hrvRange).toDouble() },
+        avgScoreLastWeek = average(lastWeek) { calculateHealthScore(it, sleepGoalMinutes, stepsGoal, hrvRange).toDouble() }
     )
 }

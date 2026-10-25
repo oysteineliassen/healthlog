@@ -1,6 +1,7 @@
 package no.healthlog.app.coach
 
 import no.healthlog.app.calculateHealthScore
+import no.healthlog.app.personalHrvScoreRange
 import no.healthlog.app.data.HealthDay
 import java.time.LocalDate
 import kotlin.math.max
@@ -42,6 +43,7 @@ fun buildYearInReview(
     sleepGoalMinutes: Int = 480,
     stepsGoal: Int = 8000
 ): YearInReviewData? {
+    val hrvRange = personalHrvScoreRange(allDays)
     val byDate = allDays.mapNotNull { day ->
         runCatching { LocalDate.parse(day.date) }.getOrNull()?.let { it to day }
     }.toMap().filterKeys { it.year == year }
@@ -80,7 +82,7 @@ fun buildYearInReview(
         totalSteps = yearDays.sumOf { (it.steps ?: 0).toLong() },
         avgSteps = average(yearDays) { it.steps },
         avgSleepHours = average(yearDays) { it.sleepMinutes?.let { m -> m / 60.0 } },
-        avgScore = average(yearDays) { calculateHealthScore(it, sleepGoalMinutes, stepsGoal).toDouble() },
+        avgScore = average(yearDays) { calculateHealthScore(it, sleepGoalMinutes, stepsGoal, hrvRange).toDouble() },
         totalTrainingMinutes = yearDays.sumOf { it.trainingMinutes ?: 0 },
         mostCommonTrainingType = mostCommonType,
         highestHrv = yearDays.mapNotNull { it.hrvMs }.maxOrNull(),

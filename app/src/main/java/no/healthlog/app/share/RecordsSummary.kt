@@ -2,6 +2,7 @@ package no.healthlog.app.share
 
 import android.content.Context
 import no.healthlog.app.calculateHealthScore
+import no.healthlog.app.personalHrvScoreRange
 import no.healthlog.app.coach.longestStreakBefore
 import no.healthlog.app.data.HealthDay
 import no.healthlog.app.R
@@ -24,7 +25,8 @@ fun buildRecordsSections(context: Context, days: List<HealthDay>): List<Clinical
     val highestHrv = days.mapNotNull { it.hrvMs }.maxOrNull()
     val mostSteps = days.mapNotNull { it.steps }.maxOrNull()
     val longestTraining = days.mapNotNull { it.trainingMinutes }.maxOrNull()
-    val highestScore = days.maxOfOrNull { calculateHealthScore(it) }
+    val hrvRange = personalHrvScoreRange(days)
+    val highestScore = days.maxOfOrNull { calculateHealthScore(it, hrvRange = hrvRange) }
 
     val rows = listOfNotNull(
         if (longestStepsStreak >= 1) {

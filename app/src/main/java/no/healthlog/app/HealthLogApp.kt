@@ -43,6 +43,8 @@ fun HealthLogApp(
     var tab by rememberSaveable { mutableIntStateOf(0) }
     var showEntry by rememberSaveable { mutableStateOf(false) }
     var showScale by rememberSaveable { mutableStateOf(false) }
+    // Etter lagring fra Vei deg går vi rett til kroppssammensetningen (samme som trykk på vektgrafen).
+    var showBodyComposition by rememberSaveable { mutableStateOf(false) }
     val days by vm.days.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -161,7 +163,10 @@ fun HealthLogApp(
                     }
                     ScaleScreen(
                         lastWeightKg = lastWeightKg,
-                        onSave = { r -> vm.saveScaleReading(r.weightKg, r.fatPercent) },
+                        onSave = { r ->
+                            vm.saveScaleReading(r.weightKg, r.fatPercent)
+                            showBodyComposition = true
+                        },
                         onClose = { showScale = false },
                         previous = days.mapNotNull { d ->
                             val date = runCatching { LocalDate.parse(d.date) }.getOrNull()
@@ -172,6 +177,10 @@ fun HealthLogApp(
                 }
             }
         }
+    }
+
+    if (showBodyComposition) {
+        BodyCompositionDialog(days, onDismiss = { showBodyComposition = false })
     }
 
     if (showEntry) EntryDialog(

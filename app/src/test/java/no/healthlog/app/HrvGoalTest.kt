@@ -64,4 +64,39 @@ class HrvGoalTest {
         // Med kun de 60 ferske 60-ms-dagene med i vinduet: snitt 60, avvik 0 -> mål 60.
         assertEquals(60f, goal.value, 0.5f)
     }
+
+    @Test
+    fun `sick days are left out of the baseline`() {
+        val normal = (1..14).map { i -> HealthDay(date = "2026-08-%02d".format(i), hrvMs = 50.0) }
+        val sick = (15..21).map { i -> HealthDay(date = "2026-08-%02d".format(i), hrvMs = 20.0, dayTag = DayTags.SICK) }
+        assertEquals(50f, calculateHrvGoal(normal + sick).value, 0.01f)
+    }
+
+    @Test
+    fun `score range is generic without enough readings`() {
+        val days = (1..10).map { i -> HealthDay(date = "2026-08-%02d".format(i), hrvMs = 33.0) }
+        assertEquals(HrvScoreRange.GENERIC, personalHrvScoreRange(days))
+    }
+
+    @Test
+    fun `score range gives full points at your own average`() {
+        // Veksler 30/36 -> snitt 33, avvik 3 -> 0 poeng ved 27, full pott ved 33.
+        val days = (1..14).map { i ->
+            HealthDay(date = "2026-08-%02d".format(i), hrvMs = if (i % 2 == 0) 36.0 else 30.0)
+        }
+        val range = personalHrvScoreRange(days)
+        assertEquals(33.0, range.goal, 0.01)
+        assertEquals(27.0, range.floor, 0.01)
+        val normalDay = HealthDay(date = "2026-08-20", hrvMs = 33.0)
+        val hrvPoints = calculateHealthScoreBreakdown(normalDay, hrvRange = range)
+            .criteria.first { it.type == HealthScoreCriterionType.HRV }.points
+        assertEquals(20, hrvPoints)
+    }
+
+    @Test
+    fun `score range is at least 5 ms wide`() {
+        val days = (1..14).map { i -> HealthDay(date = "2026-08-%02d".format(i), hrvMs = 40.0) }
+        val range = personalHrvScoreRange(days)
+        assertEquals(35.0, range.floor, 0.01)
+    }
 }

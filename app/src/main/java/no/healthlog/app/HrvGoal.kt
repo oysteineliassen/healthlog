@@ -1,9 +1,11 @@
 package no.healthlog.app
 
+import no.healthlog.app.coach.Baseline
+import no.healthlog.app.coach.baselineOf
+import no.healthlog.app.coach.isAtypical
 import no.healthlog.app.data.HealthDay
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.math.sqrt
 
 data class PersonalGoal(val value: Float, val isPersonalized: Boolean)
 
@@ -28,6 +30,22 @@ private const val BASELINE_WINDOW_DAYS = 60
  * personlig mål faktisk gir mening - Garmin selv krever også noen ukers data før de
  * viser en egen baseline i stedet for en generisk status.
  */
+/**
+ * Snitt og variasjon over de siste [BASELINE_WINDOW_DAYS] dagene, uten syk-, reise- og
+ * fastedager (samme regel som coachens "din normal") - en influensauke skal ikke dra
+ * grensen ned. Null til det finnes [MIN_READINGS_FOR_PERSONAL_GOAL] målinger.
+ */
+private fun recentBaseline(allDays: List<HealthDay>, selector: (HealthDay) -> Double?): Baseline? {
+    // Datoformatet (ÅÅÅÅ-MM-DD) sorterer riktig som ren tekst, så vi slipper å
+    // parse til LocalDate bare for å finne de nyeste målingene.
+    val recentValues = allDays
+        .sortedByDescending { it.date }
+        .take(BASELINE_WINDOW_DAYS)
+        .filterNot { it.isAtypical() }
+        .mapNotNull(selector)
+    return baselineOf(recentValues, MIN_READINGS_FOR_PERSONAL_GOAL)
+}
+
 private fun calculatePersonalGoal(
     allDays: List<HealthDay>,
     selector: (HealthDay) -> Double?,
@@ -36,20 +54,10 @@ private fun calculatePersonalGoal(
     absoluteFloor: Float? = null,
     absoluteCeiling: Float? = null
 ): PersonalGoal {
-    // Datoformatet (ÅÅÅÅ-MM-DD) sorterer riktig som ren tekst, så vi slipper å
-    // parse til LocalDate bare for å finne de nyeste målingene.
-    val recentValues = allDays
-        .sortedByDescending { it.date }
-        .take(BASELINE_WINDOW_DAYS)
-        .mapNotNull(selector)
-
-    if (recentValues.size < MIN_READINGS_FOR_PERSONAL_GOAL) {
-        return PersonalGoal(genericFallback, isPersonalized = false)
-    }
-
-    val mean = recentValues.average()
-    val variance = recentValues.sumOf { (it - mean) * (it - mean) } / recentValues.size
-    val stdDev = sqrt(variance)
+    val baseline = recentBaseline(allDays, selector)
+        ?: return PersonalGoal(genericFallback, isPersonalized = false)
+    val mean = baseline.mean
+    val stdDev = baseline.stdDev
 
     var value = when (direction) {
         GoalDirection.FLOOR -> mean - stdDev
@@ -70,6 +78,28 @@ fun calculateHrvGoal(allDays: List<HealthDay>): PersonalGoal =
         genericFallback = 40f,
         absoluteFloor = 15f
     )
+
+/**
+ * Spennet HRV-poengene i helse-scoren graderes over: 0 poeng ved [floor], full uttelling
+ * ved [goal]. [GENERIC] (20-40 ms) brukes til det finnes nok egne målinger.
+ */
+data class HrvScoreRange(val floor: Double, val goal: Double) {
+    companion object {
+        val GENERIC = HrvScoreRange(floor = 20.0, goal = 40.0)
+    }
+}
+
+/**
+ * Personlig HRV-spenn for helse-scoren: full uttelling ved snittet ditt, null poeng to
+ * standardavvik under. Grensen i HRV-grafen (snitt minus ett avvik) havner da midt i
+ * spennet - en normal dag for deg gir full pott, ikke et fast 40 ms-mål.
+ */
+fun personalHrvScoreRange(allDays: List<HealthDay>): HrvScoreRange {
+    val b = recentBaseline(allDays) { it.hrvMs } ?: return HrvScoreRange.GENERIC
+    // Minst 5 ms spenn, så svært jevne målinger ikke gjør poengene til alt-eller-ingenting.
+    val floor = min(b.mean - 2 * b.stdDev, b.mean - 5).coerceAtLeast(10.0)
+    return HrvScoreRange(floor = floor, goal = b.mean)
+}
 
 /** Søvn (timer): høyere er bedre - gulv-verdi, aldri under 6,5 timer uansett variasjon. */
 fun calculateSleepGoal(allDays: List<HealthDay>): PersonalGoal =

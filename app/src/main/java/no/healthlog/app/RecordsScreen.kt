@@ -58,7 +58,8 @@ fun RecordsScreen(days: List<HealthDay>, billingManager: BillingManager) {
     val mostSteps = remember(days) { days.mapNotNull { it.steps }.maxOrNull() }
     val longestTraining = remember(days) { days.mapNotNull { it.trainingMinutes }.maxOrNull() }
     val highestScore = remember(days, sleepGoalMinutes, stepsGoal) {
-        days.maxOfOrNull { calculateHealthScore(it, sleepGoalMinutes, stepsGoal) }
+        val hrvRange = personalHrvScoreRange(days)
+        days.maxOfOrNull { calculateHealthScore(it, sleepGoalMinutes, stepsGoal, hrvRange) }
     }
 
     val coroutineScope = rememberCoroutineScope()

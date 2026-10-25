@@ -1,6 +1,7 @@
 package no.healthlog.app.coach
 
 import no.healthlog.app.calculateHealthScore
+import no.healthlog.app.personalHrvScoreRange
 import no.healthlog.app.data.HealthDay
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -33,6 +34,7 @@ fun buildPeriodComparison(
     sleepGoalMinutes: Int = 480,
     stepsGoal: Int = 8000
 ): PeriodComparisonData {
+    val hrvRange = personalHrvScoreRange(allDays)
     val byDate = allDays.mapNotNull { day ->
         runCatching { LocalDate.parse(day.date) }.getOrNull()?.let { it to day }
     }.toMap()
@@ -47,8 +49,8 @@ fun buildPeriodComparison(
         avgStepsB = average(periodB) { it.steps },
         avgSleepA = average(periodA) { it.sleepMinutes?.let { m -> m / 60.0 } },
         avgSleepB = average(periodB) { it.sleepMinutes?.let { m -> m / 60.0 } },
-        avgScoreA = average(periodA) { calculateHealthScore(it, sleepGoalMinutes, stepsGoal).toDouble() },
-        avgScoreB = average(periodB) { calculateHealthScore(it, sleepGoalMinutes, stepsGoal).toDouble() }
+        avgScoreA = average(periodA) { calculateHealthScore(it, sleepGoalMinutes, stepsGoal, hrvRange).toDouble() },
+        avgScoreB = average(periodB) { calculateHealthScore(it, sleepGoalMinutes, stepsGoal, hrvRange).toDouble() }
     )
 }
 

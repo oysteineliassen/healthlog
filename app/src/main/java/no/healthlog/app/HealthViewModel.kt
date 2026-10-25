@@ -527,7 +527,12 @@ data class HealthScoreBreakdown(val total: Int, val criteria: List<HealthScoreCr
  * detaljvisningen (trykk på Helse-score-kortet) - garanterer at tallene der alltid
  * stemmer nøyaktig overens med selve totalsummen, siden begge deler samme utregning.
  */
-fun calculateHealthScoreBreakdown(day: HealthDay?, sleepGoalMinutes: Int = 480, stepsGoal: Int = 8000): HealthScoreBreakdown {
+fun calculateHealthScoreBreakdown(
+    day: HealthDay?,
+    sleepGoalMinutes: Int = 480,
+    stepsGoal: Int = 8000,
+    hrvRange: HrvScoreRange = HrvScoreRange.GENERIC
+): HealthScoreBreakdown {
     if (day == null) {
         return HealthScoreBreakdown(0, HealthScoreCriterionType.entries.map { HealthScoreCriterion(it, 0) })
     }
@@ -541,9 +546,9 @@ fun calculateHealthScoreBreakdown(day: HealthDay?, sleepGoalMinutes: Int = 480, 
         maxPoints = 20
     )
 
-    // HRV: ingen justerbart mål ennå - beholder 40ms som "godt" nivå fra før, gradert
-    // ned til 20ms (under det regnes som markant forhøyet stressnivå).
-    val hrvPoints = gradedScore(value = day.hrvMs ?: 0.0, floor = 20.0, goal = 40.0, maxPoints = 20)
+    // HRV: personlig spenn ut fra dine egne målinger (se personalHrvScoreRange) - full
+    // uttelling ved snittet ditt. 20-40 ms til det finnes nok data.
+    val hrvPoints = gradedScore(value = day.hrvMs ?: 0.0, floor = hrvRange.floor, goal = hrvRange.goal, maxPoints = 20)
 
     // Stress: omvendt skala - lavere er bedre. Full uttelling ved 30 eller under (som
     // før), null uttelling ved 70 eller over.
@@ -582,8 +587,12 @@ fun calculateHealthScoreBreakdown(day: HealthDay?, sleepGoalMinutes: Int = 480, 
     return HealthScoreBreakdown(criteria.sumOf { it.points }, criteria)
 }
 
-fun calculateHealthScore(day: HealthDay?, sleepGoalMinutes: Int = 480, stepsGoal: Int = 8000): Int =
-    calculateHealthScoreBreakdown(day, sleepGoalMinutes, stepsGoal).total
+fun calculateHealthScore(
+    day: HealthDay?,
+    sleepGoalMinutes: Int = 480,
+    stepsGoal: Int = 8000,
+    hrvRange: HrvScoreRange = HrvScoreRange.GENERIC
+): Int = calculateHealthScoreBreakdown(day, sleepGoalMinutes, stepsGoal, hrvRange).total
 
 fun healthScoreStatus(context: Context, score: Int): String = when {
     score >= 80 -> context.getString(R.string.health_score_status_great)

@@ -1,6 +1,7 @@
 package no.healthlog.app.coach
 
 import no.healthlog.app.calculateHealthScore
+import no.healthlog.app.personalHrvScoreRange
 import no.healthlog.app.data.HealthDay
 import java.time.LocalDate
 import java.time.YearMonth
@@ -33,6 +34,7 @@ fun buildMonthlySummary(
     val month = YearMonth.from(monthEndDate)
     val prevMonth = month.minusMonths(1)
 
+    val hrvRange = personalHrvScoreRange(allDays)
     val byDate = allDays.mapNotNull { day ->
         runCatching { LocalDate.parse(day.date) }.getOrNull()?.let { it to day }
     }.toMap()
@@ -47,7 +49,7 @@ fun buildMonthlySummary(
         stepsLastMonth = if (lastMonth.isEmpty()) null else lastMonth.sumOf { it.steps ?: 0 },
         avgSleepThisMonth = average(thisMonth) { it.sleepMinutes?.let { m -> m / 60.0 } },
         avgSleepLastMonth = average(lastMonth) { it.sleepMinutes?.let { m -> m / 60.0 } },
-        avgScoreThisMonth = average(thisMonth) { calculateHealthScore(it, sleepGoalMinutes, stepsGoal).toDouble() },
-        avgScoreLastMonth = average(lastMonth) { calculateHealthScore(it, sleepGoalMinutes, stepsGoal).toDouble() }
+        avgScoreThisMonth = average(thisMonth) { calculateHealthScore(it, sleepGoalMinutes, stepsGoal, hrvRange).toDouble() },
+        avgScoreLastMonth = average(lastMonth) { calculateHealthScore(it, sleepGoalMinutes, stepsGoal, hrvRange).toDouble() }
     )
 }

@@ -80,6 +80,7 @@ fun CalendarHeatMap(days: List<HealthDay>, onDayClick: (LocalDate) -> Unit) {
             runCatching { LocalDate.parse(day.date) }.getOrNull()?.let { it to day }
         }.toMap()
     }
+    val hrvRange = remember(days) { personalHrvScoreRange(days) }
     val cells = remember(displayedMonth) { buildMonthGrid(displayedMonth) }
     val monthLabel = displayedMonth.atDay(1)
         .format(heatMapMonthFormatter)
@@ -133,7 +134,7 @@ fun CalendarHeatMap(days: List<HealthDay>, onDayClick: (LocalDate) -> Unit) {
                         ) {
                             if (date != null) {
                                 val healthDay = byDate[date]
-                                val score = healthDay?.let { calculateHealthScore(it, sleepGoalMinutes, stepsGoal) }
+                                val score = healthDay?.let { calculateHealthScore(it, sleepGoalMinutes, stepsGoal, hrvRange) }
                                 val cellDescription = if (healthDay != null) {
                                     stringResource(
                                         R.string.heat_map_cell_description,
