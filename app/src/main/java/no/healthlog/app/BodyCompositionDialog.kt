@@ -12,7 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
@@ -221,23 +220,19 @@ fun BmiGauge(bmi: Double, modifier: Modifier = Modifier) {
                         style = Stroke(width = stroke, cap = StrokeCap.Butt)
                     )
                 }
-                // Pil på innsiden av buen med spissen inntil kanten, så den ikke dekker
-                // fargene og man ser nøyaktig om verdien er på, over eller under en grense.
+                // Tynn strek tvers over buen, litt lengre enn buen er tykk - dekker nesten
+                // ingenting av fargene, så man ser nøyaktig om verdien er på, over eller
+                // under en grense.
                 val a = Math.toRadians(angleOf(bmi.toFloat().coerceIn(GAUGE_MIN, GAUGE_MAX)).toDouble())
                 val dir = Offset(cos(a).toFloat(), sin(a).toFloat())
-                val side = Offset(-dir.y, dir.x)
-                val tipR = radius - stroke / 2f - 2.dp.toPx()
-                val length = stroke * 0.9f
-                val halfWidth = stroke * 0.45f
-                val tip = center + dir * tipR
-                val base = center + dir * (tipR - length)
-                val arrow = Path().apply {
-                    moveTo(tip.x, tip.y)
-                    lineTo(base.x + side.x * halfWidth, base.y + side.y * halfWidth)
-                    lineTo(base.x - side.x * halfWidth, base.y - side.y * halfWidth)
-                    close()
-                }
-                drawPath(arrow, markerColor)
+                val overhang = 4.dp.toPx()
+                drawLine(
+                    markerColor,
+                    start = center + dir * (radius - stroke / 2f - overhang),
+                    end = center + dir * (radius + stroke / 2f + overhang),
+                    strokeWidth = 3.dp.toPx(),
+                    cap = StrokeCap.Round
+                )
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(bottom = 4.dp)) {
                 Text("BMI", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
