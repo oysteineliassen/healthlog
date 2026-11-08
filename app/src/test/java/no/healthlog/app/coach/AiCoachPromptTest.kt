@@ -75,4 +75,37 @@ class AiCoachPromptTest {
     fun `bold line without hashes is treated as a heading`() {
         assertEquals(AiAnswerBlock.Heading("Søvn"), parseAiAnswer("**Søvn**").single())
     }
+
+    @Test
+    fun `python code copied along from Copilot is removed`() {
+        val pasted = """
+            import pandas as pd
+            s=[6.65,6.92,6.88]
+            h=[34,35,39]
+            print({'sleep_mean':sum(s)/14,'deficit':112-sum(s)})
+            ## Kort oppsummering
+            Tallene peker mot for lite søvn.
+
+            - **Søvn:** Snitt 6 t 38 min
+            ```python
+            x = 1
+            ```
+            ## Søvn
+            Natten var kort.
+        """.trimIndent()
+        val cleaned = cleanAiAnswer(pasted)
+        assertTrue(cleaned.startsWith("## Kort oppsummering"))
+        assertFalse(cleaned.contains("import"))
+        assertFalse(cleaned.contains("print("))
+        assertFalse(cleaned.contains("x = 1"))
+        assertTrue(cleaned.contains("Natten var kort."))
+        val blocks = parseAiAnswer(pasted)
+        assertEquals(AiAnswerBlock.Heading("Kort oppsummering"), blocks.first())
+    }
+
+    @Test
+    fun `ordinary answers are left untouched`() {
+        val answer = "## Søvn\nDu sov 7 timer.\n\n- Legg deg kl. 22"
+        assertEquals(answer, cleanAiAnswer(answer))
+    }
 }

@@ -119,6 +119,29 @@ sealed class AiAnswerBlock {
     data class Paragraph(val text: String) : AiAnswerBlock()
 }
 
+// Linjer som tydelig er kode og ikke tekst: import, print(...), "navn = [..." osv.
+private val CODE_LINE = Regex(
+    "^(import\\s+\\w|from\\s+\\w+\\s+import\\s|print\\(|def\\s+\\w+\\(|for\\s+\\w+\\s+in\\s|[A-Za-z_][\\w.]*(\\[[^\\]]*])?\\s*=\\s*[\\[{(\\d'\"\\w-])"
+)
+
+/**
+ * Fjerner kode som følger med når hele svaret kopieres fra f.eks. Copilot: den kjører
+ * Python i bakgrunnen for å regne på tallene, og koden blir med i utklippstavlen selv
+ * om den ikke vises i chatten. Tar bort ```-blokker og kodelinjer, og alt foran første
+ * overskrift hvis det bare er kode.
+ */
+fun cleanAiAnswer(answer: String): String {
+    val withoutFences = answer.replace(Regex("```[\\s\\S]*?(```|$)"), "\n")
+    val lines = withoutFences.lines()
+    val firstHeading = lines.indexOfFirst { it.trimStart().startsWith("#") }
+    val isCode = { line: String -> CODE_LINE.containsMatchIn(line.trim()) }
+    // Står det kode foran første overskrift, er hele innledningen kode (Copilot legger
+    // den der) - også fortsettelseslinjer som ikke ser ut som kode alene.
+    val start = if (firstHeading > 0 && lines.take(firstHeading).any(isCode)) firstHeading else 0
+    val kept = lines.drop(start).filterNot(isCode)
+    return kept.joinToString("\n").trim()
+}
+
 /**
  * Leser et svar i markdown-lignende format (overskrifter, punktlister, avsnitt). Fet/
  * kursiv-markering fjernes - appen viser ren tekst. Tåler svar som ikke følger malen.
@@ -131,7 +154,7 @@ fun parseAiAnswer(answer: String): List<AiAnswerBlock> {
         if (paragraph.isNotBlank()) blocks += AiAnswerBlock.Paragraph(strip(paragraph.toString()))
         paragraph.clear()
     }
-    for (raw in answer.lines()) {
+    for (raw in cleanAiAnswer(answer).lines()) {
         val line = raw.trim()
         when {
             line.isEmpty() -> flush()

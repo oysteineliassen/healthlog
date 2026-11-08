@@ -21,6 +21,7 @@ import no.healthlog.app.coach.AiAnswerBlock
 import no.healthlog.app.coach.AiCoachGoals
 import no.healthlog.app.coach.AiCoachPreferences
 import no.healthlog.app.coach.buildAiCoachPrompt
+import no.healthlog.app.coach.cleanAiAnswer
 import no.healthlog.app.coach.parseAiAnswer
 import no.healthlog.app.data.HealthDay
 import java.time.LocalDate
@@ -137,7 +138,7 @@ fun AiCoachCard(all: List<HealthDay>) {
         AiAnswerPasteDialog(
             onDismiss = { showPaste = false },
             onSave = { text ->
-                AiCoachPreferences.setAnswer(context, text)
+                AiCoachPreferences.setAnswer(context, cleanAiAnswer(text))
                 answer = AiCoachPreferences.getAnswer(context)
                 expanded = true
                 info = null
