@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.time.LocalDateTime
+import no.healthlog.app.R
 import no.healthlog.app.scale.Ah100Protocol as P
 
 /** What the UI shows. */
@@ -70,7 +71,7 @@ class Ah100ScaleClient(
     fun start() {
         val a = adapter
         if (a == null || !a.isEnabled) {
-            _state.value = ScaleState.Failed("Bluetooth er av")
+            _state.value = ScaleState.Failed(appContext.getString(R.string.scale_err_bluetooth_off))
             return
         }
         stop()
@@ -96,7 +97,7 @@ class Ah100ScaleClient(
     private val scanTimeout = Runnable {
         if (_state.value == ScaleState.Searching) {
             stop()
-            _state.value = ScaleState.Failed("Fant ikke vekten. Tråkk på den så den våkner, og prøv igjen.")
+            _state.value = ScaleState.Failed(appContext.getString(R.string.scale_err_not_found))
         }
     }
 
@@ -113,7 +114,7 @@ class Ah100ScaleClient(
         }
 
         override fun onScanFailed(errorCode: Int) {
-            _state.value = ScaleState.Failed("Bluetooth-søk feilet (kode $errorCode)")
+            _state.value = ScaleState.Failed(appContext.getString(R.string.scale_err_scan_failed, errorCode))
         }
     }
 
@@ -140,8 +141,8 @@ class Ah100ScaleClient(
                     if (!finished && _state.value !is ScaleState.Failed) {
                         _state.value = ScaleState.Failed(
                             if (status == 61 /* MIC failure: stale pairing */)
-                                "Tilkoblingen ble avvist. Glem vekten i Android sine Bluetooth-innstillinger og prøv igjen."
-                            else "Mistet kontakten med vekten (status $status)"
+                                appContext.getString(R.string.scale_err_rejected)
+                            else appContext.getString(R.string.scale_err_lost, status)
                         )
                     }
                 }
@@ -158,7 +159,7 @@ class Ah100ScaleClient(
             val tx = service?.getCharacteristic(P.WRITE_UUID)
             val rx = service?.getCharacteristic(P.NOTIFY_UUID)
             if (tx == null || rx == null) {
-                fail("Dette ser ikke ut som en AH100 (mangler tjeneste FAA0)")
+                fail(appContext.getString(R.string.scale_err_not_ah100))
                 return
             }
             writeChar = tx
@@ -239,7 +240,7 @@ class Ah100ScaleClient(
         send(P.versionFrame(mac))
         _state.value = ScaleState.Measuring
         main.postDelayed({
-            if (_state.value == ScaleState.Measuring) fail("Fikk ingen måling. Stå stille og barbent på vekten.")
+            if (_state.value == ScaleState.Measuring) fail(appContext.getString(R.string.scale_err_no_reading))
         }, 45_000)
     }
 

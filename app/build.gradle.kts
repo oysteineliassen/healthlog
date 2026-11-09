@@ -25,6 +25,10 @@ android {
     // å oppdatere appen (krever avinstallering). Brukes også for release-bygget, siden
     // appen bare installeres direkte (ikke via Play) - da kan release oppdatere en
     // installert debug-versjon uten avinstallering. Ikke hemmelig; ikke bruk den i Play.
+    // Egen, hemmelig utgivelsesnøkkel: settes i CI fra GitHub-hemmeligheter (se
+    // SIGNERING.md). Uten dem brukes den åpne debug-nøkkelen som før.
+    val releaseKeystore = System.getenv("HEALTHLOG_KEYSTORE_FILE")?.takeIf { it.isNotBlank() && file(it).exists() }
+
     signingConfigs {
         getByName("debug") {
             storeFile = file("debug.keystore")
@@ -32,11 +36,19 @@ android {
             keyAlias = "androiddebugkey"
             keyPassword = "android"
         }
+        if (releaseKeystore != null) {
+            create("release") {
+                storeFile = file(releaseKeystore)
+                storePassword = System.getenv("HEALTHLOG_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("HEALTHLOG_KEY_ALIAS")
+                keyPassword = System.getenv("HEALTHLOG_KEY_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName(if (releaseKeystore != null) "release" else "debug")
             // R8 krymper bibliotekene (mest ikonpakken) og fjerner ubrukte ressurser.
             // Appens egen kode beholdes urørt (se proguard-rules.pro), så refleksjon og
             // stakkspor i krasjrapporter fungerer som før.
@@ -100,4 +112,5 @@ dependencies {
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.robolectric:robolectric:4.14.1")
+    testImplementation("androidx.test:core:1.6.1")
 }

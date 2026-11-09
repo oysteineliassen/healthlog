@@ -26,6 +26,7 @@ import no.healthlog.app.data.HealthDay
 import no.healthlog.app.scale.BodyComposition
 import no.healthlog.app.scale.ScaleProfileStore
 import no.healthlog.app.scale.bodyComposition
+import no.healthlog.app.ui.SubPage
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlin.math.cos
@@ -59,26 +60,16 @@ fun BodyCompositionDialog(days: List<HealthDay>, onDismiss: () -> Unit) {
         }
     }
 
-    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        Surface(Modifier.fillMaxSize()) {
-            Column(
-                Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        stringResource(R.string.body_comp_title),
-                        style = MaterialTheme.typography.headlineSmall,
-                        modifier = Modifier.weight(1f)
-                    )
-                    TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_close)) }
-                }
-                if (latest == null) {
-                    Text(stringResource(R.string.body_comp_no_weight))
-                } else {
-                    LatestCard(latest.first, latest.second, heightCm)
-                    CompositionCharts(history)
-                }
+    SubPage(title = stringResource(R.string.body_comp_title), onBack = onDismiss) { padding ->
+        Column(
+            Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            if (latest == null) {
+                Text(stringResource(R.string.body_comp_no_weight))
+            } else {
+                LatestCard(latest.first, latest.second, heightCm)
+                CompositionCharts(history)
             }
         }
     }

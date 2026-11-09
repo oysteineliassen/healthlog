@@ -3,6 +3,7 @@ package no.healthlog.app
 import androidx.compose.ui.window.Dialog
 import no.healthlog.app.scale.PreviousWeighIn
 import no.healthlog.app.scale.ScaleScreen
+import no.healthlog.app.ui.SubPage
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -152,30 +153,21 @@ fun HealthLogApp(
     if (showScale) {
         // Siste lagrede vekt brukes som hint i profilen vekta får (se Ah100ScaleClient).
         val lastWeightKg = days.filter { it.weightKg != null }.maxByOrNull { it.date }?.weightKg?.toFloat()
-        Dialog(
-            onDismissRequest = { showScale = false },
-            properties = DialogProperties(usePlatformDefaultWidth = false)
-        ) {
-            Surface(Modifier.fillMaxSize()) {
-                Column {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                        TextButton(onClick = { showScale = false }) { Text(stringResource(R.string.action_close)) }
-                    }
-                    ScaleScreen(
-                        lastWeightKg = lastWeightKg,
-                        onSave = { r ->
-                            vm.saveScaleReading(r.weightKg, r.fatPercent)
-                            showBodyComposition = true
-                        },
-                        onClose = { showScale = false },
-                        previous = days.mapNotNull { d ->
-                            val date = runCatching { LocalDate.parse(d.date) }.getOrNull()
-                            val w = d.weightKg
-                            if (date == null || w == null) null else PreviousWeighIn(date, w, d.bodyFatPercent)
-                        }.sortedByDescending { it.date }.take(10)
-                    )
-                }
-            }
+        SubPage(title = stringResource(R.string.action_weigh), onBack = { showScale = false }) { padding ->
+            ScaleScreen(
+                lastWeightKg = lastWeightKg,
+                onSave = { r ->
+                    vm.saveScaleReading(r.weightKg, r.fatPercent)
+                    showBodyComposition = true
+                },
+                onClose = { showScale = false },
+                modifier = Modifier.padding(padding),
+                previous = days.mapNotNull { d ->
+                    val date = runCatching { LocalDate.parse(d.date) }.getOrNull()
+                    val w = d.weightKg
+                    if (date == null || w == null) null else PreviousWeighIn(date, w, d.bodyFatPercent)
+                }.sortedByDescending { it.date }.take(10)
+            )
         }
     }
 

@@ -17,7 +17,8 @@ private data class OnboardingPage(val titleRes: Int, val bodyRes: Int)
 private val onboardingPages = listOf(
     OnboardingPage(R.string.onboarding_welcome_title, R.string.onboarding_welcome_body),
     OnboardingPage(R.string.onboarding_health_connect_title, R.string.onboarding_health_connect_body),
-    OnboardingPage(R.string.onboarding_baseline_title, R.string.onboarding_baseline_body)
+    OnboardingPage(R.string.onboarding_baseline_title, R.string.onboarding_baseline_body),
+    OnboardingPage(R.string.onboarding_disclaimer_title, R.string.onboarding_disclaimer_body)
 )
 
 /**

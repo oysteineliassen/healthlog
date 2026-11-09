@@ -41,6 +41,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import no.healthlog.app.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -74,7 +76,6 @@ fun ScaleScreen(
         modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Text("Vei deg", style = MaterialTheme.typography.headlineMedium)
         val p = profile
         if (p == null) {
             ProfileForm(onDone = { store.save(it); profile = it })
@@ -123,49 +124,52 @@ private fun WeighIn(
         ) {
             when (val s = state) {
                 ScaleState.Idle -> {
-                    Text("Trykk start og tråkk på vekten barbent.")
-                    Button(onClick = ::begin) { Text("Start") }
+                    Text(stringResource(R.string.scale_idle))
+                    Button(onClick = ::begin) { Text(stringResource(R.string.scale_start)) }
                 }
-                ScaleState.Searching -> Busy("Tråkk på vekten så den våkner …")
-                ScaleState.Connecting -> Busy("Kobler til …")
-                ScaleState.Measuring -> Busy("Stå stille, måler fettprosent …")
+                ScaleState.Searching -> Busy(stringResource(R.string.scale_searching))
+                ScaleState.Connecting -> Busy(stringResource(R.string.scale_connecting))
+                ScaleState.Measuring -> Busy(stringResource(R.string.scale_measuring))
                 is ScaleState.Done -> {
                     val r = s.reading
                     Text(
-                        String.format(Locale("nb", "NO"), "%.1f kg", r.weightKg),
+                        stringResource(R.string.scale_weight_value, r.weightKg),
                         fontSize = 48.sp, fontWeight = FontWeight.Bold,
                     )
-                    r.fatPercent?.let { Text(String.format(Locale("nb", "NO"), "Fett: %.1f %%", it)) }
-                        ?: Text("Fett: ikke målt (stå barbent)", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    r.fatPercent?.let { Text(stringResource(R.string.scale_fat_value, it)) }
+                        ?: Text(stringResource(R.string.scale_fat_missing), color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        OutlinedButton(onClick = ::begin) { Text("Vei på nytt") }
-                        Button(onClick = { onSave(r); onClose() }) { Text("Lagre") }
+                        OutlinedButton(onClick = ::begin) { Text(stringResource(R.string.scale_again)) }
+                        Button(onClick = { onSave(r); onClose() }) { Text(stringResource(R.string.action_save)) }
                     }
                 }
                 is ScaleState.Failed -> {
                     Text(s.message, color = MaterialTheme.colorScheme.error)
-                    Button(onClick = ::begin) { Text("Prøv igjen") }
+                    Button(onClick = ::begin) { Text(stringResource(R.string.scale_retry)) }
                 }
             }
         }
     }
 
     Text(
-        "${profile.heightCm} cm · ${profile.age} år · ${if (profile.male) "mann" else "kvinne"}",
+        stringResource(
+            R.string.scale_profile_summary, profile.heightCm, profile.age,
+            stringResource(if (profile.male) R.string.scale_sex_male else R.string.scale_sex_female).lowercase()
+        ),
         style = MaterialTheme.typography.bodySmall,
     )
-    OutlinedButton(onClick = onEditProfile) { Text("Endre profil") }
+    OutlinedButton(onClick = onEditProfile) { Text(stringResource(R.string.scale_edit_profile)) }
 }
 
 data class PreviousWeighIn(val date: LocalDate, val weightKg: Double, val fatPercent: Double?)
 
 @Composable
 private fun PreviousWeighIns(previous: List<PreviousWeighIn>) {
-    val nb = Locale("nb", "NO")
+    val nb = Locale.getDefault()
     val dateFormat = DateTimeFormatter.ofPattern("EEE d. MMM", nb)
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text("Tidligere veiinger", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.scale_previous_title), style = MaterialTheme.typography.titleMedium)
             previous.forEachIndexed { i, w ->
                 // Endring mot veiingen før denne (neste i lista, siden nyeste står først).
                 val change = previous.getOrNull(i + 1)?.let { w.weightKg - it.weightKg }
@@ -208,27 +212,27 @@ private fun ProfileForm(onDone: (Ah100Protocol.Profile) -> Unit) {
     val h = height.toIntOrNull()?.takeIf { it in 100..220 }
     val y = birthYear.toIntOrNull()?.takeIf { it in 1920..LocalDate.now().year - 10 }
 
-    Text("Vekten trenger høyde, alder og kjønn for å regne ut fettprosent.")
+    Text(stringResource(R.string.scale_profile_intro))
     OutlinedTextField(
-        height, { height = it.filter(Char::isDigit) }, label = { Text("Høyde (cm)") },
+        height, { height = it.filter(Char::isDigit) }, label = { Text(stringResource(R.string.scale_height)) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), singleLine = true,
     )
     OutlinedTextField(
-        birthYear, { birthYear = it.filter(Char::isDigit) }, label = { Text("Fødselsår") },
+        birthYear, { birthYear = it.filter(Char::isDigit) }, label = { Text(stringResource(R.string.scale_birth_year)) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), singleLine = true,
     )
     Row(verticalAlignment = Alignment.CenterVertically) {
         RadioButton(selected = male, onClick = { male = true })
-        Text("Mann")
+        Text(stringResource(R.string.scale_sex_male))
         Spacer(Modifier.size(16.dp))
         RadioButton(selected = !male, onClick = { male = false })
-        Text("Kvinne")
+        Text(stringResource(R.string.scale_sex_female))
     }
     Spacer(Modifier.height(8.dp))
     Button(
         enabled = h != null && y != null,
         onClick = { onDone(Ah100Protocol.Profile(heightCm = h!!, age = LocalDate.now().year - y!!, male = male)) },
-    ) { Text("Lagre profil") }
+    ) { Text(stringResource(R.string.scale_save_profile)) }
 }
 
 // ---------------------------------------------------------------- helpers

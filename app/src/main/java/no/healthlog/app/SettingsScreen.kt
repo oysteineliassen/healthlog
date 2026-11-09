@@ -964,6 +964,16 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
         }
 
         item {
+            Card(shape = RoundedCornerShape(20.dp)) {
+                Column(Modifier.fillMaxWidth().padding(18.dp)) {
+                    Text(stringResource(R.string.settings_disclaimer_title), fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.height(6.dp))
+                    Text(stringResource(R.string.settings_disclaimer_description))
+                }
+            }
+        }
+
+        item {
             val versionName = remember {
                 runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }.getOrNull()
             }
