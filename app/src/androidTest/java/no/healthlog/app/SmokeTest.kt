@@ -40,7 +40,7 @@ class SmokeTest {
                 compose.waitForIdle()
             }
 
-            compose.onNodeWithContentDescription(context.getString(R.string.fab_register_description)).performClick()
+            compose.onNode(hasText(context.getString(R.string.fab_register_description)) and hasClickAction()).performClick()
             compose.onNodeWithText(context.getString(R.string.entry_dialog_title)).assertIsDisplayed()
         }
     }

@@ -2,6 +2,18 @@ package no.healthlog.app
 
 import no.healthlog.app.coach.FastingPeriod
 import no.healthlog.app.coach.AiCoachPreferences
+import no.healthlog.app.coach.CoachPreferences
+import no.healthlog.app.coach.calculateReadiness
+import no.healthlog.app.coach.evaluateCoachMessage
+import no.healthlog.app.coach.relevantFastingPeriod
+import no.healthlog.app.ui.ListCard
+import no.healthlog.app.ui.NavRow
+import no.healthlog.app.ui.SectionTitle
+import no.healthlog.app.ui.SubPage
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MonitorWeight
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
@@ -306,7 +318,8 @@ fun TodayScreen(
     healthConnectManager: HealthConnectManager,
     refreshKey: Int = 0,
     fastingPeriods: List<FastingPeriod> = emptyList(),
-    onWeigh: () -> Unit = {}
+    onWeigh: () -> Unit = {},
+    onRegister: () -> Unit = {}
 ) {
     val date = LocalDate.now().format(dateFormatter)
     val context = LocalContext.current
@@ -316,6 +329,35 @@ fun TodayScreen(
     // ikke finnes, heller ikke i "Tilpass I dag".
     val aiCoachEnabled = remember { AiCoachPreferences.isEnabled(context) }
     var showCustomize by remember { mutableStateOf(false) }
+    var showScoreDetail by remember { mutableStateOf(false) }
+    var openCard by rememberSaveable { mutableStateOf<String?>(null) }
+
+    // Hvilke rader som har noe å vise akkurat nå - de samme vilkårene som kortene selv
+    // bruker for å skjule seg, så en rad aldri åpner en tom side.
+    val nowDate = LocalDate.now()
+    val sleepGoalForRows = GoalPreferences.getSleepGoalMinutes(context)
+    val hasReadiness = remember(all, sleepGoalForRows) { calculateReadiness(all, nowDate, sleepGoalForRows) != null }
+    val hasCoachMessage = remember(all, nowDate) {
+        evaluateCoachMessage(
+            all, CoachPreferences.getHistory(context), nowDate,
+            sleepGoalMinutes = sleepGoalForRows, stepsGoal = GoalPreferences.getStepsGoal(context)
+        ) != null
+    }
+    val hasSleepDebt = remember(all) { calculateSleepDebt(context, all) != null }
+    val insightRows = cardOrder.filter { it !in hiddenCards }.filter { id ->
+        when (id) {
+            "weekly_summary" -> nowDate.dayOfWeek == DayOfWeek.SUNDAY
+            "monthly_summary" -> nowDate == YearMonth.from(nowDate).atEndOfMonth()
+            "fasting" -> relevantFastingPeriod(fastingPeriods, nowDate) != null
+            "readiness" -> hasReadiness
+            "coach" -> hasCoachMessage
+            "ai_coach" -> aiCoachEnabled
+            "sleep_debt" -> hasSleepDebt
+            "weight_trend" -> weightChange(all) != null
+            "diary", "score_goals", "weekly_activity", "heart_rate" -> true
+            else -> false // "summary" og "metrics" vises som fliser over
+        }
+    }
 
     LazyColumn(
         modifier = Modifier
@@ -328,57 +370,88 @@ fun TodayScreen(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
                     Text(
-                        stringResource(R.string.today_title),
+                        stringResource(R.string.nav_today),
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold
                     )
                     Text(date, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                TextButton(onClick = onWeigh) {
-                    Text(stringResource(R.string.action_weigh))
+                FilledTonalIconButton(onClick = onWeigh) {
+                    Icon(Icons.Default.MonitorWeight, contentDescription = stringResource(R.string.action_weigh))
                 }
-                TextButton(onClick = { showCustomize = true }) {
-                    Text(stringResource(R.string.today_customize))
+                FilledTonalIconButton(onClick = { showCustomize = true }) {
+                    Icon(Icons.Default.Tune, contentDescription = stringResource(R.string.today_customize))
                 }
             }
         }
 
-        // Kortene i din valgte rekkefølge, uten de du har skjult (se TodayCustomization.kt).
-        cardOrder.filter { it !in hiddenCards }.forEach { id ->
-            when (id) {
-                "weekly_summary" -> item(key = id) { WeeklySummaryCard(all) }
-                "monthly_summary" -> item(key = id) { MonthlySummaryCard(all) }
-                "summary" -> item(key = id) { SummaryCard(stringResource(R.string.summary_card_title), today) }
-                "diary" -> item(key = id) { DiaryCard(today) }
-                "readiness" -> item(key = id) { ReadinessCard(all) }
-                "fasting" -> item(key = id) { FastingCard(all, fastingPeriods) }
-                "coach" -> item(key = id) { CoachCard(all) }
-                "ai_coach" -> if (aiCoachEnabled) item(key = id) { AiCoachCard(all) }
-                "score_goals" -> item(key = id) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(14.dp)
-                    ) {
-                        HealthScoreCard(today, modifier = Modifier.weight(1f), allDays = all)
-                        DailyGoalsCard(today, modifier = Modifier.weight(1f))
-                    }
-                }
-                "weekly_activity" -> item(key = id) { WeeklyActivityCard(all) }
-                "heart_rate" -> item(key = id) { HeartRateChartCard(healthConnectManager, refreshKey) }
-                "sleep_debt" -> item(key = id) { SleepDebtCard(all) }
-                "weight_trend" -> item(key = id) { WeightTrendCard(all) }
-                "metrics" -> {
-                    item(key = "metrics_title") {
-                        Text(
-                            stringResource(R.string.metrics_section_title),
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.SemiBold
+        // Fast øverst: dagsform, score og én setning (se TodayHero.kt).
+        item(key = "hero") {
+            TodayHeroCard(today, all, onRegister = onRegister, onShowScore = { showScoreDetail = true })
+        }
+
+        if ("metrics" !in hiddenCards) {
+            item(key = "metrics_title") { SectionTitle(stringResource(R.string.today_numbers_title), Modifier.padding(top = 6.dp)) }
+            item(key = "metrics") { MetricGrid(today) }
+        }
+
+        // Resten som rader - trykk åpner kortet på en egen side. Rader uten innhold
+        // akkurat nå (f.eks. ukeoppsummering utenom søndag) vises ikke.
+        if (insightRows.isNotEmpty()) {
+            item(key = "insight_title") { SectionTitle(stringResource(R.string.today_insight_title), Modifier.padding(top = 6.dp)) }
+            item(key = "insight_rows") {
+                ListCard {
+                    insightRows.forEachIndexed { index, id ->
+                        NavRow(
+                            title = todayCardLabel(id),
+                            onClick = { openCard = id },
+                            showDivider = index < insightRows.lastIndex
                         )
                     }
-                    item(key = id) { MetricGrid(today) }
                 }
             }
         }
+    }
+
+    openCard?.let { id ->
+        SubPage(title = todayCardLabel(id), onBack = { openCard = null }) { padding ->
+            Column(
+                Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                when (id) {
+                    "weekly_summary" -> WeeklySummaryCard(all)
+                    "monthly_summary" -> MonthlySummaryCard(all)
+                    "diary" -> DiaryCard(today)
+                    "readiness" -> ReadinessCard(all)
+                    "fasting" -> FastingCard(all, fastingPeriods)
+                    "coach" -> CoachCard(all)
+                    "ai_coach" -> AiCoachCard(all)
+                    "score_goals" -> {
+                        HealthScoreCard(today, modifier = Modifier.fillMaxWidth(), allDays = all)
+                        DailyGoalsCard(today, modifier = Modifier.fillMaxWidth())
+                    }
+                    "weekly_activity" -> WeeklyActivityCard(all)
+                    "heart_rate" -> HeartRateChartCard(healthConnectManager, refreshKey)
+                    "sleep_debt" -> SleepDebtCard(all)
+                    "weight_trend" -> WeightTrendCard(all)
+                }
+            }
+        }
+    }
+
+    if (showScoreDetail) {
+        val context2 = LocalContext.current
+        HealthScoreDetailDialog(
+            day = today,
+            breakdown = calculateHealthScoreBreakdown(
+                today,
+                sleepGoalMinutes = GoalPreferences.getSleepGoalMinutes(context2),
+                stepsGoal = GoalPreferences.getStepsGoal(context2),
+                hrvRange = remember(all) { personalHrvScoreRange(all) }
+            ),
+            onDismiss = { showScoreDetail = false }
+        )
     }
 
     if (showCustomize) {
@@ -583,10 +656,10 @@ fun MetricGrid(day: HealthDay?) {
         dragOffset = Offset.Zero
     }
 
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         order.chunked(2).forEach { rowIds ->
             Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 rowIds.forEach { id ->
@@ -624,15 +697,18 @@ fun MetricGrid(day: HealthDay?) {
                                     }
                                 )
                             },
-                        shape = RoundedCornerShape(18.dp)
                     ) {
-                        Column(Modifier.padding(15.dp)) {
-                            Text(metric.label, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Spacer(Modifier.height(5.dp))
+                        Column(Modifier.padding(16.dp)) {
+                            Text(
+                                metric.label,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(Modifier.height(4.dp))
                             Text(
                                 metric.value,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold
                             )
                             metric.detail?.let {
                                 Spacer(Modifier.height(3.dp))

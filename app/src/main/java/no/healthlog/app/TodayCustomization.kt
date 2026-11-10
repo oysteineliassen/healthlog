@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 
 /** Kortene på I dag som kan skjules og flyttes - i standardrekkefølgen. Overskriften står alltid øverst. */
 val DEFAULT_TODAY_CARD_ORDER = listOf(
-    "weekly_summary", "monthly_summary", "summary", "diary", "fasting", "readiness", "coach", "ai_coach",
+    "weekly_summary", "monthly_summary", "diary", "fasting", "readiness", "coach", "ai_coach",
     "score_goals", "weekly_activity", "heart_rate", "sleep_debt", "weight_trend", "metrics"
 )
 

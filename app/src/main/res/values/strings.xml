@@ -799,4 +799,17 @@
     <string name="hrv_goal_explained">Your level (%1$.0f ms) is the lower edge of what is normal for you: your average of %2$.0f ms minus your usual variation of %3$.0f ms. Based on the last 60 days, excluding sick, travel and fasting days.</string>
     <string name="hrv_goal_explained_generic">The goal is a general figure until you have at least 14 HRV readings. Then it switches to your own level.</string>
     <string name="health_score_hrv_range">full points at %1$.0f ms, zero at %2$.0f</string>
+    <string name="today_numbers_title">Today\'s numbers</string>
+    <string name="today_insight_title">More insight</string>
+    <string name="hero_ready_hard">Ready for a hard session</string>
+    <string name="hero_ready_normal">Train as planned</string>
+    <string name="hero_ready_moderate">Take it a bit easy</string>
+    <string name="hero_ready_low">Take it easy</string>
+    <string name="hero_no_readiness">Readiness appears when the app has sleep, HRV or resting heart rate for today and enough days to compare with.</string>
+    <string name="hero_signal_load">Load</string>
+    <string name="hero_signal_better">%1$s better</string>
+    <string name="hero_signal_normal">%1$s normal</string>
+    <string name="hero_signal_worse">%1$s weaker</string>
+    <string name="hero_score_label">score</string>
+    <string name="hero_score_description">Health score %1$d of 100. Tap for details.</string>
 </resources>

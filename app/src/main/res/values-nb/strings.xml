@@ -799,4 +799,17 @@
     <string name="hrv_goal_explained">Ditt nivå (%1$.0f ms) er nedre kant av det som er normalt for deg: snittet ditt på %2$.0f ms minus vanlig variasjon på %3$.0f ms. Regnet fra de siste 60 dagene, uten syke-, reise- og fastedager.</string>
     <string name="hrv_goal_explained_generic">Målet er et generelt tall til du har minst 14 HRV-målinger. Da byttes det til ditt eget nivå.</string>
     <string name="health_score_hrv_range">full pott ved %1$.0f ms, null ved %2$.0f</string>
+    <string name="today_numbers_title">Dagens tall</string>
+    <string name="today_insight_title">Mer innsikt</string>
+    <string name="hero_ready_hard">Klar for en hard økt</string>
+    <string name="hero_ready_normal">Tren som planlagt</string>
+    <string name="hero_ready_moderate">Ta det litt rolig</string>
+    <string name="hero_ready_low">Ta det rolig</string>
+    <string name="hero_no_readiness">Dagsform vises når appen har søvn, HRV eller hvilepuls for i dag og nok dager å sammenligne med.</string>
+    <string name="hero_signal_load">Belastning</string>
+    <string name="hero_signal_better">%1$s bedre</string>
+    <string name="hero_signal_normal">%1$s normal</string>
+    <string name="hero_signal_worse">%1$s svakere</string>
+    <string name="hero_score_label">score</string>
+    <string name="hero_score_description">Helse-score %1$d av 100. Trykk for detaljer.</string>
 </resources>

@@ -116,15 +116,10 @@ fun HealthLogApp(
                 )
             }
         },
-        floatingActionButton = {
-            if (tab == 0) FloatingActionButton(onClick = { showEntry = true }) {
-                Icon(Icons.Default.Add, stringResource(R.string.fab_register_description))
-            }
-        }
     ) { padding ->
         Box(Modifier.padding(padding)) {
             val tabContent: @Composable () -> Unit = { when (tab) {
-                0 -> TodayScreen(todayEntry, days, billingManager, healthConnectManager, refreshKey = vm.refreshCount, fastingPeriods = vm.fastingPeriods, onWeigh = { showScale = true })
+                0 -> TodayScreen(todayEntry, days, billingManager, healthConnectManager, refreshKey = vm.refreshCount, fastingPeriods = vm.fastingPeriods, onWeigh = { showScale = true }, onRegister = { showEntry = true })
                 1 -> TrendsScreen(days, billingManager)
                 2 -> HistoryScreen(
                     days = days,
