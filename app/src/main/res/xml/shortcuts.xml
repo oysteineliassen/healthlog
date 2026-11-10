@@ -13,4 +13,17 @@
             <extra android:name="open_entry_dialog" android:value="true" />
         </intent>
     </shortcut>
+    <shortcut
+        android:shortcutId="weigh"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_scale"
+        android:shortcutShortLabel="@string/action_weigh"
+        android:shortcutLongLabel="@string/action_weigh">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="no.healthlog.app"
+            android:targetClass="no.healthlog.app.MainActivity">
+            <extra android:name="open_scale" android:value="true" />
+        </intent>
+    </shortcut>
 </shortcuts>

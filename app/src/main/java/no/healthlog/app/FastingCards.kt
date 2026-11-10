@@ -59,7 +59,7 @@ fun FastingCard(all: List<HealthDay>, periods: List<FastingPeriod>) {
     val period = relevantFastingPeriod(periods, today) ?: return
     val rows = remember(all, period, today) { fastingComparison(all, period, today) }
 
-    Card(shape = RoundedCornerShape(22.dp)) {
+    Card(shape = RoundedCornerShape(20.dp)) {
         Column(Modifier.padding(20.dp)) {
             Text(stringResource(R.string.fasting_card_title), fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(6.dp))

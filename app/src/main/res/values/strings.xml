@@ -789,4 +789,14 @@
     <string name="onboarding_disclaimer_body">HealthLog is a tool for your own overview, not a medical device. Figures such as BMI, body composition, readiness and the coach\'s advice are estimates and general guidance. They do not replace a doctor or other health professional. Talk to a doctor before fasting or making big changes to diet or training, or if you are worried about your health.</string>
     <string name="settings_disclaimer_title">Not medical advice</string>
     <string name="settings_disclaimer_description">HealthLog is not a medical device. The figures and advice in the app are estimates and general guidance, and do not replace a doctor or other health professional.</string>
+    <string name="trend_group_all">All</string>
+    <string name="trend_group_body">Body</string>
+    <string name="trend_group_recovery">Sleep and recovery</string>
+    <string name="trend_group_activity">Activity</string>
+    <string name="bmi_gauge_description">BMI %1$.1f, %2$s</string>
+    <string name="scale_slot">User slot on the scale (1–10)</string>
+    <string name="scale_slot_help">Use 1 if you are the only one using the scale. Others in the household need their own slot.</string>
+    <string name="hrv_goal_explained">Your level (%1$.0f ms) is the lower edge of what is normal for you: your average of %2$.0f ms minus your usual variation of %3$.0f ms. Based on the last 60 days, excluding sick, travel and fasting days.</string>
+    <string name="hrv_goal_explained_generic">The goal is a general figure until you have at least 14 HRV readings. Then it switches to your own level.</string>
+    <string name="health_score_hrv_range">full points at %1$.0f ms, zero at %2$.0f</string>
 </resources>

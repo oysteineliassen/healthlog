@@ -74,7 +74,7 @@ fun ReadinessCard(all: List<HealthDay>) {
         else -> stringResource(R.string.readiness_advice_low)
     }
 
-    Card(shape = RoundedCornerShape(22.dp)) {
+    Card(shape = RoundedCornerShape(20.dp)) {
         Column(Modifier.padding(20.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
@@ -181,7 +181,7 @@ fun CoachCard(all: List<HealthDay>) {
 
     Card(
         modifier = Modifier.clickable { showWhy = true },
-        shape = RoundedCornerShape(22.dp)
+        shape = RoundedCornerShape(20.dp)
     ) {
         Column(Modifier.padding(20.dp)) {
             Text(stringResource(R.string.coach_title), fontWeight = FontWeight.Bold)
@@ -405,7 +405,7 @@ fun WeeklyActivityCard(all: List<HealthDay>) {
     val week = remember(all, goal) { weeklyActivity(all, LocalDate.now(), goal) }
     val remaining = (week.goalMinutes - week.minutes).coerceAtLeast(0)
 
-    Card(shape = RoundedCornerShape(22.dp)) {
+    Card(shape = RoundedCornerShape(20.dp)) {
         Column(Modifier.padding(20.dp)) {
             Text(stringResource(R.string.weekly_activity_title), fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(10.dp))

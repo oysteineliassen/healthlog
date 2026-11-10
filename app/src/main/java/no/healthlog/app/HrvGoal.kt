@@ -101,6 +101,10 @@ fun personalHrvScoreRange(allDays: List<HealthDay>): HrvScoreRange {
     return HrvScoreRange(floor = floor, goal = b.mean)
 }
 
+/** Snitt og normal variasjon bak HRV-grensen, til forklaringen under grafen. Null uten nok data. */
+fun hrvBaselineSummary(allDays: List<HealthDay>): Pair<Double, Double>? =
+    recentBaseline(allDays) { it.hrvMs }?.let { it.mean to it.stdDev }
+
 /** Søvn (timer): høyere er bedre - gulv-verdi, aldri under 6,5 timer uansett variasjon. */
 fun calculateSleepGoal(allDays: List<HealthDay>): PersonalGoal =
     calculatePersonalGoal(

@@ -558,7 +558,7 @@ private fun HistoryDayCard(
             Text(
                 text = stringResource(
                     R.string.metric_sleep,
-                    day.sleepMinutes?.let { "${it / 60} t ${it % 60} min" } ?: placeholder
+                    day.sleepMinutes?.let { formatDuration(it) } ?: placeholder
                 )
             )
 

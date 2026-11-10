@@ -209,6 +209,8 @@ private fun ProfileForm(onDone: (Ah100Protocol.Profile) -> Unit) {
     var height by rememberSaveable { mutableStateOf("") }
     var birthYear by rememberSaveable { mutableStateOf("") }
     var male by rememberSaveable { mutableStateOf(true) }
+    var slot by rememberSaveable { mutableStateOf("1") }
+    val s = slot.toIntOrNull()?.takeIf { it in 1..10 }
     val h = height.toIntOrNull()?.takeIf { it in 100..220 }
     val y = birthYear.toIntOrNull()?.takeIf { it in 1920..LocalDate.now().year - 10 }
 
@@ -228,10 +230,18 @@ private fun ProfileForm(onDone: (Ah100Protocol.Profile) -> Unit) {
         RadioButton(selected = !male, onClick = { male = false })
         Text(stringResource(R.string.scale_sex_female))
     }
+    // Vekta husker opptil ti personer. Bruker flere i husstanden vekta, må hver ha sin
+    // egen plass - ellers overskriver dere hverandres profil på vekta.
+    OutlinedTextField(
+        slot, { slot = it.filter(Char::isDigit).take(2) }, label = { Text(stringResource(R.string.scale_slot)) },
+        supportingText = { Text(stringResource(R.string.scale_slot_help)) },
+        isError = s == null,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), singleLine = true,
+    )
     Spacer(Modifier.height(8.dp))
     Button(
-        enabled = h != null && y != null,
-        onClick = { onDone(Ah100Protocol.Profile(heightCm = h!!, age = LocalDate.now().year - y!!, male = male)) },
+        enabled = h != null && y != null && s != null,
+        onClick = { onDone(Ah100Protocol.Profile(heightCm = h!!, age = LocalDate.now().year - y!!, male = male, slot = s!!)) },
     ) { Text(stringResource(R.string.scale_save_profile)) }
 }
 
@@ -245,13 +255,14 @@ class ScaleProfileStore(context: Context) {
         val h = prefs.getInt("height", 0)
         val y = prefs.getInt("birthYear", 0)
         if (h == 0 || y == 0) return null
-        return Ah100Protocol.Profile(h, LocalDate.now().year - y, prefs.getBoolean("male", true))
+        return Ah100Protocol.Profile(h, LocalDate.now().year - y, prefs.getBoolean("male", true), prefs.getInt("slot", 1).coerceIn(1, 10))
     }
 
     fun save(p: Ah100Protocol.Profile) = prefs.edit()
         .putInt("height", p.heightCm)
         .putInt("birthYear", LocalDate.now().year - p.age)
         .putBoolean("male", p.male)
+        .putInt("slot", p.slot)
         .apply()
 }
 

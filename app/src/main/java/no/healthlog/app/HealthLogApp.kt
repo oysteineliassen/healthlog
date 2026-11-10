@@ -39,7 +39,9 @@ fun HealthLogApp(
     billingManager: BillingManager,
     healthConnectManager: HealthConnectManager,
     openEntryOnLaunch: Boolean = false,
-    onEntryDialogConsumed: () -> Unit = {}
+    onEntryDialogConsumed: () -> Unit = {},
+    openScaleOnLaunch: Boolean = false,
+    onScaleConsumed: () -> Unit = {}
 ) {
     var tab by rememberSaveable { mutableIntStateOf(0) }
     var showEntry by rememberSaveable { mutableStateOf(false) }
@@ -52,6 +54,14 @@ fun HealthLogApp(
     // Widgetens "+"-knapp åpner appen med et flagg om at registrerings-dialogen skal
     // vises med det samme - forbrukes umiddelbart så det ikke trigger på nytt ved en
     // vanlig konfigurasjonsendring (f.eks. skjermrotasjon) senere i samme økt.
+    LaunchedEffect(openScaleOnLaunch) {
+        if (openScaleOnLaunch) {
+            tab = 0
+            showScale = true
+            onScaleConsumed()
+        }
+    }
+
     LaunchedEffect(openEntryOnLaunch) {
         if (openEntryOnLaunch) {
             tab = 0
@@ -310,207 +320,204 @@ fun EntryDialog(
         weightIsValid && waistIsValid && hrvIsValid &&
             stressIsValid && bodyBatteryMaxIsValid && bodyBatteryMinIsValid && sleepScoreIsValid
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(dismissOnClickOutside = false),
-        title = { Text(stringResource(R.string.entry_dialog_title)) },
-        text = {
-            Column(
-                modifier = Modifier.verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+    val save = {
+        onSave(
+            ManualEntryInput(
+                weightKg = weightValue,
+                waistCm = waistValue,
+                hrvMs = hrvValue,
+                stress = stressValue,
+                bodyBatteryMax = bodyBatteryMaxValue,
+                bodyBatteryMin = bodyBatteryMinValue,
+                sleepScore = sleepScoreValue,
+                morningNote = morningNote.trim().ifBlank { null },
+                eveningNote = eveningNote.trim().ifBlank { null },
+                sleepReflection = sleepReflection.trim().ifBlank { null },
+                sleepFactors = sleepFactors,
+                dayTag = dayTag,
+                nutritionLevel = nutritionLevel,
+                habitTags = habitTags
+            )
+        )
+    }
+
+    SubPage(
+        title = stringResource(R.string.entry_dialog_title),
+        onBack = onDismiss,
+        actions = {
+            TextButton(onClick = save, enabled = formIsValid) { Text(stringResource(R.string.action_save)) }
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .imePadding()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+
+            EntrySectionHeader(stringResource(R.string.entry_section_night))
+
+            OutlinedTextField(
+                value = sleepReflection,
+                onValueChange = { sleepReflection = it },
+                label = { Text(stringResource(R.string.label_sleep_reflection)) },
+                placeholder = { Text(stringResource(R.string.placeholder_sleep_reflection)) },
+                minLines = 2,
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            SleepFactorSelector(selected = sleepFactors, onChange = { sleepFactors = it })
+
+            SleepFactorSuggestions(
+                previousDayHabits = previousDay.habitTagSet(),
+                selected = sleepFactors,
+                onAdd = { sleepFactors = sleepFactors + it }
+            )
+
+            HorizontalDivider(Modifier.padding(vertical = 4.dp))
+
+            EntrySectionHeader(stringResource(R.string.entry_section_day))
+
+            Row(
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                EntrySectionHeader(stringResource(R.string.entry_section_night))
-
-                OutlinedTextField(
-                    value = sleepReflection,
-                    onValueChange = { sleepReflection = it },
-                    label = { Text(stringResource(R.string.label_sleep_reflection)) },
-                    placeholder = { Text(stringResource(R.string.placeholder_sleep_reflection)) },
-                    minLines = 2,
-                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                SleepFactorSelector(selected = sleepFactors, onChange = { sleepFactors = it })
-
-                SleepFactorSuggestions(
-                    previousDayHabits = previousDay.habitTagSet(),
-                    selected = sleepFactors,
-                    onAdd = { sleepFactors = sleepFactors + it }
-                )
-
-                HorizontalDivider(Modifier.padding(vertical = 4.dp))
-
-                EntrySectionHeader(stringResource(R.string.entry_section_day))
-
-                Row(
-                    modifier = Modifier.horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    DayTags.all.forEach { tag ->
-                        FilterChip(
-                            selected = dayTag == tag,
-                            onClick = { dayTag = if (dayTag == tag) null else tag },
-                            label = { Text(dayTagLabel(tag)) }
-                        )
-                    }
-                }
-
-                OutlinedTextField(
-                    value = morningNote,
-                    onValueChange = { morningNote = it },
-                    label = { Text(stringResource(R.string.label_morning_plan)) },
-                    placeholder = { Text(stringResource(R.string.placeholder_morning_plan)) },
-                    minLines = 3,
-                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                OutlinedTextField(
-                    weight,
-                    { weight = it },
-                    label = { Text(stringResource(R.string.label_weight)) },
-                    singleLine = true,
-                    isError = !weightIsValid,
-                    supportingText = {
-                        if (!weightIsValid) Text(stringResource(R.string.error_weight_range))
-                    }
-                )
-                OutlinedTextField(
-                    waist,
-                    { waist = it },
-                    label = { Text(stringResource(R.string.label_waist)) },
-                    singleLine = true,
-                    isError = !waistIsValid,
-                    supportingText = {
-                        if (!waistIsValid) Text(stringResource(R.string.error_waist_range))
-                    }
-                )
-                OutlinedTextField(
-                    sleepScore,
-                    { sleepScore = it },
-                    label = { Text(stringResource(R.string.label_sleep_score)) },
-                    singleLine = true,
-                    isError = !sleepScoreIsValid,
-                    supportingText = {
-                        if (!sleepScoreIsValid) Text(stringResource(R.string.error_percentage_range))
-                    }
-                )
-                OutlinedTextField(
-                    hrv,
-                    { hrv = it },
-                    label = { Text(stringResource(R.string.label_hrv)) },
-                    singleLine = true,
-                    isError = !hrvIsValid,
-                    supportingText = {
-                        if (!hrvIsValid) Text(stringResource(R.string.error_hrv_range))
-                    }
-                )
-                OutlinedTextField(
-                    bodyBatteryMax,
-                    { bodyBatteryMax = it },
-                    label = { Text(stringResource(R.string.label_body_battery_high)) },
-                    singleLine = true,
-                    isError = !bodyBatteryMaxIsValid,
-                    supportingText = {
-                        if (!bodyBatteryMaxIsValid) Text(stringResource(R.string.error_percentage_range))
-                    }
-                )
-
-                HorizontalDivider(Modifier.padding(vertical = 4.dp))
-
-                EntrySectionHeader(stringResource(R.string.entry_section_evening))
-
-                Text(
-                    text = stringResource(R.string.nutrition_section_label),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Row(
-                    modifier = Modifier.horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    NutritionLevel.all.forEach { level ->
-                        FilterChip(
-                            selected = nutritionLevel == level,
-                            onClick = { nutritionLevel = if (nutritionLevel == level) null else level },
-                            label = { Text(nutritionLevelLabel(level)) }
-                        )
-                    }
-                }
-
-                HabitTagSelector(selected = habitTags, onChange = { habitTags = it })
-
-                OutlinedTextField(
-                    value = eveningNote,
-                    onValueChange = { eveningNote = it },
-                    label = { Text(stringResource(R.string.label_evening_summary)) },
-                    placeholder = { Text(stringResource(R.string.placeholder_evening_summary)) },
-                    minLines = 3,
-                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                OutlinedTextField(
-                    stress,
-                    { stress = it },
-                    label = { Text(stringResource(R.string.label_stress)) },
-                    singleLine = true,
-                    isError = !stressIsValid,
-                    supportingText = {
-                        if (!stressIsValid) Text(stringResource(R.string.error_percentage_range))
-                    }
-                )
-                OutlinedTextField(
-                    bodyBatteryMin,
-                    { bodyBatteryMin = it },
-                    label = { Text(stringResource(R.string.label_body_battery_low)) },
-                    singleLine = true,
-                    isError = !bodyBatteryMinIsValid,
-                    supportingText = {
-                        if (!bodyBatteryMinIsValid) Text(stringResource(R.string.error_percentage_range))
-                    }
-                )
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = {
-                    onSave(
-                        ManualEntryInput(
-                            weightKg = weightValue,
-                            waistCm = waistValue,
-                            hrvMs = hrvValue,
-                            stress = stressValue,
-                            bodyBatteryMax = bodyBatteryMaxValue,
-                            bodyBatteryMin = bodyBatteryMinValue,
-                            sleepScore = sleepScoreValue,
-                            morningNote = morningNote.trim().ifBlank { null },
-                            eveningNote = eveningNote.trim().ifBlank { null },
-                            sleepReflection = sleepReflection.trim().ifBlank { null },
-                            sleepFactors = sleepFactors,
-                            dayTag = dayTag,
-                            nutritionLevel = nutritionLevel,
-                            habitTags = habitTags
-                        )
+                DayTags.all.forEach { tag ->
+                    FilterChip(
+                        selected = dayTag == tag,
+                        onClick = { dayTag = if (dayTag == tag) null else tag },
+                        label = { Text(dayTagLabel(tag)) }
                     )
-                },
-                enabled = formIsValid
+                }
+            }
+
+            OutlinedTextField(
+                value = morningNote,
+                onValueChange = { morningNote = it },
+                label = { Text(stringResource(R.string.label_morning_plan)) },
+                placeholder = { Text(stringResource(R.string.placeholder_morning_plan)) },
+                minLines = 3,
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            OutlinedTextField(
+                weight,
+                { weight = it },
+                label = { Text(stringResource(R.string.label_weight)) },
+                singleLine = true,
+                isError = !weightIsValid,
+                supportingText = {
+                    if (!weightIsValid) Text(stringResource(R.string.error_weight_range))
+                }
+            )
+            OutlinedTextField(
+                waist,
+                { waist = it },
+                label = { Text(stringResource(R.string.label_waist)) },
+                singleLine = true,
+                isError = !waistIsValid,
+                supportingText = {
+                    if (!waistIsValid) Text(stringResource(R.string.error_waist_range))
+                }
+            )
+            OutlinedTextField(
+                sleepScore,
+                { sleepScore = it },
+                label = { Text(stringResource(R.string.label_sleep_score)) },
+                singleLine = true,
+                isError = !sleepScoreIsValid,
+                supportingText = {
+                    if (!sleepScoreIsValid) Text(stringResource(R.string.error_percentage_range))
+                }
+            )
+            OutlinedTextField(
+                hrv,
+                { hrv = it },
+                label = { Text(stringResource(R.string.label_hrv)) },
+                singleLine = true,
+                isError = !hrvIsValid,
+                supportingText = {
+                    if (!hrvIsValid) Text(stringResource(R.string.error_hrv_range))
+                }
+            )
+            OutlinedTextField(
+                bodyBatteryMax,
+                { bodyBatteryMax = it },
+                label = { Text(stringResource(R.string.label_body_battery_high)) },
+                singleLine = true,
+                isError = !bodyBatteryMaxIsValid,
+                supportingText = {
+                    if (!bodyBatteryMaxIsValid) Text(stringResource(R.string.error_percentage_range))
+                }
+            )
+
+            HorizontalDivider(Modifier.padding(vertical = 4.dp))
+
+            EntrySectionHeader(stringResource(R.string.entry_section_evening))
+
+            Text(
+                text = stringResource(R.string.nutrition_section_label),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Row(
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                NutritionLevel.all.forEach { level ->
+                    FilterChip(
+                        selected = nutritionLevel == level,
+                        onClick = { nutritionLevel = if (nutritionLevel == level) null else level },
+                        label = { Text(nutritionLevelLabel(level)) }
+                    )
+                }
+            }
+
+            HabitTagSelector(selected = habitTags, onChange = { habitTags = it })
+
+            OutlinedTextField(
+                value = eveningNote,
+                onValueChange = { eveningNote = it },
+                label = { Text(stringResource(R.string.label_evening_summary)) },
+                placeholder = { Text(stringResource(R.string.placeholder_evening_summary)) },
+                minLines = 3,
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            OutlinedTextField(
+                stress,
+                { stress = it },
+                label = { Text(stringResource(R.string.label_stress)) },
+                singleLine = true,
+                isError = !stressIsValid,
+                supportingText = {
+                    if (!stressIsValid) Text(stringResource(R.string.error_percentage_range))
+                }
+            )
+            OutlinedTextField(
+                bodyBatteryMin,
+                { bodyBatteryMin = it },
+                label = { Text(stringResource(R.string.label_body_battery_low)) },
+                singleLine = true,
+                isError = !bodyBatteryMinIsValid,
+                supportingText = {
+                    if (!bodyBatteryMinIsValid) Text(stringResource(R.string.error_percentage_range))
+                }
+            )
+
+
+            Button(onClick = save, enabled = formIsValid, modifier = Modifier.fillMaxWidth()) {
                 Text(stringResource(R.string.action_save))
             }
-        },
-        dismissButton = {
-            Row {
-                TextButton(
-                    onClick = onDismiss
-                ) {
-                    Text(stringResource(R.string.action_cancel))
-                }
-            }
         }
-    )
+    }
     if (showDeleteConfirm) {
 
         DeleteConfirmDialog(

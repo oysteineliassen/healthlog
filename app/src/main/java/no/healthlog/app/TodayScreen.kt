@@ -73,7 +73,7 @@ fun HealthScoreCard(day: HealthDay?, modifier: Modifier = Modifier, allDays: Lis
 
     Card(
         modifier = modifier.clickable { showDetail = true },
-        shape = RoundedCornerShape(22.dp)
+        shape = RoundedCornerShape(20.dp)
     ) {
         Column(
             Modifier.padding(20.dp)
@@ -120,7 +120,7 @@ private fun HealthScoreDetailDialog(day: HealthDay?, breakdown: HealthScoreBreak
                 Spacer(Modifier.height(18.dp))
 
                 breakdown.criteria.forEach { criterion ->
-                    HealthScoreDetailRow(day, criterion)
+                    HealthScoreDetailRow(day, criterion, breakdown.hrvRange)
                     Spacer(Modifier.height(14.dp))
                 }
 
@@ -150,12 +150,14 @@ private fun HealthScoreDetailDialog(day: HealthDay?, breakdown: HealthScoreBreak
 }
 
 @Composable
-private fun HealthScoreDetailRow(day: HealthDay?, criterion: HealthScoreCriterion) {
+private fun HealthScoreDetailRow(day: HealthDay?, criterion: HealthScoreCriterion, hrvRange: HrvScoreRange) {
     val (label, valueText) = when (criterion.type) {
         HealthScoreCriterionType.SLEEP ->
-            stringResource(R.string.metric_label_sleep) to (day?.sleepMinutes?.let { "${it / 60}t ${it % 60}min" } ?: "–")
+            stringResource(R.string.metric_label_sleep) to (day?.sleepMinutes?.let { formatDuration(it) } ?: "–")
         HealthScoreCriterionType.HRV ->
-            stringResource(R.string.metric_label_hrv) to (day?.hrvMs?.let { "${it.toInt()} ms" } ?: "–")
+            stringResource(R.string.metric_label_hrv) to
+                ((day?.hrvMs?.let { "${it.toInt()} ms" } ?: "–") + " · " +
+                    stringResource(R.string.health_score_hrv_range, hrvRange.goal, hrvRange.floor))
         HealthScoreCriterionType.STRESS ->
             stringResource(R.string.metric_label_stress) to (day?.stress?.toString() ?: "–")
         HealthScoreCriterionType.STEPS ->
@@ -208,7 +210,7 @@ fun WeightTrendCard(days: List<HealthDay>) {
             "↑"
 
     Card(
-        shape = RoundedCornerShape(22.dp)
+        shape = RoundedCornerShape(20.dp)
     ) {
         Column(
             Modifier.padding(20.dp)
@@ -255,7 +257,7 @@ fun DailyGoalsCard(day: HealthDay?, modifier: Modifier = Modifier) {
 
     Card(
         modifier = modifier,
-        shape = RoundedCornerShape(22.dp)
+        shape = RoundedCornerShape(20.dp)
     ) {
         Column(
             Modifier.padding(20.dp)
@@ -395,7 +397,7 @@ fun TodayScreen(
 
 @Composable
 fun SummaryCard(title: String, day: HealthDay?) {
-    Card(shape = RoundedCornerShape(22.dp)) {
+    Card(shape = RoundedCornerShape(20.dp)) {
         Column(Modifier.padding(20.dp)) {
             Text(title, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(12.dp))
@@ -406,7 +408,7 @@ fun SummaryCard(title: String, day: HealthDay?) {
                     stringResource(
                         R.string.summary_steps_sleep_format,
                         day.steps?.let { "%,d".format(it) } ?: "–",
-                        day.sleepMinutes?.let { "${it / 60} t ${it % 60} min" } ?: "–"
+                        day.sleepMinutes?.let { formatDuration(it) } ?: "–"
                     )
                 },
                 style = MaterialTheme.typography.titleMedium
@@ -422,7 +424,7 @@ fun SummaryCard(title: String, day: HealthDay?) {
 
 @Composable
 fun DiaryCard(day: HealthDay?) {
-    Card(shape = RoundedCornerShape(22.dp)) {
+    Card(shape = RoundedCornerShape(20.dp)) {
         Column(Modifier.padding(20.dp)) {
             // Vises bare når den er skrevet - ingen "tom"-tekst, så kortet ikke blir
             // lengre for de som ikke bruker feltet.
@@ -513,7 +515,7 @@ fun MetricGrid(day: HealthDay?) {
         GridMetric(
             "sleep",
             stringResource(R.string.metric_label_sleep),
-            day?.sleepMinutes?.let { "${it / 60} t ${it % 60} min" } ?: "–",
+            day?.sleepMinutes?.let { formatDuration(it) } ?: "–",
             sleepDetail
         ),
         GridMetric("sleep_score", stringResource(R.string.metric_label_sleep_score), day?.sleepScore?.toString() ?: "–"),
@@ -691,7 +693,7 @@ fun WeeklySummaryCard(all: List<HealthDay>) {
         }
     }
 
-    Card(shape = RoundedCornerShape(22.dp)) {
+    Card(shape = RoundedCornerShape(20.dp)) {
         Column(Modifier.padding(20.dp)) {
             Text(stringResource(R.string.weekly_summary_title), fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(10.dp))
@@ -789,7 +791,7 @@ fun MonthlySummaryCard(all: List<HealthDay>) {
         }
     }
 
-    Card(shape = RoundedCornerShape(22.dp)) {
+    Card(shape = RoundedCornerShape(20.dp)) {
         Column(Modifier.padding(20.dp)) {
             Text(stringResource(R.string.monthly_summary_title), fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(10.dp))
@@ -863,7 +865,7 @@ fun SleepDebtCard(all: List<HealthDay>) {
     }
     val hoursText = "%.1f".format(kotlin.math.abs(debt.netHours))
 
-    Card(shape = RoundedCornerShape(22.dp)) {
+    Card(shape = RoundedCornerShape(20.dp)) {
         Column(Modifier.padding(20.dp)) {
             Text(stringResource(labelRes), fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(8.dp))
@@ -904,7 +906,7 @@ fun HeartRateChartCard(healthConnectManager: HealthConnectManager, refreshKey: I
         }
     }
 
-    Card(shape = RoundedCornerShape(22.dp)) {
+    Card(shape = RoundedCornerShape(20.dp)) {
         Column(Modifier.padding(20.dp)) {
             Text(stringResource(R.string.heart_rate_chart_title), fontWeight = FontWeight.Bold)
 

@@ -16,6 +16,8 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -190,7 +192,11 @@ fun BmiGauge(bmi: Double, modifier: Modifier = Modifier) {
     val markerColor = MaterialTheme.colorScheme.onSurface
 
     Column(modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(Modifier.fillMaxWidth(0.8f).aspectRatio(2f), contentAlignment = Alignment.BottomCenter) {
+        val gaugeDescription = stringResource(R.string.bmi_gauge_description, bmi, stringResource(zone.label))
+        Box(
+            Modifier.fillMaxWidth(0.8f).aspectRatio(2f).clearAndSetSemantics { contentDescription = gaugeDescription },
+            contentAlignment = Alignment.BottomCenter
+        ) {
             Canvas(Modifier.fillMaxSize()) {
                 val stroke = size.width * 0.07f
                 val radius = (size.width - stroke) / 2f

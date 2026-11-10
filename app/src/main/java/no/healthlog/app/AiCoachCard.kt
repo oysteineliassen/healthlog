@@ -56,7 +56,7 @@ fun AiCoachCard(all: List<HealthDay>) {
     var expanded by remember { mutableStateOf(false) }
     var info by remember { mutableStateOf<String?>(null) }
 
-    Card(shape = RoundedCornerShape(22.dp)) {
+    Card(shape = RoundedCornerShape(20.dp)) {
         Column(Modifier.padding(20.dp)) {
             Text(stringResource(R.string.ai_coach_title), fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(10.dp))

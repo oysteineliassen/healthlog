@@ -789,4 +789,14 @@
     <string name="onboarding_disclaimer_body">HealthLog er et verktøy for egen oversikt, ikke medisinsk utstyr. Tall som BMI, kroppssammensetning, dagsform og rådene fra treneren er anslag og generell veiledning. De erstatter ikke lege eller annet helsepersonell. Snakk med lege før du faster, legger om kosthold eller trening kraftig, eller hvis du er bekymret for helsen din.</string>
     <string name="settings_disclaimer_title">Ikke medisinsk råd</string>
     <string name="settings_disclaimer_description">HealthLog er ikke medisinsk utstyr. Tallene og rådene i appen er anslag og generell veiledning, og erstatter ikke lege eller annet helsepersonell.</string>
+    <string name="trend_group_all">Alle</string>
+    <string name="trend_group_body">Kropp</string>
+    <string name="trend_group_recovery">Søvn og restitusjon</string>
+    <string name="trend_group_activity">Aktivitet</string>
+    <string name="bmi_gauge_description">BMI %1$.1f, %2$s</string>
+    <string name="scale_slot">Brukerplass på vekta (1–10)</string>
+    <string name="scale_slot_help">Bruk 1 hvis du er alene om vekta. Flere i husstanden må ha hver sin plass.</string>
+    <string name="hrv_goal_explained">Ditt nivå (%1$.0f ms) er nedre kant av det som er normalt for deg: snittet ditt på %2$.0f ms minus vanlig variasjon på %3$.0f ms. Regnet fra de siste 60 dagene, uten syke-, reise- og fastedager.</string>
+    <string name="hrv_goal_explained_generic">Målet er et generelt tall til du har minst 14 HRV-målinger. Da byttes det til ditt eget nivå.</string>
+    <string name="health_score_hrv_range">full pott ved %1$.0f ms, null ved %2$.0f</string>
 </resources>

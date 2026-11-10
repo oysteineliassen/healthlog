@@ -150,6 +150,7 @@ fun TrendsScreen(days: List<HealthDay>, billingManager: BillingManager) {
     // Uavhengig av hvilken periode (14d/31d/1å) som er valgt over - baseline skal
     // alltid bygges på de nyeste faktiske målingene, ikke bare det som vises i grafen.
     val hrvGoal = remember(sorted) { calculateHrvGoal(sorted) }
+    val hrvBaseline = remember(sorted) { hrvBaselineSummary(sorted) }
     val restingHrGoal = remember(sorted) { calculateRestingHrGoal(sorted) }
     // Bruker DITT SATTE søvnmål (GoalPreferences, samme tall som Dagens mål og
     // Søvnoverskudd) i stedet for en egen automatisk utregnet baseline - de viste
@@ -376,6 +377,15 @@ fun TrendsScreen(days: List<HealthDay>, billingManager: BillingManager) {
                 axisRange = AxisRange.Padded(5f),
                 goalValue = hrvGoal.value,
                 smoothed = hrvSmoothed,
+                footer = {
+                    Text(
+                        hrvBaseline?.let { (mean, sd) ->
+                            stringResource(R.string.hrv_goal_explained, hrvGoal.value, mean, sd)
+                        } ?: stringResource(R.string.hrv_goal_explained_generic),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
                 goalLabel = stringResource(
                     if (hrvGoal.isPersonalized) R.string.goal_label_hrv_personal else R.string.goal_label_hrv_generic
                 ),
@@ -514,6 +524,7 @@ fun TrendsScreen(days: List<HealthDay>, billingManager: BillingManager) {
         if (missing.isNotEmpty()) trendCardOrder = trendCardOrder + missing
     }
 
+    var selectedGroup by rememberSaveable { mutableStateOf<String?>(null) }
     var draggingTrendCardId by remember { mutableStateOf<String?>(null) }
     var trendCardDragOffset by remember { mutableStateOf(Offset.Zero) }
     val trendCardBounds = remember { mutableStateMapOf<String, Rect>() }
@@ -628,7 +639,30 @@ fun TrendsScreen(days: List<HealthDay>, billingManager: BillingManager) {
             PeriodComparisonCard(days)
         }
 
-        items(trendCardOrder, key = { it }) { id ->
+        // Gruppefilter: tolv-tretten grafer under hverandre blir langt - velg en gruppe
+        // for å se bare de som hører sammen. Rekkefølgen du har dratt deg til beholdes.
+        item {
+            Row(
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FilterChip(
+                    selected = selectedGroup == null,
+                    onClick = { selectedGroup = null },
+                    label = { Text(stringResource(R.string.trend_group_all)) }
+                )
+                TrendGroup.entries.forEach { group ->
+                    FilterChip(
+                        selected = selectedGroup == group.name,
+                        onClick = { selectedGroup = if (selectedGroup == group.name) null else group.name },
+                        label = { Text(stringResource(group.labelRes)) }
+                    )
+                }
+            }
+        }
+
+        val visibleGroupIds = selectedGroup?.let { name -> TrendGroup.entries.firstOrNull { it.name == name }?.cardIds }
+        items(trendCardOrder.filter { visibleGroupIds == null || it in visibleGroupIds }, key = { it }) { id ->
             val content = trendCardsById[id]
             if (content != null) {
                 ReorderableTrendCardBox(
@@ -650,6 +684,13 @@ fun TrendsScreen(days: List<HealthDay>, billingManager: BillingManager) {
             }
         }
     }
+}
+
+/** Grupper for filteret over trendgrafene. [cardIds] er id-ene i trendCards. */
+private enum class TrendGroup(val labelRes: Int, val cardIds: Set<String>) {
+    BODY(R.string.trend_group_body, setOf("weight", "waist", "body_fat")),
+    RECOVERY(R.string.trend_group_recovery, setOf("hrv", "resting_hr", "sleep", "sleep_score", "body_battery", "stress")),
+    ACTIVITY(R.string.trend_group_activity, setOf("steps", "active_minutes", "training", "avg_heart_rate"))
 }
 
 /** Anslaget under vektgrafen: tempo per uke, og når målet nås med dagens tempo. */
@@ -1631,7 +1672,7 @@ fun PeriodComparisonCard(days: List<HealthDay>) {
         buildPeriodComparison(days, rangeA.start, rangeA.end, rangeB.start, rangeB.end, sleepGoalMinutes, stepsGoal)
     }
 
-    Card(shape = RoundedCornerShape(22.dp)) {
+    Card(shape = RoundedCornerShape(20.dp)) {
         Column(Modifier.padding(20.dp)) {
             Text(stringResource(R.string.period_comparison_title), fontWeight = FontWeight.Bold)
 

@@ -23,20 +23,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import no.healthlog.app.billing.BillingManager
 import no.healthlog.app.data.*
 import no.healthlog.app.garmin.HealthConnectManager
-
-private val LightColors = lightColorScheme(
-    primary = Color(0xFF2F6B5F),
-    secondary = Color(0xFF7C9A92),
-    background = Color(0xFFF7F8FA),
-    surface = Color.White
-)
-
-private val DarkColors = darkColorScheme(
-    primary = Color(0xFF8FCFC0),
-    secondary = Color(0xFFA9C4BC),
-    background = Color(0xFF12191A),
-    surface = Color(0xFF1B2422)
-)
+import no.healthlog.app.ui.HealthLogTheme
 
 class MainActivity : ComponentActivity() {
 
@@ -44,6 +31,7 @@ class MainActivity : ComponentActivity() {
     // på widgetens "+"-knapp gjenbruker en allerede kjørende instans i stedet for å
     // stable opp en ny aktivitet oppå den gamle.
     private val openEntryFlow = MutableStateFlow(false)
+    private val openScaleFlow = MutableStateFlow(false)
 
     // Samme factory som setContent bruker - ViewModelProvider gir da tilbake SAMME
     // ViewModel-instans som Compose-skjermene, slik at onResume kan be den synke.
@@ -63,6 +51,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val vm: HealthViewModel = viewModel(factory = vmFactory)
             val openEntryOnLaunch by openEntryFlow.collectAsState()
+            val openScaleOnLaunch by openScaleFlow.collectAsState()
 
             val useDarkTheme = when (vm.themeMode) {
                 ThemeMode.SYSTEM -> isSystemInDarkTheme()
@@ -70,9 +59,7 @@ class MainActivity : ComponentActivity() {
                 ThemeMode.DARK -> true
             }
 
-            MaterialTheme(
-                colorScheme = if (useDarkTheme) DarkColors else LightColors
-            ) {
+            HealthLogTheme(darkTheme = useDarkTheme) {
                 var showOnboarding by rememberSaveable {
                     mutableStateOf(!OnboardingPreferences.hasCompletedOnboarding(applicationContext))
                 }
@@ -88,7 +75,9 @@ class MainActivity : ComponentActivity() {
                         billingManager = billingManager,
                         healthConnectManager = healthConnectManager,
                         openEntryOnLaunch = openEntryOnLaunch,
-                        onEntryDialogConsumed = { openEntryFlow.value = false }
+                        onEntryDialogConsumed = { openEntryFlow.value = false },
+                        openScaleOnLaunch = openScaleOnLaunch,
+                        onScaleConsumed = { openScaleFlow.value = false }
                     )
                 }
             }
@@ -137,6 +126,10 @@ class MainActivity : ComponentActivity() {
         if (openEntry) {
             openEntryFlow.value = true
         }
+        // App-snarveien "Vei deg".
+        if (intent.getBooleanExtra(EXTRA_OPEN_SCALE, false) || intent.getStringExtra(EXTRA_OPEN_SCALE) == "true") {
+            openScaleFlow.value = true
+        }
     }
 
     /** Filene som er delt til / åpnet med appen (Garmin-eksport). */
@@ -156,6 +149,8 @@ class MainActivity : ComponentActivity() {
     companion object {
         /** Widgetens "+"-knapp og app-snarveien setter denne for å åpne rett til registrerings-dialogen. */
         const val EXTRA_OPEN_ENTRY = "open_entry_dialog"
+        /** App-snarveien "Vei deg" åpner rett til vekt-siden. */
+        const val EXTRA_OPEN_SCALE = "open_scale"
         /** AI-påminnelsen: kopier ukens prompt når appen åpnes. */
         const val EXTRA_COPY_AI_PROMPT = "copy_ai_prompt"
 

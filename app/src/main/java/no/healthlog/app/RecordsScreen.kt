@@ -215,7 +215,7 @@ private fun YearInReviewCard(days: List<HealthDay>) {
         }
     }
 
-    Card(shape = RoundedCornerShape(22.dp)) {
+    Card(shape = RoundedCornerShape(20.dp)) {
         Column(Modifier.padding(20.dp)) {
             Text(reviewTitle, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge)
 

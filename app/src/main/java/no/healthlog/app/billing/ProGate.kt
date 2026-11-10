@@ -41,7 +41,7 @@ private fun ProUpsellCard(billingManager: BillingManager, featureName: String) {
     val context = LocalContext.current
     val price = billingManager.getFormattedPrice()
 
-    Card(shape = RoundedCornerShape(22.dp)) {
+    Card(shape = RoundedCornerShape(20.dp)) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()

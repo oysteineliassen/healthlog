@@ -510,7 +510,12 @@ private fun gradedScoreInverted(value: Double, goal: Double, ceiling: Double, ma
 enum class HealthScoreCriterionType { SLEEP, HRV, STRESS, STEPS, BODY_BATTERY }
 
 data class HealthScoreCriterion(val type: HealthScoreCriterionType, val points: Int, val maxPoints: Int = 20)
-data class HealthScoreBreakdown(val total: Int, val criteria: List<HealthScoreCriterion>)
+data class HealthScoreBreakdown(
+    val total: Int,
+    val criteria: List<HealthScoreCriterion>,
+    /** HRV-spennet poengene er gradert over - vises i detaljvisningen. */
+    val hrvRange: HrvScoreRange = HrvScoreRange.GENERIC
+)
 
 /**
  * sleepGoalMinutes/stepsGoal har standardverdier som matcher GoalPreferences sine egne
@@ -584,7 +589,7 @@ fun calculateHealthScoreBreakdown(
         HealthScoreCriterion(HealthScoreCriterionType.STEPS, stepsPoints),
         HealthScoreCriterion(HealthScoreCriterionType.BODY_BATTERY, bodyBatteryPoints)
     )
-    return HealthScoreBreakdown(criteria.sumOf { it.points }, criteria)
+    return HealthScoreBreakdown(criteria.sumOf { it.points }, criteria, hrvRange)
 }
 
 fun calculateHealthScore(
