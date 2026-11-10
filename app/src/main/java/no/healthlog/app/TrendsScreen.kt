@@ -42,6 +42,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import no.healthlog.app.billing.BillingManager
+import no.healthlog.app.ui.ListCard
+import no.healthlog.app.ui.NavRow
+import no.healthlog.app.ui.SectionTitle
+import no.healthlog.app.ui.StatTile
+import no.healthlog.app.ui.SubPage
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
+import kotlin.math.abs
+import kotlin.math.roundToInt
 import no.healthlog.app.data.HealthDay
 import no.healthlog.app.coach.ComparisonPeriodType
 import no.healthlog.app.coach.PeriodRange
@@ -62,7 +74,6 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.time.temporal.WeekFields
 import java.util.Locale
-import kotlin.math.abs
 import kotlin.math.max
 
 enum class TrendRange { DAYS_14, DAYS_31, YEAR_1 }
@@ -442,176 +453,221 @@ fun TrendsScreen(days: List<HealthDay>, billingManager: BillingManager) {
     ) + bodyFatCards
     val trendCardsById = trendCards.toMap()
 
-    var trendCardOrder by rememberSaveable {
-        mutableStateOf(
-            TilePreferences.getTrendCardOrder(context)?.filter { it in trendCardsById }
-                ?: trendCards.map { it.first }
-        )
-    }
-    LaunchedEffect(trendCardsById.keys) {
-        val missing = trendCardsById.keys - trendCardOrder.toSet()
-        if (missing.isNotEmpty()) trendCardOrder = trendCardOrder + missing
-    }
+    // Oversikten: én liten flis per måling (siste verdi, endring i perioden og mini-graf).
+    // Trykk åpner detaljsiden med den store grafen fra trendCards.
+    val hoursUnit = stringResource(R.string.unit_hours)
+    fun plain(unit: String, decimals: Int): (Float) -> String = { v -> "${formatValue(v, decimals)} $unit".trim() }
+    val tiles = listOf(
+        TrendTile("hrv", stringResource(R.string.metric_label_hrv), hrvPoints, plain(stringResource(R.string.unit_ms), 0)),
+        TrendTile("resting_hr", stringResource(R.string.metric_label_resting_hr), restingHeartRatePoints, plain(stringResource(R.string.unit_bpm), 0)),
+        TrendTile("sleep", stringResource(R.string.metric_label_sleep), sleepPoints, { v -> formatDuration((v * 60).roundToInt()) }, plain(hoursUnit, 1)),
+        TrendTile("sleep_score", stringResource(R.string.metric_label_sleep_score), sleepScorePoints, plain("", 0)),
+        TrendTile("body_battery", stringResource(R.string.metric_label_body_battery), bodyBatteryPoints.map { TrendPoint(it.date, it.high) }, plain("", 0)),
+        TrendTile("stress", stringResource(R.string.metric_label_stress), stressPoints, plain("", 0)),
+        TrendTile("weight", stringResource(R.string.metric_title_weight), weightPoints, plain(stringResource(R.string.unit_kg), 1)),
+        TrendTile("body_fat", stringResource(R.string.metric_title_body_fat), bodyFatPoints, plain("%", 1)),
+        TrendTile("waist", stringResource(R.string.metric_title_waist), waistPoints, plain(stringResource(R.string.unit_cm), 1)),
+        TrendTile("steps", stringResource(R.string.metric_label_steps), stepsPoints, { v -> "%,d".format(v.roundToInt()) }),
+        TrendTile("active_minutes", stringResource(R.string.metric_label_active_minutes), activeMinutesPoints, plain(stringResource(R.string.unit_minutes), 0)),
+        TrendTile("training", stringResource(R.string.metric_label_training), trainingPoints, plain(stringResource(R.string.unit_minutes), 0)),
+        TrendTile("avg_heart_rate", stringResource(R.string.metric_label_avg_heart_rate), avgHeartRatePoints, plain(stringResource(R.string.unit_bpm), 0))
+    ).filter { it.points.isNotEmpty() && it.id in trendCardsById }
 
-    var selectedGroup by rememberSaveable { mutableStateOf<String?>(null) }
-    var draggingTrendCardId by remember { mutableStateOf<String?>(null) }
-    var trendCardDragOffset by remember { mutableStateOf(Offset.Zero) }
-    val trendCardBounds = remember { mutableStateMapOf<String, Rect>() }
+    var openTrend by rememberSaveable { mutableStateOf<String?>(null) }
+    var showComparison by rememberSaveable { mutableStateOf(false) }
+    var showRecords by rememberSaveable { mutableStateOf(false) }
+    var showShareMenu by remember { mutableStateOf(false) }
 
-    fun endTrendCardDrag() {
-        val fromId = draggingTrendCardId
-        val fromBounds = fromId?.let { trendCardBounds[it] }
-        if (fromId != null && fromBounds != null) {
-            val draggedCenter = fromBounds.center + trendCardDragOffset
-            val targetId = trendCardBounds.entries
-                .filter { it.key != fromId }
-                .minByOrNull { (_, bounds) -> (bounds.center - draggedCenter).getDistance() }
-                ?.key
-            if (targetId != null) {
-                val fromIndex = trendCardOrder.indexOf(fromId)
-                val toIndex = trendCardOrder.indexOf(targetId)
-                if (fromIndex != -1 && toIndex != -1) {
-                    trendCardOrder = trendCardOrder.toMutableList().apply {
-                        this[fromIndex] = targetId
-                        this[toIndex] = fromId
-                    }
-                    TilePreferences.setTrendCardOrder(context, trendCardOrder)
-                }
+    val rangeRow: @Composable () -> Unit = {
+        SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+            val ranges = listOf(
+                TrendRange.DAYS_14 to R.string.range_14_days,
+                TrendRange.DAYS_31 to R.string.range_31_days,
+                TrendRange.YEAR_1 to R.string.range_1_year
+            )
+            ranges.forEachIndexed { index, (range, labelRes) ->
+                SegmentedButton(
+                    selected = selectedRange == range,
+                    onClick = { selectedRange = range },
+                    shape = SegmentedButtonDefaults.itemShape(index, ranges.size)
+                ) { Text(stringResource(labelRes)) }
             }
         }
-        draggingTrendCardId = null
-        trendCardDragOffset = Offset.Zero
     }
 
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 20.dp),
-        contentPadding = PaddingValues(
-            top = 28.dp,
-            bottom = 32.dp
-        ),
+        contentPadding = PaddingValues(top = 28.dp, bottom = 32.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         item {
-            Text(
-                text = stringResource(R.string.trends_title),
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold
-            )
-
-            Text(
-                text = stringResource(R.string.trends_subtitle),
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Spacer(Modifier.height(12.dp))
-
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChip(
-                    selected = selectedRange == TrendRange.DAYS_14,
-                    onClick = { selectedRange = TrendRange.DAYS_14 },
-                    label = { Text(stringResource(R.string.range_14_days)) }
-                )
-                FilterChip(
-                    selected = selectedRange == TrendRange.DAYS_31,
-                    onClick = { selectedRange = TrendRange.DAYS_31 },
-                    label = { Text(stringResource(R.string.range_31_days)) }
-                )
-                FilterChip(
-                    selected = selectedRange == TrendRange.YEAR_1,
-                    onClick = { selectedRange = TrendRange.YEAR_1 },
-                    label = { Text(stringResource(R.string.range_1_year)) }
-                )
-            }
-
-            if (allHabitTags.isNotEmpty()) {
-                Spacer(Modifier.height(10.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    stringResource(R.string.trends_habit_highlight_label),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = stringResource(R.string.trends_title),
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f)
                 )
-                Row(
-                    modifier = Modifier.horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    allHabitTags.forEach { tag ->
-                        FilterChip(
-                            selected = selectedHabit == tag,
-                            onClick = { selectedHabit = if (selectedHabit == tag) null else tag },
-                            label = { Text(tag) }
+                Box {
+                    FilledTonalIconButton(onClick = { showShareMenu = true }) {
+                        Icon(Icons.Default.Share, contentDescription = stringResource(R.string.action_share))
+                    }
+                    DropdownMenu(expanded = showShareMenu, onDismissRequest = { showShareMenu = false }) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.share_as_image)) },
+                            onClick = { showShareMenu = false; shareSummary(asPdf = false) }
+                        )
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.share_as_pdf)) },
+                            onClick = { showShareMenu = false; shareSummary(asPdf = true) }
+                        )
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.share_as_clinical_pdf)) },
+                            onClick = { showShareMenu = false; shareClinicalPdf() }
                         )
                     }
                 }
             }
+        }
 
-            Spacer(Modifier.height(10.dp))
+        item { rangeRow() }
 
-            Row(
-                modifier = Modifier.horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                OutlinedButton(onClick = { shareSummary(asPdf = false) }) {
-                    Text(stringResource(R.string.share_as_image))
-                }
-                OutlinedButton(onClick = { shareSummary(asPdf = true) }) {
-                    Text(stringResource(R.string.share_as_pdf))
-                }
-                OutlinedButton(onClick = { shareClinicalPdf() }) {
-                    Text(stringResource(R.string.share_as_clinical_pdf))
+        if (tiles.isEmpty()) {
+            item {
+                Text(stringResource(R.string.chart_no_data), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+
+        TrendGroup.entries.forEach { group ->
+            val groupTiles = tiles.filter { it.id in group.cardIds }
+            if (groupTiles.isEmpty()) return@forEach
+            item(key = "group_${group.name}") {
+                SectionTitle(stringResource(group.labelRes), Modifier.padding(top = 6.dp))
+            }
+            item(key = "tiles_${group.name}") {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    groupTiles.chunked(2).forEach { rowTiles ->
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+                            rowTiles.forEach { tile ->
+                                val last = tile.points.last().value
+                                val change = if (tile.points.size >= 2) last - tile.points.first().value else null
+                                StatTile(
+                                    label = tile.label,
+                                    value = tile.format(last),
+                                    modifier = Modifier.weight(1f),
+                                    detail = change?.let {
+                                        stringResource(
+                                            R.string.trend_tile_change,
+                                            (if (it > 0f) "+" else if (it < 0f) "−" else "") + tile.formatChange(abs(it))
+                                        )
+                                    },
+                                    onClick = { openTrend = tile.id },
+                                    extra = { Sparkline(tile.points) }
+                                )
+                            }
+                            if (rowTiles.size == 1) Spacer(Modifier.weight(1f))
+                        }
+                    }
                 }
             }
         }
 
         item {
-            PeriodComparisonCard(days)
+            ListCard(Modifier.padding(top = 6.dp)) {
+                NavRow(stringResource(R.string.period_comparison_title), onClick = { showComparison = true })
+                NavRow(stringResource(R.string.trends_records_row), onClick = { showRecords = true }, showDivider = false)
+            }
         }
+    }
 
-        // Gruppefilter: tolv-tretten grafer under hverandre blir langt - velg en gruppe
-        // for å se bare de som hører sammen. Rekkefølgen du har dratt deg til beholdes.
-        item {
-            Row(
-                modifier = Modifier.horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+    // Detaljsiden: periodevelger, vane-markering og den store grafen for målingen.
+    openTrend?.let { id ->
+        val tile = tiles.firstOrNull { it.id == id }
+        SubPage(title = tile?.label ?: stringResource(R.string.trends_title), onBack = { openTrend = null }) { padding ->
+            Column(
+                Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                FilterChip(
-                    selected = selectedGroup == null,
-                    onClick = { selectedGroup = null },
-                    label = { Text(stringResource(R.string.trend_group_all)) }
-                )
-                TrendGroup.entries.forEach { group ->
-                    FilterChip(
-                        selected = selectedGroup == group.name,
-                        onClick = { selectedGroup = if (selectedGroup == group.name) null else group.name },
-                        label = { Text(stringResource(group.labelRes)) }
-                    )
+                rangeRow()
+                if (allHabitTags.isNotEmpty()) {
+                    Column {
+                        Text(
+                            stringResource(R.string.trends_habit_highlight_label),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Row(
+                            modifier = Modifier.horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            allHabitTags.forEach { tag ->
+                                FilterChip(
+                                    selected = selectedHabit == tag,
+                                    onClick = { selectedHabit = if (selectedHabit == tag) null else tag },
+                                    label = { Text(tag) }
+                                )
+                            }
+                        }
+                    }
+                }
+                trendCardsById[id]?.invoke()
+                if (id == "weight" || id == "body_fat") {
+                    ListCard {
+                        NavRow(stringResource(R.string.body_comp_title), onClick = { showBodyComposition = true }, showDivider = false)
+                    }
                 }
             }
         }
+    }
 
-        val visibleGroupIds = selectedGroup?.let { name -> TrendGroup.entries.firstOrNull { it.name == name }?.cardIds }
-        items(trendCardOrder.filter { visibleGroupIds == null || it in visibleGroupIds }, key = { it }) { id ->
-            val content = trendCardsById[id]
-            if (content != null) {
-                ReorderableTrendCardBox(
-                    isDragging = draggingTrendCardId == id,
-                    dragOffset = trendCardDragOffset,
-                    onPositioned = { bounds -> trendCardBounds[id] = bounds },
-                    onDragStart = {
-                        draggingTrendCardId = id
-                        trendCardDragOffset = Offset.Zero
-                    },
-                    onDrag = { delta -> trendCardDragOffset += delta },
-                    onDragEnd = { endTrendCardDrag() },
-                    onDragCancel = {
-                        draggingTrendCardId = null
-                        trendCardDragOffset = Offset.Zero
-                    },
-                    content = content
-                )
+    if (showComparison) {
+        SubPage(title = stringResource(R.string.period_comparison_title), onBack = { showComparison = false }) { padding ->
+            Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp)) {
+                PeriodComparisonCard(days)
             }
         }
+    }
+
+    if (showRecords) {
+        SubPage(title = stringResource(R.string.records_title), onBack = { showRecords = false }) { padding ->
+            Box(Modifier.fillMaxSize().padding(padding)) {
+                RecordsScreen(days, billingManager, showTitle = false)
+            }
+        }
+    }
+}
+
+/** Én flis i Trender-oversikten. [formatChange] brukes for endringen når den skal vises annerledes enn verdien. */
+private class TrendTile(
+    val id: String,
+    val label: String,
+    val points: List<TrendPoint>,
+    val format: (Float) -> String,
+    val formatChange: (Float) -> String = format
+)
+
+/** Mini-graf uten akser: bare formen på utviklingen i perioden. */
+@Composable
+private fun Sparkline(points: List<TrendPoint>) {
+    val color = MaterialTheme.colorScheme.primary
+    Canvas(Modifier.fillMaxWidth().height(36.dp)) {
+        if (points.size < 2) {
+            drawCircle(color, radius = 3.dp.toPx(), center = Offset(size.width / 2, size.height / 2))
+            return@Canvas
+        }
+        val min = points.minOf { it.value }
+        val max = points.maxOf { it.value }
+        val span = (max - min).takeIf { it > 0f } ?: 1f
+        val pad = 3.dp.toPx()
+        val path = Path()
+        points.forEachIndexed { i, p ->
+            val x = size.width * i / (points.size - 1)
+            val y = pad + (size.height - 2 * pad) * (1f - (p.value - min) / span)
+            if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
+        }
+        drawPath(path, color, style = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round))
     }
 }
 

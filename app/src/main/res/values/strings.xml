@@ -812,4 +812,7 @@
     <string name="hero_signal_worse">%1$s weaker</string>
     <string name="hero_score_label">score</string>
     <string name="hero_score_description">Health score %1$d of 100. Tap for details.</string>
+    <string name="trend_tile_change">%1$s in the period</string>
+    <string name="trends_records_row">Records and year in review</string>
+    <string name="action_share">Share</string>
 </resources>

@@ -812,4 +812,7 @@
     <string name="hero_signal_worse">%1$s svakere</string>
     <string name="hero_score_label">score</string>
     <string name="hero_score_description">Helse-score %1$d av 100. Trykk for detaljer.</string>
+    <string name="trend_tile_change">%1$s i perioden</string>
+    <string name="trends_records_row">Rekorder og årsoversikt</string>
+    <string name="action_share">Del</string>
 </resources>

@@ -35,7 +35,7 @@ import java.time.LocalDate
  * er i samme modul) i stedet for å duplisere streak-logikken.
  */
 @Composable
-fun RecordsScreen(days: List<HealthDay>, billingManager: BillingManager) {
+fun RecordsScreen(days: List<HealthDay>, billingManager: BillingManager, showTitle: Boolean = true) {
     val context = LocalContext.current
     val sleepGoalMinutes = GoalPreferences.getSleepGoalMinutes(context)
     val stepsGoal = GoalPreferences.getStepsGoal(context)
@@ -83,10 +83,10 @@ fun RecordsScreen(days: List<HealthDay>, billingManager: BillingManager) {
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 20.dp),
-        contentPadding = PaddingValues(top = 28.dp, bottom = 32.dp),
+        contentPadding = PaddingValues(top = if (showTitle) 28.dp else 12.dp, bottom = 32.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        item {
+        if (showTitle) item {
             Text(
                 text = stringResource(R.string.records_title),
                 style = MaterialTheme.typography.headlineMedium,
