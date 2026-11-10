@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Insights
+import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -101,18 +102,12 @@ fun HealthLogApp(
                     label = { Text(stringResource(R.string.nav_history)) }
                 )
 
+                // Rekorder ligger nå under Trender, og innstillingene i menyen "Mer".
                 NavigationBarItem(
                     tab == 3,
                     { tab = 3 },
-                    icon = { Icon(Icons.Default.Settings, null) },
-                    label = { Text(stringResource(R.string.nav_settings)) }
-                )
-
-                NavigationBarItem(
-                    tab == 4,
-                    { tab = 4 },
-                    icon = { Icon(Icons.Default.EmojiEvents, null) },
-                    label = { Text(stringResource(R.string.nav_records)) }
+                    icon = { Icon(Icons.Default.MoreHoriz, null) },
+                    label = { Text(stringResource(R.string.nav_more)) }
                 )
             }
         },
@@ -136,8 +131,7 @@ fun HealthLogApp(
                         vm.resetFieldToHealthConnect(date, field)
                     }
                 )
-                3 -> SettingsScreen(vm, billingManager)
-                4 -> RecordsScreen(days, billingManager)
+                else -> SettingsScreen(vm, billingManager)
             } }
 
             // Dra ned for å hente ferske data fra Health Connect - på alle fanene som

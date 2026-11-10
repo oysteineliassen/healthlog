@@ -815,4 +815,14 @@
     <string name="trend_tile_change">%1$s i perioden</string>
     <string name="trends_records_row">Rekorder og årsoversikt</string>
     <string name="action_share">Del</string>
+    <string name="nav_more">Mer</string>
+    <string name="more_group_you">Deg</string>
+    <string name="more_group_data">Data</string>
+    <string name="more_group_app">Appen</string>
+    <string name="more_sources">Datakilder</string>
+    <string name="more_about">Om og personvern</string>
+    <string name="more_backup_auto">Automatisk · sist %1$s</string>
+    <string name="more_backup_auto_on">Automatisk daglig</string>
+    <string name="more_backup_off">Ikke automatisk</string>
+    <string name="more_backup_failing">Siste forsøk feilet</string>
 </resources>

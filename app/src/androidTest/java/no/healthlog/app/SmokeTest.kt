@@ -32,8 +32,7 @@ class SmokeTest {
 
         ActivityScenario.launch(MainActivity::class.java).use {
             val tabs = listOf(
-                R.string.nav_trends, R.string.nav_history, R.string.nav_settings,
-                R.string.nav_records, R.string.nav_today
+                R.string.nav_trends, R.string.nav_history, R.string.nav_more, R.string.nav_today
             )
             for (tab in tabs) {
                 compose.onNode(hasText(context.getString(tab)) and hasClickAction()).performClick()

@@ -1,6 +1,12 @@
 package no.healthlog.app.ui
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material.icons.Icons
@@ -49,5 +55,29 @@ fun SubPage(
             contentWindowInsets = WindowInsets(0, 0, 0, 0),
             content = content
         )
+    }
+}
+
+/**
+ * Underside som vises INNE i fanen (bunnmenyen og meldinger nederst forblir synlige),
+ * f.eks. delene av Mer. Systemets tilbake-knapp går tilbake til [onBack].
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun InPlacePage(title: String, onBack: () -> Unit, content: @Composable () -> Unit) {
+    BackHandler(onBack = onBack)
+    Column(Modifier.fillMaxSize()) {
+        TopAppBar(
+            title = { Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+            navigationIcon = {
+                IconButton(onClick = onBack) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
+                }
+            },
+            // Scaffold-en rundt har allerede lagt inn plass til statusfeltet.
+            windowInsets = WindowInsets(0, 0, 0, 0),
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+        )
+        content()
     }
 }

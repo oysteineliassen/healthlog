@@ -815,4 +815,14 @@
     <string name="trend_tile_change">%1$s in the period</string>
     <string name="trends_records_row">Records and year in review</string>
     <string name="action_share">Share</string>
+    <string name="nav_more">More</string>
+    <string name="more_group_you">You</string>
+    <string name="more_group_data">Data</string>
+    <string name="more_group_app">The app</string>
+    <string name="more_sources">Data sources</string>
+    <string name="more_about">About and privacy</string>
+    <string name="more_backup_auto">Automatic · last %1$s</string>
+    <string name="more_backup_auto_on">Automatic daily</string>
+    <string name="more_backup_off">Not automatic</string>
+    <string name="more_backup_failing">Last attempt failed</string>
 </resources>

@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -32,6 +33,9 @@ import androidx.core.content.ContextCompat
 import kotlinx.coroutines.launch
 import no.healthlog.app.billing.BillingManager
 import no.healthlog.app.backup.BackupPreferences
+import no.healthlog.app.ui.InPlacePage
+import no.healthlog.app.ui.ListCard
+import no.healthlog.app.ui.NavRow
 import no.healthlog.app.backup.BackupSyncScheduler
 import no.healthlog.app.backup.notifyIfBackupRepeatedlyFailing
 import no.healthlog.app.garmin.HealthConnectManager
@@ -400,14 +404,84 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
         }
     }
 
+    var section by rememberSaveable { mutableStateOf<String?>(null) }
+    val openSection = section
+    val backupSuccessTime = lastBackupSuccess
+
+    // Menyen: korte rader i tre grupper. Hver rad åpner sin del av innstillingene.
+    if (openSection == null) {
+        LazyColumn(
+            Modifier.fillMaxSize().padding(horizontal = 20.dp),
+            contentPadding = PaddingValues(top = 28.dp, bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            item {
+                Text(
+                    stringResource(R.string.nav_more),
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            item { SettingsGroupLabel(stringResource(R.string.more_group_you)) }
+            item {
+                ListCard {
+                    NavRow(stringResource(R.string.settings_goals_title), onClick = { section = "goals" })
+                    NavRow(stringResource(R.string.today_card_fasting), onClick = { section = "fasting" })
+                    NavRow(stringResource(R.string.settings_ai_coach_title), onClick = { section = "ai_coach" }, showDivider = false)
+                }
+            }
+            item { SettingsGroupLabel(stringResource(R.string.more_group_data)) }
+            item {
+                ListCard {
+                    NavRow(stringResource(R.string.more_sources), onClick = { section = "sources" })
+                    NavRow(
+                        stringResource(R.string.settings_backup_title),
+                        onClick = { section = "backup" },
+                        subtitle = when {
+                            lastBackupError != null -> stringResource(R.string.more_backup_failing)
+                            isAutoBackupOn && backupSuccessTime != null ->
+                                stringResource(R.string.more_backup_auto, formatBackupTime(backupSuccessTime))
+                            isAutoBackupOn -> stringResource(R.string.more_backup_auto_on)
+                            else -> stringResource(R.string.more_backup_off)
+                        },
+                        subtitleColor = if (lastBackupError != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    NavRow(stringResource(R.string.settings_export_title), onClick = { section = "export" }, showDivider = false)
+                }
+            }
+            item { SettingsGroupLabel(stringResource(R.string.more_group_app)) }
+            item {
+                ListCard {
+                    NavRow(stringResource(R.string.settings_reminder_title), onClick = { section = "reminders" })
+                    NavRow(stringResource(R.string.settings_appearance_title), onClick = { section = "appearance" })
+                    NavRow(stringResource(R.string.more_about), onClick = { section = "about" }, showDivider = false)
+                }
+            }
+        }
+    } else InPlacePage(
+        title = stringResource(
+            when (openSection) {
+                "goals" -> R.string.settings_goals_title
+                "fasting" -> R.string.today_card_fasting
+                "ai_coach" -> R.string.settings_ai_coach_title
+                "sources" -> R.string.more_sources
+                "backup" -> R.string.settings_backup_title
+                "export" -> R.string.settings_export_title
+                "reminders" -> R.string.settings_reminder_title
+                "appearance" -> R.string.settings_appearance_title
+                else -> R.string.more_about
+            }
+        ),
+        onBack = { section = null }
+    ) {
     LazyColumn(
         Modifier
             .fillMaxSize()
             .padding(horizontal = 20.dp),
-        contentPadding = PaddingValues(top = 28.dp, bottom = 32.dp),
+        contentPadding = PaddingValues(top = 8.dp, bottom = 32.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        item {
+        if (openSection == "none") item {
             Text(
                 stringResource(R.string.settings_title),
                 style = MaterialTheme.typography.headlineMedium,
@@ -415,7 +489,7 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
             )
         }
 
-        item {
+        if (openSection == "sources") item {
             Card(shape = RoundedCornerShape(20.dp)) {
                 Column(Modifier.padding(18.dp)) {
                     Text(
@@ -478,7 +552,7 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
             }
         }
 
-        item {
+        if (openSection == "goals") item {
             Card(shape = RoundedCornerShape(20.dp)) {
                 Column(Modifier.padding(18.dp)) {
                     Text(
@@ -617,7 +691,7 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
             }
         }
 
-        item {
+        if (openSection == "appearance") item {
             Card(shape = RoundedCornerShape(20.dp)) {
                 Column(Modifier.padding(18.dp)) {
                     Text(
@@ -649,7 +723,7 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
             }
         }
 
-        item {
+        if (openSection == "reminders") item {
             Card(shape = RoundedCornerShape(20.dp)) {
                 Column(Modifier.padding(18.dp)) {
                     Text(
@@ -707,9 +781,9 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
             }
         }
 
-        item { FastingSettingsCard(vm) }
+        if (openSection == "fasting") item { FastingSettingsCard(vm) }
 
-        item {
+        if (openSection == "ai_coach") item {
             Card(shape = RoundedCornerShape(20.dp)) {
                 Column(Modifier.padding(18.dp)) {
                     Row(
@@ -753,7 +827,7 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
             }
         }
 
-        item {
+        if (openSection == "sources") item {
             Card(shape = RoundedCornerShape(20.dp)) {
                 Column(Modifier.padding(18.dp)) {
                     Text(stringResource(R.string.settings_steps_diag_title), fontWeight = FontWeight.Bold)
@@ -776,7 +850,7 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
             }
         }
 
-        item {
+        if (openSection == "sources") item {
             Card(shape = RoundedCornerShape(20.dp)) {
                 Column(Modifier.padding(18.dp)) {
                     Text(
@@ -801,7 +875,7 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
             }
         }
 
-        item {
+        if (openSection == "backup") item {
             Card(shape = RoundedCornerShape(20.dp)) {
                 Column(Modifier.padding(18.dp)) {
                     Text(
@@ -896,7 +970,7 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
             }
         }
 
-        item {
+        if (openSection == "export") item {
             Card(shape = RoundedCornerShape(20.dp)) {
                 Column(Modifier.padding(18.dp)) {
                     Text(
@@ -912,7 +986,7 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
             }
         }
 
-        item {
+        if (openSection == "export") item {
             Card(shape = RoundedCornerShape(20.dp)) {
                 Column(Modifier.padding(18.dp)) {
                     Text(
@@ -936,7 +1010,7 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
             }
         }
 
-        item {
+        if (openSection == "about") item {
             Card(shape = RoundedCornerShape(20.dp)) {
                 Column(Modifier.padding(18.dp)) {
                     Text(
@@ -963,7 +1037,7 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
             }
         }
 
-        item {
+        if (openSection == "about") item {
             Card(shape = RoundedCornerShape(20.dp)) {
                 Column(Modifier.fillMaxWidth().padding(18.dp)) {
                     Text(stringResource(R.string.settings_disclaimer_title), fontWeight = FontWeight.Bold)
@@ -973,7 +1047,7 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
             }
         }
 
-        item {
+        if (openSection == "about") item {
             val versionName = remember {
                 runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }.getOrNull()
             }
@@ -984,6 +1058,7 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
                 modifier = Modifier.fillMaxWidth().padding(top = 4.dp)
             )
         }
+    }
     }
 
     vm.stepsDiagnostics?.let { text ->
@@ -1118,4 +1193,15 @@ private fun ReminderRow(
             }
         }
     }
+}
+
+/** Liten etikett over en gruppe rader i Mer-menyen. */
+@Composable
+private fun SettingsGroupLabel(text: String) {
+    Text(
+        text,
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(top = 10.dp)
+    )
 }
