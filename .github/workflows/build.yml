@@ -66,3 +66,36 @@ jobs:
           name: test-rapport
           path: app/build/reports/tests/
           retention-days: 7
+
+  # Starter appen på en emulator og åpner hver fane. Egen jobb som ikke stopper
+  # APK-en: emulatoren er treg og kan en sjelden gang feile uten at koden er skyld i det.
+  smoke:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Slå på KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Røyktest på emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          disable-animations: true
+          script: ./gradlew connectedDebugAndroidTest --console=plain
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: roktest-rapport
+          path: app/build/reports/androidTests/
+          retention-days: 7
