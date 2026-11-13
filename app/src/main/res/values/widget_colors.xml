@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="widget_background">#188A80</color>
+    <!-- Samme farger som app-ikonet. -->
+    <color name="widget_background">#12403A</color>
     <color name="widget_text_primary">#FFFFFF</color>
-    <color name="widget_text_secondary">#E0F2F0</color>
+    <color name="widget_text_secondary">#B4EFDF</color>
 </resources>

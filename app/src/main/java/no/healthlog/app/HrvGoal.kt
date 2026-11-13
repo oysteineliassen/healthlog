@@ -105,6 +105,10 @@ fun personalHrvScoreRange(allDays: List<HealthDay>): HrvScoreRange {
 fun hrvBaselineSummary(allDays: List<HealthDay>): Pair<Double, Double>? =
     recentBaseline(allDays) { it.hrvMs }?.let { it.mean to it.stdDev }
 
+/** Snitt og normal variasjon for hvilepuls - til normalfeltet i grafen. Null uten nok data. */
+fun restingHrBaselineSummary(allDays: List<HealthDay>): Pair<Double, Double>? =
+    recentBaseline(allDays) { it.restingHeartRate?.toDouble() }?.let { it.mean to it.stdDev }
+
 /** Søvn (timer): høyere er bedre - gulv-verdi, aldri under 6,5 timer uansett variasjon. */
 fun calculateSleepGoal(allDays: List<HealthDay>): PersonalGoal =
     calculatePersonalGoal(

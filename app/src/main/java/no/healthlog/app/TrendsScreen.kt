@@ -92,6 +92,7 @@ fun TrendsScreen(days: List<HealthDay>, billingManager: BillingManager) {
     val hrvGoal = remember(sorted) { calculateHrvGoal(sorted) }
     val hrvBaseline = remember(sorted) { hrvBaselineSummary(sorted) }
     val restingHrGoal = remember(sorted) { calculateRestingHrGoal(sorted) }
+    val restingHrBaseline = remember(sorted) { restingHrBaselineSummary(sorted) }
     // Bruker DITT SATTE søvnmål (GoalPreferences, samme tall som Dagens mål og
     // Søvnoverskudd) i stedet for en egen automatisk utregnet baseline - de viste
     // ulike tall for samme ting før, forvirrende.
@@ -315,7 +316,9 @@ fun TrendsScreen(days: List<HealthDay>, billingManager: BillingManager) {
                 decimals = 0,
                 isMonthly = isMonthly,
                 axisRange = AxisRange.Padded(5f),
-                goalValue = hrvGoal.value,
+                // Med nok egne data: et felt for det som er normalt for deg i stedet for én strek.
+                goalValue = if (hrvBaseline == null) hrvGoal.value else null,
+                normalBand = hrvBaseline?.let { (mean, sd) -> (mean - sd).toFloat() to (mean + sd).toFloat() },
                 smoothed = hrvSmoothed,
                 footer = {
                     Text(
@@ -341,10 +344,11 @@ fun TrendsScreen(days: List<HealthDay>, billingManager: BillingManager) {
                 decimals = 0,
                 isMonthly = isMonthly,
                 axisRange = AxisRange.Padded(10f),
-                goalValue = restingHrGoal.value,
+                goalValue = if (restingHrBaseline == null) restingHrGoal.value else null,
                 goalLabel = stringResource(
                     if (restingHrGoal.isPersonalized) R.string.goal_label_resting_hr_personal else R.string.goal_label_resting_hr_generic
                 ),
+                normalBand = restingHrBaseline?.let { (mean, sd) -> (mean - sd).toFloat() to (mean + sd).toFloat() },
                 taggedDates = taggedDates,
                 highlight = habitHighlight
             )
@@ -610,6 +614,14 @@ fun TrendsScreen(days: List<HealthDay>, billingManager: BillingManager) {
                                 )
                             }
                         }
+                    }
+                }
+                // Nøkkeltall for perioden over grafen.
+                if (tile != null && tile.points.size >= 2) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+                        StatTile(stringResource(R.string.stat_average), tile.format(tile.points.map { it.value }.average().toFloat()), Modifier.weight(1f))
+                        StatTile(stringResource(R.string.stat_lowest), tile.format(tile.points.minOf { it.value }), Modifier.weight(1f))
+                        StatTile(stringResource(R.string.stat_highest), tile.format(tile.points.maxOf { it.value }), Modifier.weight(1f))
                     }
                 }
                 trendCardsById[id]?.invoke()

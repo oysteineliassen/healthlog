@@ -11,7 +11,11 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -80,4 +84,29 @@ fun InPlacePage(title: String, onBack: () -> Unit, content: @Composable () -> Un
         )
         content()
     }
+}
+
+/**
+ * Spørsmålet som vises når du går tilbake fra et skjema med endringer som ikke er lagret:
+ * Lagre, Forkast eller bli værende (Avbryt). [canSave] false = skjemaet har feil, så bare
+ * Forkast og Avbryt er mulig.
+ */
+@Composable
+fun UnsavedChangesDialog(canSave: Boolean, onSave: () -> Unit, onDiscard: () -> Unit, onCancel: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onCancel,
+        title = { Text(stringResource(R.string.unsaved_title)) },
+        text = { Text(stringResource(if (canSave) R.string.unsaved_body else R.string.unsaved_body_invalid)) },
+        confirmButton = {
+            if (canSave) TextButton(onClick = onSave) { Text(stringResource(R.string.action_save)) }
+        },
+        dismissButton = {
+            Row {
+                TextButton(onClick = onCancel) { Text(stringResource(R.string.action_cancel)) }
+                TextButton(onClick = onDiscard) {
+                    Text(stringResource(R.string.unsaved_discard), color = MaterialTheme.colorScheme.error)
+                }
+            }
+        }
+    )
 }

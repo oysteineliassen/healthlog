@@ -162,6 +162,8 @@ fun TrendCard(
     smoothed: List<TrendPoint> = emptyList(),
     highlight: ChartHighlight? = null,
     includeGoalInScale: Boolean = false,
+    /** Området som er normalt for deg (lav, høy) - tegnes som et lyst felt bak kurven. */
+    normalBand: Pair<Float, Float>? = null,
     footer: (@Composable () -> Unit)? = null,
     /** Trykk på kortet (f.eks. vekt -> kroppssammensetning). null = ikke trykkbart. */
     onClick: (() -> Unit)? = null
@@ -242,7 +244,8 @@ fun TrendCard(
 
             DatedLineChart(
                 title, points, unit, decimals, isMonthly, axisRange, goalValue, goalLabel, taggedDates,
-                smoothed = smoothed, highlight = highlight, includeGoalInScale = includeGoalInScale
+                smoothed = smoothed, highlight = highlight, includeGoalInScale = includeGoalInScale,
+                normalBand = normalBand
             )
 
             if (points.size >= 2) {
@@ -303,7 +306,8 @@ fun DatedLineChart(
     taggedDates: Map<LocalDate, String> = emptyMap(),
     smoothed: List<TrendPoint> = emptyList(),
     highlight: ChartHighlight? = null,
-    includeGoalInScale: Boolean = false
+    includeGoalInScale: Boolean = false,
+    normalBand: Pair<Float, Float>? = null
 ) {
     if (points.isEmpty()) {
         Text(
@@ -357,8 +361,9 @@ fun DatedLineChart(
     // Vektmålet tas med i skalaen når det er bedt om, slik at mål-streken alltid er synlig
     // selv om du er et stykke unna målet ennå.
     val goalForScale = if (includeGoalInScale) goalValue else null
-    val dataMinValue = listOfNotNull(values.minOrNull(), goalForScale).minOrNull() ?: 0f
-    val dataMaxValue = listOfNotNull(values.maxOrNull(), goalForScale).maxOrNull() ?: 1f
+    val dataMinValue = listOfNotNull(values.minOrNull(), goalForScale, normalBand?.first).minOrNull() ?: 0f
+    val dataMaxValue = listOfNotNull(values.maxOrNull(), goalForScale, normalBand?.second).maxOrNull() ?: 1f
+    val bandColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
     val (scaleMin, scaleMax) = axisRange.resolve(dataMinValue, dataMaxValue)
     val labelColor = MaterialTheme.colorScheme.onSurfaceVariant
     val goalColor = MaterialTheme.colorScheme.tertiary
@@ -478,6 +483,18 @@ fun DatedLineChart(
                 end = Offset(size.width - horizontalPaddingPx, size.height - verticalPaddingPx),
                 strokeWidth = 2f
             )
+
+            if (normalBand != null && scaleMax > scaleMin) {
+                val bandChartHeight = (size.height - verticalPaddingPx * 2f).coerceAtLeast(1f)
+                fun yOf(v: Float) = size.height - verticalPaddingPx -
+                    ((v.coerceIn(scaleMin, scaleMax) - scaleMin) / max(0.1f, scaleMax - scaleMin)) * bandChartHeight
+                val top = yOf(normalBand.second)
+                drawRect(
+                    color = bandColor,
+                    topLeft = Offset(horizontalPaddingPx, top),
+                    size = androidx.compose.ui.geometry.Size(size.width - 2 * horizontalPaddingPx, yOf(normalBand.first) - top)
+                )
+            }
 
             if (goalValue != null && scaleMax > scaleMin && goalValue in scaleMin..scaleMax) {
                 val goalChartHeight = (size.height - verticalPaddingPx * 2f).coerceAtLeast(1f)
@@ -643,6 +660,18 @@ fun DatedLineChart(
             text = stringResource(R.string.chart_legend_rolling_average),
             style = MaterialTheme.typography.labelSmall,
             color = chartColor
+        )
+    }
+
+    if (normalBand != null) {
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = stringResource(
+                R.string.normal_band_caption,
+                formatValue(normalBand.first, decimals), formatValue(normalBand.second, decimals), unit
+            ),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.primary
         )
     }
 

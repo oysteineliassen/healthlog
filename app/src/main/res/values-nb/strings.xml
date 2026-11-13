@@ -825,4 +825,22 @@
     <string name="more_backup_auto_on">Automatisk daglig</string>
     <string name="more_backup_off">Ikke automatisk</string>
     <string name="more_backup_failing">Siste forsøk feilet</string>
+    <string name="normal_band_caption">Grønt felt: normalt for deg (%1$s–%2$s %3$s)</string>
+    <string name="stat_average">Snitt</string>
+    <string name="stat_lowest">Lavest</string>
+    <string name="stat_highest">Høyest</string>
+    <string name="status_goal_reached">Mål nådd</string>
+    <string name="status_normal_for_you">Normalt for deg</string>
+    <string name="status_under_goal">%1$s under mål</string>
+    <string name="status_under_your_level">Under ditt nivå (%1$d)</string>
+    <string name="status_vs_normal">%1$s mot normalen</string>
+    <string name="status_percent_of_goal">%1$d %% av målet</string>
+    <string name="history_steps_short">skritt</string>
+    <string name="more_scale">Vekt</string>
+    <string name="more_scale_summary">%1$d cm · brukerplass %2$d</string>
+    <string name="more_scale_not_set">Ikke satt opp</string>
+    <string name="unsaved_title">Lagre endringene?</string>
+    <string name="unsaved_body">Du har endringer som ikke er lagret.</string>
+    <string name="unsaved_body_invalid">Du har endringer som ikke er lagret, men noen felt har feil og må rettes før du kan lagre.</string>
+    <string name="unsaved_discard">Forkast</string>
 </resources>

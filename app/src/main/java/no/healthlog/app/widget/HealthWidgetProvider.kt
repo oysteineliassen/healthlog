@@ -13,6 +13,9 @@ import kotlinx.coroutines.launch
 import no.healthlog.app.MainActivity
 import no.healthlog.app.R
 import no.healthlog.app.calculateHealthScore
+import no.healthlog.app.GoalPreferences
+import no.healthlog.app.coach.ReadinessLevel
+import no.healthlog.app.coach.calculateReadiness
 import no.healthlog.app.personalHrvScoreRange
 import no.healthlog.app.healthScoreStatus
 import no.healthlog.app.data.AppDatabase
@@ -53,11 +56,20 @@ class HealthWidgetProvider : AppWidgetProvider() {
             try {
                 val repo = HealthRepository(AppDatabase.getInstance(context).healthDayDao())
                 val today = repo.get(LocalDate.now().toString())
-                val score = calculateHealthScore(today, hrvRange = personalHrvScoreRange(repo.getAllOnce()))
+                val all = repo.getAllOnce()
+                val score = calculateHealthScore(today, hrvRange = personalHrvScoreRange(all))
+                // Dagsform når det finnes nok data, ellers score-vurderingen som før.
+                val readiness = calculateReadiness(all, LocalDate.now(), GoalPreferences.getSleepGoalMinutes(context))
+                val status = when (readiness?.level) {
+                    ReadinessLevel.GOOD -> context.getString(if (readiness.isStrong) R.string.hero_ready_hard else R.string.hero_ready_normal)
+                    ReadinessLevel.MODERATE -> context.getString(R.string.hero_ready_moderate)
+                    ReadinessLevel.LOW -> context.getString(R.string.hero_ready_low)
+                    null -> healthScoreStatus(context, score)
+                }
 
                 val views = RemoteViews(context.packageName, R.layout.widget_health_score).apply {
                     setTextViewText(R.id.widget_score, score.toString())
-                    setTextViewText(R.id.widget_status, healthScoreStatus(context, score))
+                    setTextViewText(R.id.widget_status, status)
 
                     val metric1 = WidgetPreferences.getMetric1(context, appWidgetId)
                     val metric2 = WidgetPreferences.getMetric2(context, appWidgetId)

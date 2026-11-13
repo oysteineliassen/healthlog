@@ -4,6 +4,7 @@ import androidx.compose.ui.window.Dialog
 import no.healthlog.app.scale.PreviousWeighIn
 import no.healthlog.app.scale.ScaleScreen
 import no.healthlog.app.ui.SubPage
+import no.healthlog.app.ui.UnsavedChangesDialog
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -309,34 +310,43 @@ fun EntryDialog(
         weightIsValid && waistIsValid && hrvIsValid &&
             stressIsValid && bodyBatteryMaxIsValid && bodyBatteryMinIsValid && sleepScoreIsValid
 
-    val save = {
-        onSave(
-            ManualEntryInput(
-                weightKg = weightValue,
-                waistCm = waistValue,
-                hrvMs = hrvValue,
-                stress = stressValue,
-                bodyBatteryMax = bodyBatteryMaxValue,
-                bodyBatteryMin = bodyBatteryMinValue,
-                sleepScore = sleepScoreValue,
-                morningNote = morningNote.trim().ifBlank { null },
-                eveningNote = eveningNote.trim().ifBlank { null },
-                sleepReflection = sleepReflection.trim().ifBlank { null },
-                sleepFactors = sleepFactors,
-                dayTag = dayTag,
-                nutritionLevel = nutritionLevel,
-                habitTags = habitTags
-            )
-        )
-    }
-
+    val currentInput = ManualEntryInput(
+        weightKg = weightValue,
+        waistCm = waistValue,
+        hrvMs = hrvValue,
+        stress = stressValue,
+        bodyBatteryMax = bodyBatteryMaxValue,
+        bodyBatteryMin = bodyBatteryMinValue,
+        sleepScore = sleepScoreValue,
+        morningNote = morningNote.trim().ifBlank { null },
+        eveningNote = eveningNote.trim().ifBlank { null },
+        sleepReflection = sleepReflection.trim().ifBlank { null },
+        sleepFactors = sleepFactors,
+        dayTag = dayTag,
+        nutritionLevel = nutritionLevel,
+        habitTags = habitTags
+    )
+    // Slik skjemaet var da det ble åpnet - forskjell betyr ulagrede endringer.
+    val originalInput = remember(initial?.date) { currentInput }
+    val save: () -> Unit = { onSave(currentInput) }
+    var showUnsaved by remember { mutableStateOf(false) }
+    val back: () -> Unit = { if (currentInput != originalInput) showUnsaved = true else onDismiss() }
     SubPage(
         title = stringResource(R.string.entry_dialog_title),
-        onBack = onDismiss,
+        onBack = back,
         actions = {
             TextButton(onClick = save, enabled = formIsValid) { Text(stringResource(R.string.action_save)) }
         }
     ) { padding ->
+        // Inne i siden, så spørsmålet legger seg over den og ikke bak.
+        if (showUnsaved) {
+            UnsavedChangesDialog(
+                canSave = formIsValid,
+                onSave = { showUnsaved = false; save() },
+                onDiscard = { showUnsaved = false; onDismiss() },
+                onCancel = { showUnsaved = false }
+            )
+        }
         Column(
             modifier = Modifier
                 .fillMaxSize()

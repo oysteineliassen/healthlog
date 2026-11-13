@@ -11,7 +11,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Search
@@ -29,6 +31,8 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import no.healthlog.app.data.HealthDay
+import no.healthlog.app.ui.SubPage
+import no.healthlog.app.ui.UnsavedChangesDialog
 import no.healthlog.app.data.habitTagSet
 import no.healthlog.app.data.sleepFactorSet
 import no.healthlog.app.data.manualOverrideSet
@@ -259,7 +263,7 @@ fun HistoryScreen(
         }
 
         item {
-            var showCalendar by rememberSaveable { mutableStateOf(false) }
+            var showCalendar by rememberSaveable { mutableStateOf(true) }
             val rotation by animateFloatAsState(if (showCalendar) 180f else 0f, label = "calendar_chevron")
 
             Column {
@@ -414,211 +418,70 @@ private fun MonthHeader(
     }
 }
 
+/**
+ * Én dag i Historikk: dato, merker, de viktigste tallene på én linje og starten på
+ * notatet. Trykk åpner dagen (alle tall og notater, redigering og sletting).
+ */
 @Composable
 private fun HistoryDayCard(
     day: HealthDay,
     onEdit: () -> Unit,
-    onDelete: () -> Unit
+    @Suppress("UNUSED_PARAMETER") onDelete: () -> Unit
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            val formattedDate = runCatching {
-                LocalDate
-                    .parse(day.date)
-                    .format(dateFormatter)
-            }.getOrDefault(day.date)
+    val date = runCatching { LocalDate.parse(day.date) }.getOrNull()
+    val weekday = date?.format(java.time.format.DateTimeFormatter.ofPattern("EEEE", java.util.Locale.getDefault()))
+        ?.replaceFirstChar { it.titlecase(java.util.Locale.getDefault()) }
+    val formattedDate = date?.format(dateFormatter) ?: day.date
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+    val numbers = listOfNotNull(
+        day.sleepMinutes?.let { "${stringResource(R.string.metric_label_sleep)} ${formatDuration(it)}" },
+        day.hrvMs?.let { "HRV ${it.toInt()}" },
+        day.steps?.let { "${"%,d".format(it)} ${stringResource(R.string.history_steps_short)}" },
+        day.weightKg?.let { "%.1f kg".format(it) }
+    ).joinToString(" · ")
+    val note = listOfNotNull(day.sleepReflection, day.eveningNote, day.morningNote)
+        .firstOrNull { it.isNotBlank() }
+    val tags = listOfNotNull(
+        day.dayTag?.let { dayTagLabel(it) },
+        day.nutritionLevel?.let { nutritionLevelLabel(it) }
+    ) + day.habitTagSet()
 
+    Card(Modifier.fillMaxWidth().clickable(onClick = onEdit)) {
+        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(weekday ?: formattedDate, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    if (weekday != null) {
+                        Spacer(Modifier.width(8.dp))
+                        Text(formattedDate, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+                if (numbers.isNotEmpty()) {
+                    Text(numbers, style = MaterialTheme.typography.bodyMedium)
+                }
+                if (tags.isNotEmpty()) {
                     Text(
-                        text = formattedDate,
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.titleMedium
+                        tags.joinToString(" · "),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary
                     )
-                    day.dayTag?.let { tag ->
-                        Spacer(Modifier.width(8.dp))
-                        AssistChip(
-                            onClick = { },
-                            enabled = false,
-                            label = { Text(dayTagLabel(tag), style = MaterialTheme.typography.labelSmall) }
-                        )
-                    }
-                    day.nutritionLevel?.let { level ->
-                        Spacer(Modifier.width(8.dp))
-                        AssistChip(
-                            onClick = { },
-                            enabled = false,
-                            label = { Text(nutritionLevelLabel(level), style = MaterialTheme.typography.labelSmall) }
-                        )
-                    }
                 }
-
-                Row {
-
-                    TextButton(onClick = onEdit) {
-                        Text(stringResource(R.string.action_edit))
-                    }
-
-                    TextButton(onClick = onDelete) {
-                        Text(
-                            text = stringResource(R.string.action_delete),
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
-                }
-            }
-
-            val dayHabitTags = day.habitTagSet()
-            if (dayHabitTags.isNotEmpty()) {
-                Text(
-                    text = stringResource(R.string.habit_day_summary, dayHabitTags.joinToString(" · ")),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(Modifier.height(6.dp))
-            }
-
-            HorizontalDivider()
-
-            Spacer(Modifier.height(10.dp))
-
-            val placeholder = stringResource(R.string.value_placeholder)
-
-            val factorLabels = day.sleepFactorSet().map { sleepFactorLabel(it) }
-            if (!day.sleepReflection.isNullOrBlank() || factorLabels.isNotEmpty()) {
-                Text(
-                    text = stringResource(
-                        R.string.diary_sleep_prefix,
-                        listOfNotNull(factorLabels.joinToString(", ").ifEmpty { null }, day.sleepReflection?.takeIf { it.isNotBlank() })
-                            .joinToString(" – ")
-                    ),
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontStyle = FontStyle.Italic
-                )
-                Spacer(Modifier.height(8.dp))
-            }
-
-            if (!day.morningNote.isNullOrBlank()) {
-                Text(
-                    text = stringResource(R.string.diary_morning_prefix, day.morningNote),
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontStyle = FontStyle.Italic
-                )
-                Spacer(Modifier.height(8.dp))
-            }
-
-            if (!day.eveningNote.isNullOrBlank()) {
-                Text(
-                    text = stringResource(R.string.diary_evening_prefix, day.eveningNote),
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontStyle = FontStyle.Italic
-                )
-                Spacer(Modifier.height(10.dp))
-            }
-
-            Text(
-                text = stringResource(
-                    R.string.metric_weight,
-                    (day.weightKg?.let { "%.1f kg".format(it) } ?: placeholder) +
-                        (day.bodyFatPercent?.let { " · " + stringResource(R.string.history_body_fat, "%.1f".format(it)) } ?: "")
-                )
-            )
-
-            Text(
-                text = stringResource(
-                    R.string.metric_waist,
-                    day.waistCm?.let { "%.1f cm".format(it) } ?: placeholder
-                )
-            )
-
-            Text(
-                text = stringResource(
-                    R.string.metric_resting_hr,
-                    day.restingHeartRate?.let { "$it bpm" } ?: placeholder
-                )
-            )
-
-            Text(
-                text = stringResource(
-                    R.string.metric_hrv,
-                    day.hrvMs?.let { "${it.toInt()} ms" } ?: placeholder
-                )
-            )
-
-            Text(
-                text = stringResource(
-                    R.string.metric_sleep,
-                    day.sleepMinutes?.let { formatDuration(it) } ?: placeholder
-                )
-            )
-
-            val sleepStageParts = listOfNotNull(
-                day.deepSleepMinutes?.let { "${stringResource(R.string.sleep_stage_deep_short)} ${if (it >= 60) "${it / 60}t ${it % 60}m" else "${it}m"}" },
-                day.lightSleepMinutes?.let { "${stringResource(R.string.sleep_stage_light_short)} ${if (it >= 60) "${it / 60}t ${it % 60}m" else "${it}m"}" },
-                day.remSleepMinutes?.let { "${stringResource(R.string.sleep_stage_rem_short)} ${if (it >= 60) "${it / 60}t ${it % 60}m" else "${it}m"}" },
-                day.sleepAwakeMinutes?.let { "${stringResource(R.string.sleep_stage_awake_short)} ${if (it >= 60) "${it / 60}t ${it % 60}m" else "${it}m"}" }
-            )
-            if (sleepStageParts.isNotEmpty()) {
-                Text(
-                    text = sleepStageParts.joinToString(" · "),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            Text(
-                text = stringResource(
-                    R.string.metric_steps,
-                    day.steps?.let { "%,d".format(it) } ?: placeholder
-                )
-            )
-
-            val sessions = day.trainingSessionList()
-            if (sessions.size > 1) {
-                Text(
-                    text = stringResource(R.string.metric_label_training),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodySmall
-                )
-                sessions.forEach { session ->
-                    val intensitySuffix = session.intensity?.let { " (${trainingIntensityLabel(it)})" } ?: ""
-                    Text("• ${session.minutes} min, ${trainingTypeLabel(session.type)}$intensitySuffix")
-                }
-            } else {
-                Text(
-                    text = stringResource(
-                        R.string.metric_training,
-                        day.trainingMinutes?.let { minutes ->
-                            val type = day.trainingType?.let { ", ${trainingTypeLabel(it)}" } ?: ""
-                            val intensity = day.trainingIntensity?.let { " (${trainingIntensityLabel(it)})" } ?: ""
-                            "$minutes min$type$intensity"
-                        } ?: placeholder
+                if (note != null) {
+                    Text(
+                        note,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontStyle = FontStyle.Italic,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                     )
-                )
+                }
             }
-
-            Text(
-                text = stringResource(
-                    R.string.metric_body_battery,
-                    if (day.bodyBatteryMax != null || day.bodyBatteryMin != null)
-                        "${day.bodyBatteryMax ?: "–"} / ${day.bodyBatteryMin ?: "–"}"
-                    else placeholder
-                )
+            Icon(
+                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
-
-            Text(text = stringResource(R.string.metric_stress, day.stress?.toString() ?: placeholder))
-
-            Text(text = stringResource(R.string.metric_sleep_score, day.sleepScore?.toString() ?: placeholder))
         }
     }
 }
@@ -786,406 +649,391 @@ fun EditHistoryDialog(
             stressIsValid && bodyBatteryMaxIsValid && bodyBatteryMinIsValid && sleepScoreIsValid &&
             stepsIsValid && activeMinutesIsValid && sleepMinutesIsValid && restingHeartRateIsValid && avgHeartRateIsValid && trainingMinutesIsValid
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(dismissOnClickOutside = false),
-        title = {
-            Column {
-                Text(stringResource(R.string.edit_dialog_title))
+    val currentInput = ManualEntryInput(
+        weightKg = weightValue,
+        waistCm = waistValue,
+        hrvMs = hrvValue,
+        stress = stressValue,
+        bodyBatteryMax = bodyBatteryMaxValue,
+        bodyBatteryMin = bodyBatteryMinValue,
+        sleepScore = sleepScoreValue,
+        morningNote = morningNote.trim().ifBlank { null },
+        eveningNote = eveningNote.trim().ifBlank { null },
+        sleepReflection = sleepReflection.trim().ifBlank { null },
+        sleepFactors = sleepFactors,
+        dayTag = dayTag,
+        nutritionLevel = nutritionLevel,
+        habitTags = habitTags,
+        steps = stepsValue,
+        activeMinutes = activeMinutesValue,
+        sleepMinutes = sleepMinutesValue,
+        restingHeartRate = restingHeartRateValue,
+        avgHeartRate = avgHeartRateValue,
+        trainingMinutes = trainingMinutesValue,
+        trainingType = trainingTypeField,
+        trainingIntensity = trainingIntensityField
+    )
+    // Slik dagen var da siden ble åpnet - forskjell betyr ulagrede endringer.
+    val originalInput = remember(day.date) { currentInput }
+    val save: () -> Unit = { onSave(currentInput) }
+    var showUnsaved by remember { mutableStateOf(false) }
+    val back: () -> Unit = { if (currentInput != originalInput) showUnsaved = true else onDismiss() }
 
-                Text(
-                    text = formattedDate,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+    SubPage(
+        title = stringResource(R.string.edit_dialog_title) + " · " + formattedDate,
+        onBack = back,
+        actions = {
+            IconButton(onClick = { showDeleteConfirm = true }) {
+                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.action_delete), tint = MaterialTheme.colorScheme.error)
             }
-        },
-        text = {
-            Column(
-                modifier = Modifier.verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                EntrySectionHeader(stringResource(R.string.entry_section_night))
-
-                OutlinedTextField(
-                    value = sleepReflection,
-                    onValueChange = { sleepReflection = it },
-                    label = { Text(stringResource(R.string.label_sleep_reflection)) },
-                    placeholder = { Text(stringResource(R.string.placeholder_sleep_reflection)) },
-                    minLines = 2,
-                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                SleepFactorSelector(selected = sleepFactors, onChange = { sleepFactors = it })
-
-                SleepFactorSuggestions(
-                    previousDayHabits = previousDay.habitTagSet(),
-                    selected = sleepFactors,
-                    onAdd = { sleepFactors = sleepFactors + it }
-                )
-
-                HorizontalDivider(Modifier.padding(vertical = 4.dp))
-
-                EntrySectionHeader(stringResource(R.string.entry_section_day))
-
-                Row(
-                    modifier = Modifier.horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    DayTags.all.forEach { tag ->
-                        FilterChip(
-                            selected = dayTag == tag,
-                            onClick = { dayTag = if (dayTag == tag) null else tag },
-                            label = { Text(dayTagLabel(tag)) }
-                        )
-                    }
-                }
-
-                OutlinedTextField(
-                    value = morningNote,
-                    onValueChange = { morningNote = it },
-                    label = { Text(stringResource(R.string.label_morning_plan)) },
-                    placeholder = { Text(stringResource(R.string.placeholder_morning_plan_past)) },
-                    minLines = 3,
-                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                OutlinedTextField(
-                    value = weight,
-                    onValueChange = {
-                        weight = it
-                    },
-                    label = {
-                        Text(stringResource(R.string.label_weight))
-                    },
-                    singleLine = true,
-                    isError = !weightIsValid,
-                    supportingText = {
-                        if (!weightIsValid) {
-                            Text(stringResource(R.string.error_weight_range))
-                        }
-                    }
-                )
-                resetHint("weightKg")
-
-                OutlinedTextField(
-                    value = waist,
-                    onValueChange = {
-                        waist = it
-                    },
-                    label = {
-                        Text(stringResource(R.string.label_waist))
-                    },
-                    singleLine = true,
-                    isError = !waistIsValid,
-                    supportingText = {
-                        if (!waistIsValid) {
-                            Text(stringResource(R.string.error_waist_range))
-                        }
-                    }
-                )
-
-                OutlinedTextField(
-                    value = sleepScore,
-                    onValueChange = { sleepScore = it },
-                    label = { Text(stringResource(R.string.label_sleep_score)) },
-                    singleLine = true,
-                    isError = !sleepScoreIsValid,
-                    supportingText = {
-                        if (!sleepScoreIsValid) {
-                            Text(stringResource(R.string.error_percentage_range))
-                        }
-                    }
-                )
-
-                OutlinedTextField(
-                    value = hrv,
-                    onValueChange = { hrv = it },
-                    label = { Text(stringResource(R.string.label_hrv)) },
-                    singleLine = true,
-                    isError = !hrvIsValid,
-                    supportingText = {
-                        if (!hrvIsValid) {
-                            Text(stringResource(R.string.error_hrv_range))
-                        }
-                    }
-                )
-
-                OutlinedTextField(
-                    value = bodyBatteryMax,
-                    onValueChange = { bodyBatteryMax = it },
-                    label = { Text(stringResource(R.string.label_body_battery_high)) },
-                    singleLine = true,
-                    isError = !bodyBatteryMaxIsValid,
-                    supportingText = {
-                        if (!bodyBatteryMaxIsValid) {
-                            Text(stringResource(R.string.error_percentage_range))
-                        }
-                    }
-                )
-
-                HorizontalDivider(Modifier.padding(vertical = 4.dp))
-
-                EntrySectionHeader(stringResource(R.string.entry_section_evening))
-
-                Text(
-                    text = stringResource(R.string.nutrition_section_label_history),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Row(
-                    modifier = Modifier.horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    NutritionLevel.all.forEach { level ->
-                        FilterChip(
-                            selected = nutritionLevel == level,
-                            onClick = { nutritionLevel = if (nutritionLevel == level) null else level },
-                            label = { Text(nutritionLevelLabel(level)) }
-                        )
-                    }
-                }
-
-                HabitTagSelector(selected = habitTags, onChange = { habitTags = it })
-
-                OutlinedTextField(
-                    value = eveningNote,
-                    onValueChange = { eveningNote = it },
-                    label = { Text(stringResource(R.string.label_evening_summary)) },
-                    placeholder = { Text(stringResource(R.string.placeholder_evening_summary_past)) },
-                    minLines = 3,
-                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                OutlinedTextField(
-                    value = stress,
-                    onValueChange = { stress = it },
-                    label = { Text(stringResource(R.string.label_stress)) },
-                    singleLine = true,
-                    isError = !stressIsValid,
-                    supportingText = {
-                        if (!stressIsValid) {
-                            Text(stringResource(R.string.error_percentage_range))
-                        }
-                    }
-                )
-
-                OutlinedTextField(
-                    value = bodyBatteryMin,
-                    onValueChange = { bodyBatteryMin = it },
-                    label = { Text(stringResource(R.string.label_body_battery_low)) },
-                    singleLine = true,
-                    isError = !bodyBatteryMinIsValid,
-                    supportingText = {
-                        if (!bodyBatteryMinIsValid) {
-                            Text(stringResource(R.string.error_percentage_range))
-                        }
-                    }
-                )
-
-                HorizontalDivider(Modifier.padding(vertical = 4.dp))
-
-                Text(
-                    text = stringResource(R.string.edit_health_connect_section_title),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold
-                )
-
-                Text(
-                    text = stringResource(R.string.edit_health_connect_hint),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                OutlinedTextField(
-                    value = stepsField,
-                    onValueChange = { stepsField = it },
-                    label = { Text(stringResource(R.string.metric_label_steps)) },
-                    singleLine = true,
-                    isError = !stepsIsValid,
-                    supportingText = {
-                        if (!stepsIsValid) Text(stringResource(R.string.error_generic_range))
-                    }
-                )
-                resetHint("steps")
-
-                OutlinedTextField(
-                    value = activeMinutesField,
-                    onValueChange = { activeMinutesField = it },
-                    label = { Text(stringResource(R.string.metric_label_active_minutes)) },
-                    singleLine = true,
-                    isError = !activeMinutesIsValid,
-                    supportingText = {
-                        if (!activeMinutesIsValid) Text(stringResource(R.string.error_generic_range))
-                    }
-                )
-                resetHint("activeMinutes")
-
-                OutlinedTextField(
-                    value = sleepMinutesField,
-                    onValueChange = { sleepMinutesField = it },
-                    label = { Text(stringResource(R.string.label_sleep_minutes)) },
-                    singleLine = true,
-                    isError = !sleepMinutesIsValid,
-                    supportingText = {
-                        if (!sleepMinutesIsValid) Text(stringResource(R.string.error_generic_range))
-                    }
-                )
-                resetHint("sleepMinutes")
-
-                OutlinedTextField(
-                    value = restingHeartRateField,
-                    onValueChange = { restingHeartRateField = it },
-                    label = { Text(stringResource(R.string.metric_label_resting_hr)) },
-                    singleLine = true,
-                    isError = !restingHeartRateIsValid,
-                    supportingText = {
-                        if (!restingHeartRateIsValid) Text(stringResource(R.string.error_generic_range))
-                    }
-                )
-                resetHint("restingHeartRate")
-
-                OutlinedTextField(
-                    value = avgHeartRateField,
-                    onValueChange = { avgHeartRateField = it },
-                    label = { Text(stringResource(R.string.metric_label_avg_heart_rate)) },
-                    singleLine = true,
-                    isError = !avgHeartRateIsValid,
-                    supportingText = {
-                        if (!avgHeartRateIsValid) Text(stringResource(R.string.error_generic_range))
-                    }
-                )
-                resetHint("avgHeartRate")
-
-                OutlinedTextField(
-                    value = trainingMinutesField,
-                    onValueChange = { trainingMinutesField = it },
-                    label = { Text(stringResource(R.string.metric_label_training)) },
-                    singleLine = true,
-                    isError = !trainingMinutesIsValid,
-                    supportingText = {
-                        if (!trainingMinutesIsValid) Text(stringResource(R.string.error_generic_range))
-                    }
-                )
-                resetHint("trainingMinutes")
-
-                var trainingTypeExpanded by remember { mutableStateOf(false) }
-                ExposedDropdownMenuBox(
-                    expanded = trainingTypeExpanded,
-                    onExpandedChange = { trainingTypeExpanded = it }
-                ) {
-                    OutlinedTextField(
-                        value = trainingTypeField?.let { trainingTypeLabel(it) } ?: "",
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text(stringResource(R.string.label_training_type)) },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = trainingTypeExpanded) },
-                        modifier = Modifier
-                            .menuAnchor(MenuAnchorType.PrimaryNotEditable)
-                            .fillMaxWidth()
-                    )
-                    ExposedDropdownMenu(
-                        expanded = trainingTypeExpanded,
-                        onDismissRequest = { trainingTypeExpanded = false }
-                    ) {
-                        TrainingType.all.forEach { type ->
-                            DropdownMenuItem(
-                                text = { Text(trainingTypeLabel(type)) },
-                                onClick = {
-                                    trainingTypeField = type
-                                    trainingTypeExpanded = false
-                                }
-                            )
-                        }
-                    }
-                }
-                resetHint("trainingType")
-
-                Text(stringResource(R.string.label_training_intensity), style = MaterialTheme.typography.labelMedium)
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    listOf(TrainingIntensity.LIGHT, TrainingIntensity.MODERATE, TrainingIntensity.VIGOROUS).forEach { level ->
-                        FilterChip(
-                            selected = trainingIntensityField == level,
-                            onClick = {
-                                trainingIntensityField = if (trainingIntensityField == level) null else level
-                            },
-                            label = { Text(trainingIntensityLabel(level)) }
-                        )
-                    }
-                }
-                resetHint("trainingIntensity")
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = {
-                    onSave(
-                        ManualEntryInput(
-                            weightKg = weightValue,
-                            waistCm = waistValue,
-                            hrvMs = hrvValue,
-                            stress = stressValue,
-                            bodyBatteryMax = bodyBatteryMaxValue,
-                            bodyBatteryMin = bodyBatteryMinValue,
-                            sleepScore = sleepScoreValue,
-                            morningNote = morningNote.trim().ifBlank { null },
-                            eveningNote = eveningNote.trim().ifBlank { null },
-                            sleepReflection = sleepReflection.trim().ifBlank { null },
-                            sleepFactors = sleepFactors,
-                            dayTag = dayTag,
-                            nutritionLevel = nutritionLevel,
-                            habitTags = habitTags,
-                            steps = stepsValue,
-                            activeMinutes = activeMinutesValue,
-                            sleepMinutes = sleepMinutesValue,
-                            restingHeartRate = restingHeartRateValue,
-                            avgHeartRate = avgHeartRateValue,
-                            trainingMinutes = trainingMinutesValue,
-                            trainingType = trainingTypeField,
-                            trainingIntensity = trainingIntensityField
-                        )
-                    )
+            TextButton(onClick = save, enabled = formIsValid) { Text(stringResource(R.string.action_save)) }
+        }
+    ) { padding ->
+        if (showUnsaved) {
+            UnsavedChangesDialog(
+                canSave = formIsValid,
+                onSave = { showUnsaved = false; save() },
+                onDiscard = { showUnsaved = false; onDismiss() },
+                onCancel = { showUnsaved = false }
+            )
+        }
+        if (showDeleteConfirm) {
+            DeleteConfirmDialog(
+                onConfirm = {
+                    showDeleteConfirm = false
+                    onDelete()
                 },
-                enabled = formIsValid
+                onDismiss = { showDeleteConfirm = false }
+            )
+        }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .imePadding()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+
+            EntrySectionHeader(stringResource(R.string.entry_section_night))
+
+            OutlinedTextField(
+                value = sleepReflection,
+                onValueChange = { sleepReflection = it },
+                label = { Text(stringResource(R.string.label_sleep_reflection)) },
+                placeholder = { Text(stringResource(R.string.placeholder_sleep_reflection)) },
+                minLines = 2,
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            SleepFactorSelector(selected = sleepFactors, onChange = { sleepFactors = it })
+
+            SleepFactorSuggestions(
+                previousDayHabits = previousDay.habitTagSet(),
+                selected = sleepFactors,
+                onAdd = { sleepFactors = sleepFactors + it }
+            )
+
+            HorizontalDivider(Modifier.padding(vertical = 4.dp))
+
+            EntrySectionHeader(stringResource(R.string.entry_section_day))
+
+            Row(
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                DayTags.all.forEach { tag ->
+                    FilterChip(
+                        selected = dayTag == tag,
+                        onClick = { dayTag = if (dayTag == tag) null else tag },
+                        label = { Text(dayTagLabel(tag)) }
+                    )
+                }
+            }
+
+            OutlinedTextField(
+                value = morningNote,
+                onValueChange = { morningNote = it },
+                label = { Text(stringResource(R.string.label_morning_plan)) },
+                placeholder = { Text(stringResource(R.string.placeholder_morning_plan_past)) },
+                minLines = 3,
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            OutlinedTextField(
+                value = weight,
+                onValueChange = {
+                    weight = it
+                },
+                label = {
+                    Text(stringResource(R.string.label_weight))
+                },
+                singleLine = true,
+                isError = !weightIsValid,
+                supportingText = {
+                    if (!weightIsValid) {
+                        Text(stringResource(R.string.error_weight_range))
+                    }
+                }
+            )
+            resetHint("weightKg")
+
+            OutlinedTextField(
+                value = waist,
+                onValueChange = {
+                    waist = it
+                },
+                label = {
+                    Text(stringResource(R.string.label_waist))
+                },
+                singleLine = true,
+                isError = !waistIsValid,
+                supportingText = {
+                    if (!waistIsValid) {
+                        Text(stringResource(R.string.error_waist_range))
+                    }
+                }
+            )
+
+            OutlinedTextField(
+                value = sleepScore,
+                onValueChange = { sleepScore = it },
+                label = { Text(stringResource(R.string.label_sleep_score)) },
+                singleLine = true,
+                isError = !sleepScoreIsValid,
+                supportingText = {
+                    if (!sleepScoreIsValid) {
+                        Text(stringResource(R.string.error_percentage_range))
+                    }
+                }
+            )
+
+            OutlinedTextField(
+                value = hrv,
+                onValueChange = { hrv = it },
+                label = { Text(stringResource(R.string.label_hrv)) },
+                singleLine = true,
+                isError = !hrvIsValid,
+                supportingText = {
+                    if (!hrvIsValid) {
+                        Text(stringResource(R.string.error_hrv_range))
+                    }
+                }
+            )
+
+            OutlinedTextField(
+                value = bodyBatteryMax,
+                onValueChange = { bodyBatteryMax = it },
+                label = { Text(stringResource(R.string.label_body_battery_high)) },
+                singleLine = true,
+                isError = !bodyBatteryMaxIsValid,
+                supportingText = {
+                    if (!bodyBatteryMaxIsValid) {
+                        Text(stringResource(R.string.error_percentage_range))
+                    }
+                }
+            )
+
+            HorizontalDivider(Modifier.padding(vertical = 4.dp))
+
+            EntrySectionHeader(stringResource(R.string.entry_section_evening))
+
+            Text(
+                text = stringResource(R.string.nutrition_section_label_history),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Row(
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                NutritionLevel.all.forEach { level ->
+                    FilterChip(
+                        selected = nutritionLevel == level,
+                        onClick = { nutritionLevel = if (nutritionLevel == level) null else level },
+                        label = { Text(nutritionLevelLabel(level)) }
+                    )
+                }
+            }
+
+            HabitTagSelector(selected = habitTags, onChange = { habitTags = it })
+
+            OutlinedTextField(
+                value = eveningNote,
+                onValueChange = { eveningNote = it },
+                label = { Text(stringResource(R.string.label_evening_summary)) },
+                placeholder = { Text(stringResource(R.string.placeholder_evening_summary_past)) },
+                minLines = 3,
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            OutlinedTextField(
+                value = stress,
+                onValueChange = { stress = it },
+                label = { Text(stringResource(R.string.label_stress)) },
+                singleLine = true,
+                isError = !stressIsValid,
+                supportingText = {
+                    if (!stressIsValid) {
+                        Text(stringResource(R.string.error_percentage_range))
+                    }
+                }
+            )
+
+            OutlinedTextField(
+                value = bodyBatteryMin,
+                onValueChange = { bodyBatteryMin = it },
+                label = { Text(stringResource(R.string.label_body_battery_low)) },
+                singleLine = true,
+                isError = !bodyBatteryMinIsValid,
+                supportingText = {
+                    if (!bodyBatteryMinIsValid) {
+                        Text(stringResource(R.string.error_percentage_range))
+                    }
+                }
+            )
+
+            HorizontalDivider(Modifier.padding(vertical = 4.dp))
+
+            Text(
+                text = stringResource(R.string.edit_health_connect_section_title),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            Text(
+                text = stringResource(R.string.edit_health_connect_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            OutlinedTextField(
+                value = stepsField,
+                onValueChange = { stepsField = it },
+                label = { Text(stringResource(R.string.metric_label_steps)) },
+                singleLine = true,
+                isError = !stepsIsValid,
+                supportingText = {
+                    if (!stepsIsValid) Text(stringResource(R.string.error_generic_range))
+                }
+            )
+            resetHint("steps")
+
+            OutlinedTextField(
+                value = activeMinutesField,
+                onValueChange = { activeMinutesField = it },
+                label = { Text(stringResource(R.string.metric_label_active_minutes)) },
+                singleLine = true,
+                isError = !activeMinutesIsValid,
+                supportingText = {
+                    if (!activeMinutesIsValid) Text(stringResource(R.string.error_generic_range))
+                }
+            )
+            resetHint("activeMinutes")
+
+            OutlinedTextField(
+                value = sleepMinutesField,
+                onValueChange = { sleepMinutesField = it },
+                label = { Text(stringResource(R.string.label_sleep_minutes)) },
+                singleLine = true,
+                isError = !sleepMinutesIsValid,
+                supportingText = {
+                    if (!sleepMinutesIsValid) Text(stringResource(R.string.error_generic_range))
+                }
+            )
+            resetHint("sleepMinutes")
+
+            OutlinedTextField(
+                value = restingHeartRateField,
+                onValueChange = { restingHeartRateField = it },
+                label = { Text(stringResource(R.string.metric_label_resting_hr)) },
+                singleLine = true,
+                isError = !restingHeartRateIsValid,
+                supportingText = {
+                    if (!restingHeartRateIsValid) Text(stringResource(R.string.error_generic_range))
+                }
+            )
+            resetHint("restingHeartRate")
+
+            OutlinedTextField(
+                value = avgHeartRateField,
+                onValueChange = { avgHeartRateField = it },
+                label = { Text(stringResource(R.string.metric_label_avg_heart_rate)) },
+                singleLine = true,
+                isError = !avgHeartRateIsValid,
+                supportingText = {
+                    if (!avgHeartRateIsValid) Text(stringResource(R.string.error_generic_range))
+                }
+            )
+            resetHint("avgHeartRate")
+
+            OutlinedTextField(
+                value = trainingMinutesField,
+                onValueChange = { trainingMinutesField = it },
+                label = { Text(stringResource(R.string.metric_label_training)) },
+                singleLine = true,
+                isError = !trainingMinutesIsValid,
+                supportingText = {
+                    if (!trainingMinutesIsValid) Text(stringResource(R.string.error_generic_range))
+                }
+            )
+            resetHint("trainingMinutes")
+
+            var trainingTypeExpanded by remember { mutableStateOf(false) }
+            ExposedDropdownMenuBox(
+                expanded = trainingTypeExpanded,
+                onExpandedChange = { trainingTypeExpanded = it }
+            ) {
+                OutlinedTextField(
+                    value = trainingTypeField?.let { trainingTypeLabel(it) } ?: "",
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text(stringResource(R.string.label_training_type)) },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = trainingTypeExpanded) },
+                    modifier = Modifier
+                        .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                        .fillMaxWidth()
+                )
+                ExposedDropdownMenu(
+                    expanded = trainingTypeExpanded,
+                    onDismissRequest = { trainingTypeExpanded = false }
+                ) {
+                    TrainingType.all.forEach { type ->
+                        DropdownMenuItem(
+                            text = { Text(trainingTypeLabel(type)) },
+                            onClick = {
+                                trainingTypeField = type
+                                trainingTypeExpanded = false
+                            }
+                        )
+                    }
+                }
+            }
+            resetHint("trainingType")
+
+            Text(stringResource(R.string.label_training_intensity), style = MaterialTheme.typography.labelMedium)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf(TrainingIntensity.LIGHT, TrainingIntensity.MODERATE, TrainingIntensity.VIGOROUS).forEach { level ->
+                    FilterChip(
+                        selected = trainingIntensityField == level,
+                        onClick = {
+                            trainingIntensityField = if (trainingIntensityField == level) null else level
+                        },
+                        label = { Text(trainingIntensityLabel(level)) }
+                    )
+                }
+            }
+            resetHint("trainingIntensity")
+
+
+            Button(onClick = save, enabled = formIsValid, modifier = Modifier.fillMaxWidth()) {
                 Text(stringResource(R.string.action_save_changes))
             }
-        },
-        dismissButton = {
-            Row {
-                TextButton(
-                    onClick = {
-                        showDeleteConfirm = true
-                    }
-                ) {
-                    Text(
-                        text = stringResource(R.string.action_delete),
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-
-                TextButton(
-                    onClick = onDismiss
-                ) {
-                    Text(stringResource(R.string.action_cancel))
-                }
-            }
         }
-    )
-    if (showDeleteConfirm) {
-        DeleteConfirmDialog(
-            onConfirm = {
-                showDeleteConfirm = false
-                onDelete()
-            },
-
-            onDismiss = {
-                showDeleteConfirm = false
-            }
-        )
     }
 }

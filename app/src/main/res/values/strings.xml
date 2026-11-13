@@ -825,4 +825,22 @@
     <string name="more_backup_auto_on">Automatic daily</string>
     <string name="more_backup_off">Not automatic</string>
     <string name="more_backup_failing">Last attempt failed</string>
+    <string name="normal_band_caption">Green band: normal for you (%1$s–%2$s %3$s)</string>
+    <string name="stat_average">Average</string>
+    <string name="stat_lowest">Lowest</string>
+    <string name="stat_highest">Highest</string>
+    <string name="status_goal_reached">Goal reached</string>
+    <string name="status_normal_for_you">Normal for you</string>
+    <string name="status_under_goal">%1$s under goal</string>
+    <string name="status_under_your_level">Below your level (%1$d)</string>
+    <string name="status_vs_normal">%1$s vs. normal</string>
+    <string name="status_percent_of_goal">%1$d %% of goal</string>
+    <string name="history_steps_short">steps</string>
+    <string name="more_scale">Scale</string>
+    <string name="more_scale_summary">%1$d cm · user slot %2$d</string>
+    <string name="more_scale_not_set">Not set up</string>
+    <string name="unsaved_title">Save changes?</string>
+    <string name="unsaved_body">You have changes that are not saved.</string>
+    <string name="unsaved_body_invalid">You have unsaved changes, but some fields have errors that must be fixed before you can save.</string>
+    <string name="unsaved_discard">Discard</string>
 </resources>

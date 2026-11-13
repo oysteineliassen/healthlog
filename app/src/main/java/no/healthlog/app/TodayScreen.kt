@@ -7,6 +7,8 @@ import no.healthlog.app.coach.calculateReadiness
 import no.healthlog.app.coach.evaluateCoachMessage
 import no.healthlog.app.coach.relevantFastingPeriod
 import no.healthlog.app.ui.ListCard
+import no.healthlog.app.ui.StatusColors
+import kotlin.math.roundToInt
 import no.healthlog.app.ui.NavRow
 import no.healthlog.app.ui.SectionTitle
 import no.healthlog.app.ui.SubPage
@@ -392,7 +394,7 @@ fun TodayScreen(
 
         if ("metrics" !in hiddenCards) {
             item(key = "metrics_title") { SectionTitle(stringResource(R.string.today_numbers_title), Modifier.padding(top = 6.dp)) }
-            item(key = "metrics") { MetricGrid(today) }
+            item(key = "metrics") { MetricGrid(today, all) }
         }
 
         // Resten som rader - trykk åpner kortet på en egen side. Rader uten innhold
@@ -541,7 +543,15 @@ fun DiaryCard(day: HealthDay?) {
     }
 }
 
-private data class GridMetric(val id: String, val label: String, val value: String, val detail: String? = null)
+private data class GridMetric(
+    val id: String,
+    val label: String,
+    val value: String,
+    val detail: String? = null,
+    /** Kort vurdering under tallet ("Mål nådd", "+3 mot normalen") og om den er bra. */
+    val status: String? = null,
+    val statusGood: Boolean = true
+)
 
 /** Rekkefølgen appen starter med, og den som brukes for flistyper som ikke finnes i en tidligere lagret rekkefølge. */
 private val DEFAULT_TILE_ORDER = listOf(
@@ -563,8 +573,34 @@ private fun formatSleepStageDuration(totalMinutes: Int): String {
  * ved vanlig skrolling. Rekkefølgen lagres permanent ved hvert bytte.
  */
 @Composable
-fun MetricGrid(day: HealthDay?) {
+fun MetricGrid(day: HealthDay?, all: List<HealthDay> = emptyList()) {
     val context = LocalContext.current
+    val sleepGoal = GoalPreferences.getSleepGoalMinutes(context)
+    val stepsGoal = GoalPreferences.getStepsGoal(context)
+    val hrvGoal = remember(all) { calculateHrvGoal(all) }
+    val restingBaseline = remember(all) { restingHrBaselineSummary(all) }
+    val goalReached = stringResource(R.string.status_goal_reached)
+    val normalForYou = stringResource(R.string.status_normal_for_you)
+
+    val sleepStatus: Pair<String, Boolean>? = day?.sleepMinutes?.let { m ->
+        if (m >= sleepGoal) goalReached to true
+        else stringResource(R.string.status_under_goal, formatDuration(sleepGoal - m)) to false
+    }
+    val hrvStatus: Pair<String, Boolean>? = day?.hrvMs?.takeIf { hrvGoal.isPersonalized }?.let { v ->
+        if (v >= hrvGoal.value) normalForYou to true
+        else stringResource(R.string.status_under_your_level, hrvGoal.value.roundToInt()) to false
+    }
+    val restingStatus: Pair<String, Boolean>? = day?.restingHeartRate?.let { v ->
+        restingBaseline?.let { (mean, _) ->
+            val diff = (v - mean).roundToInt()
+            if (diff >= 3) stringResource(R.string.status_vs_normal, "+$diff") to false
+            else normalForYou to true
+        }
+    }
+    val stepsStatus: Pair<String, Boolean>? = day?.steps?.let { s ->
+        if (s >= stepsGoal) goalReached to true
+        else stringResource(R.string.status_percent_of_goal, s * 100 / stepsGoal.coerceAtLeast(1)) to true
+    }
 
     val deepLabel = stringResource(R.string.sleep_stage_deep_short)
     val lightLabel = stringResource(R.string.sleep_stage_light_short)
@@ -582,19 +618,30 @@ fun MetricGrid(day: HealthDay?) {
     }
 
     val metricsById = listOf(
-        GridMetric("resting_hr", stringResource(R.string.metric_label_resting_hr), day?.restingHeartRate?.let { "$it bpm" } ?: "–"),
+        GridMetric(
+            "resting_hr", stringResource(R.string.metric_label_resting_hr), day?.restingHeartRate?.let { "$it bpm" } ?: "–",
+            status = restingStatus?.first, statusGood = restingStatus?.second ?: true
+        ),
         GridMetric("avg_heart_rate", stringResource(R.string.metric_label_avg_heart_rate), day?.avgHeartRate?.let { "$it bpm" } ?: "–"),
-        GridMetric("hrv", stringResource(R.string.metric_label_hrv), day?.hrvMs?.let { "${it.toInt()} ms" } ?: "–"),
+        GridMetric(
+            "hrv", stringResource(R.string.metric_label_hrv), day?.hrvMs?.let { "${it.toInt()} ms" } ?: "–",
+            status = hrvStatus?.first, statusGood = hrvStatus?.second ?: true
+        ),
         GridMetric(
             "sleep",
             stringResource(R.string.metric_label_sleep),
             day?.sleepMinutes?.let { formatDuration(it) } ?: "–",
-            sleepDetail
+            sleepDetail,
+            status = sleepStatus?.first,
+            statusGood = sleepStatus?.second ?: true
         ),
         GridMetric("sleep_score", stringResource(R.string.metric_label_sleep_score), day?.sleepScore?.toString() ?: "–"),
         GridMetric("body_battery", stringResource(R.string.metric_label_body_battery), if (day?.bodyBatteryMax != null) "${day.bodyBatteryMax} / ${day.bodyBatteryMin ?: "–"}" else "–"),
         GridMetric("stress", stringResource(R.string.metric_label_stress), day?.stress?.toString() ?: "–"),
-        GridMetric("steps", stringResource(R.string.metric_label_steps), day?.steps?.let { "%,d".format(it) } ?: "–"),
+        GridMetric(
+            "steps", stringResource(R.string.metric_label_steps), day?.steps?.let { "%,d".format(it) } ?: "–",
+            status = stepsStatus?.first, statusGood = stepsStatus?.second ?: true
+        ),
         GridMetric("active_minutes", stringResource(R.string.metric_label_active_minutes), day?.activeMinutes?.let { "$it min" } ?: "–"),
         GridMetric(
             "training",
@@ -710,6 +757,14 @@ fun MetricGrid(day: HealthDay?) {
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold
                             )
+                            metric.status?.let {
+                                Spacer(Modifier.height(3.dp))
+                                Text(
+                                    it,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = if (metric.statusGood) StatusColors.good() else StatusColors.warn()
+                                )
+                            }
                             metric.detail?.let {
                                 Spacer(Modifier.height(3.dp))
                                 Text(

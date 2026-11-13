@@ -78,7 +78,7 @@ fun ScaleScreen(
     ) {
         val p = profile
         if (p == null) {
-            ProfileForm(onDone = { store.save(it); profile = it })
+            ProfileForm(initial = store.load(), onDone = { store.save(it); profile = it })
         } else {
             WeighIn(p, lastWeightKg, onSave, onClose, onEditProfile = { profile = null })
         }
@@ -204,12 +204,13 @@ private fun Busy(text: String) {
     Text(text)
 }
 
+/** Skjemaet for høyde, fødselsår, kjønn og brukerplass - også brukt fra Mer → Vekt. */
 @Composable
-private fun ProfileForm(onDone: (Ah100Protocol.Profile) -> Unit) {
-    var height by rememberSaveable { mutableStateOf("") }
-    var birthYear by rememberSaveable { mutableStateOf("") }
-    var male by rememberSaveable { mutableStateOf(true) }
-    var slot by rememberSaveable { mutableStateOf("1") }
+fun ProfileForm(initial: Ah100Protocol.Profile? = null, onDone: (Ah100Protocol.Profile) -> Unit) {
+    var height by rememberSaveable { mutableStateOf(initial?.heightCm?.toString() ?: "") }
+    var birthYear by rememberSaveable { mutableStateOf(initial?.let { (LocalDate.now().year - it.age).toString() } ?: "") }
+    var male by rememberSaveable { mutableStateOf(initial?.male ?: true) }
+    var slot by rememberSaveable { mutableStateOf((initial?.slot ?: 1).toString()) }
     val s = slot.toIntOrNull()?.takeIf { it in 1..10 }
     val h = height.toIntOrNull()?.takeIf { it in 100..220 }
     val y = birthYear.toIntOrNull()?.takeIf { it in 1920..LocalDate.now().year - 10 }

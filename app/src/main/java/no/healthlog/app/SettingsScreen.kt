@@ -34,6 +34,8 @@ import kotlinx.coroutines.launch
 import no.healthlog.app.billing.BillingManager
 import no.healthlog.app.backup.BackupPreferences
 import no.healthlog.app.ui.InPlacePage
+import no.healthlog.app.scale.ProfileForm
+import no.healthlog.app.scale.ScaleProfileStore
 import no.healthlog.app.ui.ListCard
 import no.healthlog.app.ui.NavRow
 import no.healthlog.app.backup.BackupSyncScheduler
@@ -405,6 +407,8 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
     }
 
     var section by rememberSaveable { mutableStateOf<String?>(null) }
+    val scaleStore = remember { ScaleProfileStore(context) }
+    var scaleProfile by remember { mutableStateOf(scaleStore.load()) }
     val openSection = section
     val backupSuccessTime = lastBackupSuccess
 
@@ -434,6 +438,12 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
             item {
                 ListCard {
                     NavRow(stringResource(R.string.more_sources), onClick = { section = "sources" })
+                    NavRow(
+                        stringResource(R.string.more_scale),
+                        onClick = { section = "scale" },
+                        subtitle = scaleProfile?.let { stringResource(R.string.more_scale_summary, it.heightCm, it.slot) }
+                            ?: stringResource(R.string.more_scale_not_set)
+                    )
                     NavRow(
                         stringResource(R.string.settings_backup_title),
                         onClick = { section = "backup" },
@@ -465,6 +475,7 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
                 "fasting" -> R.string.today_card_fasting
                 "ai_coach" -> R.string.settings_ai_coach_title
                 "sources" -> R.string.more_sources
+                "scale" -> R.string.more_scale
                 "backup" -> R.string.settings_backup_title
                 "export" -> R.string.settings_export_title
                 "reminders" -> R.string.settings_reminder_title
@@ -782,6 +793,18 @@ fun SettingsScreen(vm: HealthViewModel, billingManager: BillingManager) {
         }
 
         if (openSection == "fasting") item { FastingSettingsCard(vm) }
+
+        // Vekt-profilen: det samme skjemaet som Vei deg viser første gang.
+        if (openSection == "scale") item {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                ProfileForm(initial = scaleProfile) { profile ->
+                    scaleStore.save(profile)
+                    scaleProfile = profile
+                    vm.showMessage(context.getString(R.string.saved))
+                    section = null
+                }
+            }
+        }
 
         if (openSection == "ai_coach") item {
             Card(shape = RoundedCornerShape(20.dp)) {
